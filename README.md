@@ -19,6 +19,7 @@ thermal backbone.
 - `diagrams/` — figures (SVG/PNG) and exported drawings
 
 ## Key docs
+
 - docs/architecture/node-class-s-50kw.md
 - docs/compute/compute-baseline-50kw.md
 - docs/architecture/launch-packaging-assumptions.md
