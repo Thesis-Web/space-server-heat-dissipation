@@ -17,3 +17,8 @@ thermal backbone.
 - `docs/compute/` — compute sled specs, networking, storage
 - `docs/finance/` — ROI and scaling economics
 - `diagrams/` — figures (SVG/PNG) and exported drawings
+
+## Key docs
+- docs/architecture/node-class-s-50kw.md
+- docs/compute/compute-baseline-50kw.md
+- docs/architecture/launch-packaging-assumptions.md
