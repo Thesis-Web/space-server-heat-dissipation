@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "schema_id": "thermal-zone",
+  "schema_version": "v0.1.0",
+  "title": "ThermalZone",
+  "description": "Thermal zone definition. Governed by §19.",
+  "type": "object",
+  "required": [
+    "zone_id",
+    "schema_version",
+    "zone_label",
+    "zone_type",
+    "target_temp_k",
+    "temp_min_k",
+    "temp_max_k",
+    "notes"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "zone_id": { "type": "string" },
+    "schema_version": { "type": "string", "pattern": "^v\\d+\\.\\d+\\.\\d+$" },
+    "zone_label": { "type": "string" },
+    "zone_type": {
+      "type": "string",
+      "enum": ["compute_vault", "hx_boundary", "high_temp_backbone", "radiator_emitter", "custom"]
+    },
+    "target_temp_k": { "type": "number", "exclusiveMinimum": 0 },
+    "temp_min_k": { "type": "number", "exclusiveMinimum": 0 },
+    "temp_max_k": { "type": "number", "exclusiveMinimum": 0 },
+    "pressure_min_pa": { "type": "number", "minimum": 0 },
+    "pressure_max_pa": { "type": "number", "minimum": 0 },
+    "notes": { "type": "string" }
+  }
+}

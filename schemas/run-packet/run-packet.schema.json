@@ -1,0 +1,97 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "schema_id": "run-packet",
+  "schema_version": "v0.1.0",
+  "title": "RunPacket",
+  "description": "Deterministic handoff artifact from browser UI to hub AI workflow. Governed by §25.",
+  "type": "object",
+  "required": [
+    "packet_id",
+    "schema_version",
+    "blueprint_version",
+    "engineering_spec_version",
+    "scenario_ref",
+    "payload_file_refs",
+    "operator_notes",
+    "requested_outputs",
+    "branch_selection_summary",
+    "comparison_requests",
+    "ai_role_instructions"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "packet_id": { "type": "string" },
+    "schema_version": { "type": "string", "pattern": "^v\\d+\\.\\d+\\.\\d+$" },
+    "blueprint_version": { "type": "string", "pattern": "^v\\d+\\.\\d+\\.\\d+$" },
+    "engineering_spec_version": { "type": "string", "pattern": "^v\\d+\\.\\d+\\.\\d+$" },
+    "runtime_version": { "type": "string", "pattern": "^v\\d+\\.\\d+\\.\\d+$" },
+    "schema_bundle_version": { "type": "string", "pattern": "^v\\d+\\.\\d+\\.\\d+$" },
+    "scenario_ref": {
+      "type": "string",
+      "description": "Filename of the primary scenario JSON in this bundle."
+    },
+    "payload_file_refs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "All payload filenames included in this bundle."
+    },
+    "operator_notes": { "type": "string" },
+    "requested_outputs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "structured_json",
+          "summary_markdown",
+          "comparison_report",
+          "flag_report",
+          "packet_bundle"
+        ]
+      }
+    },
+    "branch_selection_summary": {
+      "type": "object",
+      "additionalProperties": { "type": "boolean" },
+      "description": "Map of branch_id to enabled boolean."
+    },
+    "comparison_requests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["base_scenario_ref", "variant_scenario_ref"],
+        "properties": {
+          "base_scenario_ref": { "type": "string" },
+          "variant_scenario_ref": { "type": "string" },
+          "label": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "ai_role_instructions": {
+      "type": "object",
+      "properties": {
+        "claude_instructions": { "type": "string" },
+        "chatgpt_instructions": { "type": "string" },
+        "perplexity_instructions": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "file_manifest": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["filename", "byte_length"],
+        "properties": {
+          "filename": { "type": "string" },
+          "byte_length": { "type": "integer", "minimum": 0 }
+        },
+        "additionalProperties": false
+      },
+      "description": "Integrity manifest per §37.3."
+    }
+  }
+}

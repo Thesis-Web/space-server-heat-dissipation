@@ -1,0 +1,59 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "schema_id": "thermal-stage",
+  "schema_version": "v0.1.0",
+  "title": "ThermalStage",
+  "description": "One node in the thermal execution DAG. Governed by §23.",
+  "type": "object",
+  "required": [
+    "stage_id",
+    "schema_version",
+    "stage_type",
+    "input_zone_ref",
+    "output_zone_ref",
+    "input_temp_k",
+    "output_temp_k",
+    "work_input_w",
+    "work_output_w",
+    "loss_w",
+    "notes"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "stage_id": { "type": "string" },
+    "schema_version": { "type": "string", "pattern": "^v\\d+\\.\\d+\\.\\d+$" },
+    "stage_type": {
+      "type": "string",
+      "enum": [
+        "capture",
+        "transport",
+        "exchanger",
+        "storage",
+        "lift",
+        "power_cycle",
+        "emission",
+        "rejection",
+        "branch_interface"
+      ]
+    },
+    "input_zone_ref": { "type": "string" },
+    "output_zone_ref": { "type": "string" },
+    "input_temp_k": { "type": "number", "exclusiveMinimum": 0 },
+    "output_temp_k": { "type": "number", "exclusiveMinimum": 0 },
+    "work_input_w": { "type": "number", "minimum": 0 },
+    "work_output_w": { "type": "number", "minimum": 0 },
+    "loss_w": { "type": "number", "minimum": 0 },
+    "pressure_in_pa": { "type": "number", "minimum": 0 },
+    "pressure_out_pa": { "type": "number", "minimum": 0 },
+    "fluid_ref": { "type": "string" },
+    "efficiency": { "type": "number", "minimum": 0, "maximum": 1 },
+    "effectiveness": { "type": "number", "minimum": 0, "maximum": 1 },
+    "cop_actual": { "type": "number", "minimum": 0 },
+    "high_temp_source_k": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Required for power_cycle stage per §30.1."
+    },
+    "notes": { "type": "string" }
+  }
+}

@@ -8,8 +8,7 @@ Project: space-server-heat-dissipation
 
 ## 1. Purpose
 
-This engineering specification converts the canonical human blueprint into build law for the first
-deterministic implementation track of the orbital thermal trade system.
+This engineering specification converts the canonical human blueprint into build law for the first deterministic implementation track of the orbital thermal trade system.
 
 This document defines:
 
@@ -27,14 +26,11 @@ This document defines:
 - output contracts
 - versioning and conformance gates
 
-This document is implementation-authoritative for the human canonical layer. The AI-pinned build
-documents will later be derived from this document and the blueprint. The implementation must not
-bypass this document.
+This document is implementation-authoritative for the human canonical layer. The AI-pinned build documents will later be derived from this document and the blueprint. The implementation must not bypass this document.
 
 ## 2. Scope
 
-This specification governs the first deterministic build track for a schema-first, browser-assisted,
-runtime-authoritative orbital thermal trade system.
+This specification governs the first deterministic build track for a schema-first, browser-assisted, runtime-authoritative orbital thermal trade system.
 
 The implementation covered by this version includes:
 
@@ -66,8 +62,7 @@ The implementation covered by this version does not include:
 The engineering specification inherits its conceptual authority from the canonical human blueprint.
 
 Where this document is more detailed than the blueprint, this document governs implementation.  
-Where this document appears to conflict with the blueprint, the blueprint governs until this
-document is formally revised.
+Where this document appears to conflict with the blueprint, the blueprint governs until this document is formally revised.
 
 The implementation must preserve the following blueprint truths without reinterpretation:
 
@@ -85,24 +80,19 @@ The implementation must obey the following build laws.
 
 ### 4.1 No undocumented field invention
 
-No runtime, UI, or AI packet layer may invent schema fields not declared in the versioned schema
-family.
+No runtime, UI, or AI packet layer may invent schema fields not declared in the versioned schema family.
 
 ### 4.2 No undocumented formula substitution
 
-No runtime module may replace a governing equation without formal document revision and version
-change.
+No runtime module may replace a governing equation without formal document revision and version change.
 
 ### 4.3 No hidden derived assumptions
 
-Any derived assumption used by runtime execution must be surfaced in emitted outputs or in declared
-defaults.
+Any derived assumption used by runtime execution must be surfaced in emitted outputs or in declared defaults.
 
 ### 4.4 No silent operating-mode fusion
 
-Heat-lift stages, power-cycle stages, electrical conversion stages, and directed-energy stages may
-not be silently fused into a single stage unless that combined stage is explicitly declared in
-schema and documented in this specification.
+Heat-lift stages, power-cycle stages, electrical conversion stages, and directed-energy stages may not be silently fused into a single stage unless that combined stage is explicitly declared in schema and documented in this specification.
 
 ### 4.5 No UI-only truth
 
@@ -158,8 +148,7 @@ The repository must evolve to the following logical shape.
       conformance/
     reference/
 
-The implementation may use different sub-file granularity than shown above, but the following
-separations are mandatory:
+The implementation may use different sub-file granularity than shown above, but the following separations are mandatory:
 
 - human canonical docs must not be mixed with runtime code
 - schema files must be version-visible
@@ -171,8 +160,7 @@ separations are mandatory:
 
 ### 6.1 Version syntax
 
-All canonical documents, schemas, and major runtime output contracts must use semantic version
-style:
+All canonical documents, schemas, and major runtime output contracts must use semantic version style:
 
 `vMAJOR.MINOR.PATCH`
 
@@ -198,8 +186,7 @@ Every runtime result bundle must declare:
 
 ### 6.4 Derived AI-pinned documents
 
-Every AI-pinned document must declare the exact canonical human blueprint and engineering
-specification versions from which it was derived.
+Every AI-pinned document must declare the exact canonical human blueprint and engineering specification versions from which it was derived.
 
 ## 7. GEO-Only System Boundary
 
@@ -220,8 +207,7 @@ The implementation must support a GEO environment profile abstraction that can i
 
 ### 7.3 Orbit validation
 
-If any scenario declares an orbit class other than GEO, runtime validation must reject the scenario
-under v0.1.0.
+If any scenario declares an orbit class other than GEO, runtime validation must reject the scenario under v0.1.0.
 
 ## 8. Canonical Node Classes
 
@@ -232,19 +218,16 @@ The implementation must support the following node classes:
 - 1 MW class
 - custom
 
-These node classes are scenario labels and scale anchors. They are not hard constraints on exact
-payload power.
+These node classes are scenario labels and scale anchors. They are not hard constraints on exact payload power.
 
 ## 9. Governing Math Policy
 
-The system is math-governed. All core thermal, electrical, and branch outputs must be derived from
-explicit formula modules.
+The system is math-governed. All core thermal, electrical, and branch outputs must be derived from explicit formula modules.
 
 ### 9.1 Math presentation policy
 
 This document defines the canonical equation set, variable names, and interpretation rules.  
-The runtime implementation must use these equations or declared equivalents that are algebraically
-identical.
+The runtime implementation must use these equations or declared equivalents that are algebraically identical.
 
 ### 9.2 Output policy
 
@@ -256,8 +239,7 @@ The runtime must compute and emit:
 - declared assumptions
 - uncertainty notes where a parameter is user-estimated rather than sourced
 
-The runtime must not emit a single final viability truth value as a substitute for the underlying
-output set.
+The runtime must not emit a single final viability truth value as a substitute for the underlying output set.
 
 ## 10. Units Policy
 
@@ -283,13 +265,11 @@ Minimum canonical internal units:
 
 ### 10.2 UI input units
 
-The UI may allow user-friendly unit entry, but every input must be normalized to canonical internal
-units before runtime execution.
+The UI may allow user-friendly unit entry, but every input must be normalized to canonical internal units before runtime execution.
 
 ### 10.3 Output unit display
 
-The runtime may emit both canonical SI values and operator-friendly display units, but SI must
-remain present in structured output.
+The runtime may emit both canonical SI values and operator-friendly display units, but SI must remain present in structured output.
 
 ## 11. Variable Naming Convention
 
@@ -347,11 +327,9 @@ Interpretation rules:
 
 - `Q_dot_internal` includes compute and non-compute dissipation
 - `Q_dot_external` includes modeled environmental absorption terms
-- `W_dot_parasitic` is treated as internal dissipation unless the operator explicitly models it as
-  externally removed
+- `W_dot_parasitic` is treated as internal dissipation unless the operator explicitly models it as externally removed
 - `Q_dot_branch_losses` includes conversion and control losses that remain on-node
-- `W_dot_exported_equivalent` is only applied if a branch removes usable energy from the node in
-  modeled form
+- `W_dot_exported_equivalent` is only applied if a branch removes usable energy from the node in modeled form
 - if no export branch exists, `W_dot_exported_equivalent = 0`
 
 ### 12.2 Radiator emission equation
@@ -363,8 +341,7 @@ Canonical radiator rejection equation:
 Where:
 
 - `sigma = 5.670374419e-8 W/m²-K⁴`
-- `T_sink_effective` defaults to 0 K for first-order sizing unless the scenario explicitly sets a
-  higher effective sink term
+- `T_sink_effective` defaults to 0 K for first-order sizing unless the scenario explicitly sets a higher effective sink term
 
 First-order sizing rearrangement:
 
@@ -372,8 +349,7 @@ First-order sizing rearrangement:
 
 ### 12.3 Blackbody limit note
 
-No modeled emitter may exceed blackbody radiative power at its declared temperature and
-emissivity.  
+No modeled emitter may exceed blackbody radiative power at its declared temperature and emissivity.  
 Any directed or shaped emission model must still preserve declared temperature and radiance bounds.
 
 ### 12.4 Sensible-heat transport equation
@@ -411,8 +387,7 @@ Interpretation rules:
 
 - `T_ref` is the scenario reference sink or environment temperature
 - `T_source` must be greater than `T_ref`
-- if `T_source <= T_ref`, runtime must reject the exergy calculation as non-physical for positive
-  work extraction
+- if `T_source <= T_ref`, runtime must reject the exergy calculation as non-physical for positive work extraction
 
 ### 12.7 Carnot heat-engine limit
 
@@ -450,8 +425,7 @@ or
 
 Interpretation rules:
 
-- the runtime must preserve the distinction between cold-side heat removed and hot-side heat
-  delivered
+- the runtime must preserve the distinction between cold-side heat removed and hot-side heat delivered
 - the hot side is what the radiator must ultimately see if the lifted heat remains on-node
 
 ### 12.10 Power-cycle equation
@@ -463,8 +437,7 @@ For a true power-cycle branch:
 Interpretation rules:
 
 - `Q_dot_hot_source` must come from a declared thermal source quality that supports power-cycle mode
-- waste heat from a low-temperature source may be included, but the branch must not implicitly claim
-  a high-temperature source unless explicitly modeled
+- waste heat from a low-temperature source may be included, but the branch must not implicitly claim a high-temperature source unless explicitly modeled
 
 ### 12.11 Heat-exchanger duty equation
 
@@ -472,8 +445,7 @@ For a generic exchanger:
 
 `Q_dot_hx = UA_hx * Delta_T_lm`
 
-where `Delta_T_lm` is the log-mean temperature difference if the stage is modeled in that level of
-detail.
+where `Delta_T_lm` is the log-mean temperature difference if the stage is modeled in that level of detail.
 
 For v0.1.0, runtime may alternatively use a simpler effectiveness model:
 
@@ -489,8 +461,7 @@ and
 
 ### 12.12 Load-state interpolation rule
 
-If a device or subsystem declares idle, light, medium, and full power values, intermediate duty
-outputs must be derived by declared interpolation rule.
+If a device or subsystem declares idle, light, medium, and full power values, intermediate duty outputs must be derived by declared interpolation rule.
 
 Default interpolation rule for v0.1.0:
 
@@ -511,19 +482,16 @@ Any electrical draw that remains on-node is thermalized on-node unless explicitl
 A heat-lift branch uses work input to move heat to a more rejectable or useful state.  
 A power-cycle branch extracts work from a sufficiently high-quality thermal source.
 
-The runtime must enforce separate stage types, separate fields, and separate validation logic for
-these modes.
+The runtime must enforce separate stage types, separate fields, and separate validation logic for these modes.
 
 ### 13.2 Directed-energy branch boundary
 
-A directed-energy branch may remove usable energy from the node only after prior modeled conversion
-steps.  
+A directed-energy branch may remove usable energy from the node only after prior modeled conversion steps.  
 The branch must account for conversion losses that remain on-node.
 
 ### 13.3 Low-grade scavenging boundary
 
-Scavenging branches such as TEG-like stages may be modeled, but the runtime must flag
-low-significance outputs if the branch contributes insignificantly relative to total thermal burden.
+Scavenging branches such as TEG-like stages may be modeled, but the runtime must flag low-significance outputs if the branch contributes insignificantly relative to total thermal burden.
 
 ## 14. Reference Cases
 
@@ -552,7 +520,7 @@ For `Q_dot_rad = 50,000 W`:
 
 - at `T_radiator_target = 600 K`, `A_radiator_effective ≈ 7.56 m²`
 - at `T_radiator_target = 800 K`, `A_radiator_effective ≈ 2.39 m²`
-- at `T_radiator_target = 1200 K`, `A_radiator_effective ≈ 0.95 m²`
+- at `T_radiator_target = 1200 K`, `A_radiator_effective ≈ 0.4725 m²`
 
 ### 14.4 Heat-pump upper-bound example
 
@@ -750,9 +718,7 @@ The working-fluid schema must include:
 ### 20.2 Validation rules
 
 - `temp_min_k < temp_max_k`
-- if a stage references this fluid, the stage operating temperature range must lie within the
-  declared fluid range unless the scenario explicitly sets an out-of-range flag that triggers
-  failure or review as configured
+- if a stage references this fluid, the stage operating temperature range must lie within the declared fluid range unless the scenario explicitly sets an out-of-range flag that triggers failure or review as configured
 
 ## 21. Storage Schema Contract
 
@@ -803,11 +769,9 @@ The radiator schema must include:
 
 ### 22.2 Derived sizing
 
-If `effective_area_m2` is not user-specified, the runtime must compute it from required rejection
-and governing emission equation.
+If `effective_area_m2` is not user-specified, the runtime must compute it from required rejection and governing emission equation.
 
-If `effective_area_m2` is user-specified, the runtime must compute achievable rejection and
-resulting mismatch.
+If `effective_area_m2` is user-specified, the runtime must compute achievable rejection and resulting mismatch.
 
 ### 22.3 Validation rules
 
@@ -852,11 +816,9 @@ The thermal-stage schema must include:
 ### 23.3 Stage validation rules
 
 - a `lift` stage must have `work_input_w >= 0`
-- a `power_cycle` stage must have a declared high-temperature source field and may not derive its
-  source implicitly from a low-temperature stage without explicit modeling
+- a `power_cycle` stage must have a declared high-temperature source field and may not derive its source implicitly from a low-temperature stage without explicit modeling
 - `loss_w >= 0`
-- temperature direction must not violate stage semantics unless a custom stage contract explicitly
-  allows it
+- temperature direction must not violate stage semantics unless a custom stage contract explicitly allows it
 
 ## 24. Conversion Branch Schema Contract
 
@@ -890,8 +852,7 @@ The conversion-branch schema must include:
 ### 24.3 Validation rules
 
 - for heat-lift branches, `efficiency_or_cop` is interpreted as COP and must obey Carnot bound
-- for power-cycle branches, `efficiency_or_cop` is interpreted as efficiency and must obey Carnot
-  bound
+- for power-cycle branches, `efficiency_or_cop` is interpreted as efficiency and must obey Carnot bound
 - for directed-energy branches, upstream electrical or thermal input must be declared explicitly
 
 ## 25. Run Packet Schema Contract
@@ -1030,16 +991,14 @@ Generate descriptive problem-area flags.
 
 ### 27.11 Step 11 — output emission
 
-Emit structured outputs, summaries, packet-ready report artifacts, and comparison artifacts if
-requested.
+Emit structured outputs, summaries, packet-ready report artifacts, and comparison artifacts if requested.
 
 ## 28. Stage Execution Rules
 
 ### 28.1 Directed acyclic execution graph
 
 Thermal stage execution must form a directed acyclic graph for v0.1.0.  
-True cyclic solver behavior is out of scope for this version unless a loop is collapsed into an
-explicitly documented equivalent stage.
+True cyclic solver behavior is out of scope for this version unless a loop is collapsed into an explicitly documented equivalent stage.
 
 ### 28.2 Stage dependency ordering
 
@@ -1077,8 +1036,7 @@ A heat-lift branch must declare:
 
 ### 29.3 Emission accounting
 
-If lifted heat remains on-node, the radiator rejection requirement must increase to include the
-added work input.
+If lifted heat remains on-node, the radiator rejection requirement must increase to include the added work input.
 
 ## 30. Power-Cycle Branch Rules
 
@@ -1099,8 +1057,7 @@ A power-cycle branch must declare:
 
 ### 30.3 Source-quality rule
 
-A power-cycle branch must not infer a high-temperature source from a low-temperature compute zone
-unless an explicit upstream stage has already provided that thermal state.
+A power-cycle branch must not infer a high-temperature source from a low-temperature compute zone unless an explicit upstream stage has already provided that thermal state.
 
 ## 31. TEG and Low-Significance Recovery Rules
 
@@ -1110,13 +1067,11 @@ TEG-like stages are permitted as modeled scavenging branches.
 
 ### 31.2 Constraints
 
-The runtime must not allow TEG-like branches to reduce required total thermal rejection by more than
-the electrical output they explicitly produce.
+The runtime must not allow TEG-like branches to reduce required total thermal rejection by more than the electrical output they explicitly produce.
 
 ### 31.3 Flag rule
 
-If a scavenging branch output is less than the configured significance threshold, the runtime must
-emit `low_significance_recovery_branch_output`.
+If a scavenging branch output is less than the configured significance threshold, the runtime must emit `low_significance_recovery_branch_output`.
 
 Default threshold for v0.1.0:
 
@@ -1148,8 +1103,7 @@ When sizing a radiator, required area must be multiplied by:
 
 ### 32.4 Temperature flag rule
 
-If `target_surface_temp_k` exceeds operator-selected material policy range, the runtime must emit
-`exceeds_selected_material_range` and `requires_extreme_target_surface_temperature`.
+If `target_surface_temp_k` exceeds operator-selected material policy range, the runtime must emit `exceeds_selected_material_range` and `requires_extreme_target_surface_temperature`.
 
 ## 33. Thermal Policy Contract
 
@@ -1321,8 +1275,7 @@ Recommended bundle naming pattern:
 
 ### 37.3 Bundle integrity
 
-The run packet must include checksums or at minimum file-length and file-name manifest entries for
-included payloads.
+The run packet must include checksums or at minimum file-length and file-name manifest entries for included payloads.
 
 ## 38. AI Role Contract
 
@@ -1377,8 +1330,7 @@ The runtime and packet system must support marking fields as:
 - inferred
 - research-required
 
-If a scenario relies on a field marked `research-required`, the runtime must emit
-`research_confirmation_required`.
+If a scenario relies on a field marked `research-required`, the runtime must emit `research_confirmation_required`.
 
 ## 40. Example Canonical Defaults
 
@@ -1422,8 +1374,7 @@ Runtime reproduces the mandatory reference cases within declared tolerance.
 
 ### 41.7 Drift gate
 
-No implementation artifact contradicts canonical versions without explicit version change and
-document update.
+No implementation artifact contradicts canonical versions without explicit version change and document update.
 
 ## 42. Reference-Case Tolerances
 
@@ -1521,8 +1472,7 @@ The following are prohibited in v0.1.0 implementation:
 
 ## 47. Required Future Derivatives
 
-Once this human canonical engineering specification is accepted, the following derivative artifacts
-must be created:
+Once this human canonical engineering specification is accepted, the following derivative artifacts must be created:
 
 - AI build blueprint
 - AI build engineering spec
@@ -1531,8 +1481,7 @@ must be created:
 - ChatGPT design/compiler guide
 - Perplexity research guide
 
-These are out of scope for this document’s content, but in scope for this document’s downstream
-intent.
+These are out of scope for this document’s content, but in scope for this document’s downstream intent.
 
 ## 48. Completion Criteria for This Specification
 
@@ -1543,8 +1492,7 @@ This engineering specification is complete for v0.1.0 when:
 - variable names and interpretation boundaries are declared
 - required artifact families are declared
 - conformance gates are declared
-- the document is sufficient to derive the first AI-pinned build artifacts without reopening
-  conceptual ambiguity
+- the document is sufficient to derive the first AI-pinned build artifacts without reopening conceptual ambiguity
 
 ## 49. Appendix A — Minimal Example Scenario Payload Shape
 

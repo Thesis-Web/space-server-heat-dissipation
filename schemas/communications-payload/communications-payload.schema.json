@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "schema_id": "communications-payload",
+  "schema_version": "v0.1.0",
+  "title": "CommunicationsPayload",
+  "description": "Non-compute mission load definition. W_dot_non_compute derived per §18.2.",
+  "type": "object",
+  "required": [
+    "payload_id",
+    "schema_version",
+    "rf_comms_power_w",
+    "telemetry_power_w",
+    "radar_power_w",
+    "optical_crosslink_power_w",
+    "duty_cycle_profile",
+    "notes"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "payload_id": { "type": "string" },
+    "schema_version": { "type": "string", "pattern": "^v\\d+\\.\\d+\\.\\d+$" },
+    "rf_comms_power_w": { "type": "number", "minimum": 0 },
+    "telemetry_power_w": { "type": "number", "minimum": 0 },
+    "radar_power_w": { "type": "number", "minimum": 0 },
+    "optical_crosslink_power_w": { "type": "number", "minimum": 0 },
+    "duty_cycle_profile": {
+      "description": "Named duty profile or inline fraction object.",
+      "oneOf": [
+        { "type": "string" },
+        {
+          "type": "object",
+          "properties": {
+            "rf_comms_fraction": { "type": "number", "minimum": 0, "maximum": 1 },
+            "telemetry_fraction": { "type": "number", "minimum": 0, "maximum": 1 },
+            "radar_fraction": { "type": "number", "minimum": 0, "maximum": 1 },
+            "optical_crosslink_fraction": { "type": "number", "minimum": 0, "maximum": 1 }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "sourcing_status": {
+      "type": "string",
+      "enum": ["operator-estimated", "sourced", "inferred", "research-required"]
+    },
+    "notes": { "type": "string" }
+  }
+}

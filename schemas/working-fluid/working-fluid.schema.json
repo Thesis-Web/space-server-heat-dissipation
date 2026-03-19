@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "schema_id": "working-fluid",
+  "schema_version": "v0.1.0",
+  "title": "WorkingFluid",
+  "description": "Working fluid property envelope for thermal stage use. Governed by §20.",
+  "type": "object",
+  "required": [
+    "fluid_id",
+    "schema_version",
+    "label",
+    "medium_class",
+    "intended_use_domain",
+    "temp_min_k",
+    "temp_max_k",
+    "pressure_notes",
+    "compatibility_notes",
+    "hazards",
+    "maturity_class"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "fluid_id": { "type": "string" },
+    "schema_version": { "type": "string", "pattern": "^v\\d+\\.\\d+\\.\\d+$" },
+    "label": { "type": "string" },
+    "medium_class": {
+      "type": "string",
+      "enum": ["gas", "liquid", "two_phase", "liquid_metal", "molten_salt", "custom"]
+    },
+    "intended_use_domain": {
+      "type": "string",
+      "enum": ["cold_loop", "hot_backbone", "radiator_loop", "storage_interface", "custom"]
+    },
+    "temp_min_k": { "type": "number", "exclusiveMinimum": 0 },
+    "temp_max_k": { "type": "number", "exclusiveMinimum": 0 },
+    "pressure_notes": { "type": "string" },
+    "compatibility_notes": { "type": "string" },
+    "hazards": { "type": "string" },
+    "maturity_class": {
+      "type": "string",
+      "enum": ["flight_proven", "trl_6_plus", "trl_4_5", "conceptual", "research_required"]
+    },
+    "default_cp_j_per_kgk": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Fixed cp for runtime abstraction per §20.1."
+    },
+    "default_density_kg_per_m3": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "sourcing_status": {
+      "type": "string",
+      "enum": ["operator-estimated", "sourced", "inferred", "research-required"]
+    },
+    "notes": { "type": "string" }
+  }
+}

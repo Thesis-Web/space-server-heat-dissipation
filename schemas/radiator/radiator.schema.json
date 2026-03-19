@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "schema_id": "radiator",
+  "schema_version": "v0.1.0",
+  "title": "Radiator",
+  "description": "Radiator configuration. Area computed or validated per §22.2 and §12.2. Margin per §32.3.",
+  "type": "object",
+  "required": [
+    "radiator_id",
+    "schema_version",
+    "target_surface_temp_k",
+    "emissivity",
+    "material_family",
+    "geometry_class",
+    "deployment_class",
+    "packaging_notes",
+    "reserve_margin_fraction"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "radiator_id": { "type": "string" },
+    "schema_version": { "type": "string", "pattern": "^v\\d+\\.\\d+\\.\\d+$" },
+    "target_surface_temp_k": { "type": "number", "exclusiveMinimum": 0 },
+    "emissivity": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+    "effective_area_m2": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "If omitted, runtime computes from rejection requirement per §22.2."
+    },
+    "sink_temp_k": {
+      "type": "number",
+      "minimum": 0,
+      "default": 0,
+      "description": "T_sink_effective. Defaults to 0 K per §40."
+    },
+    "material_family": {
+      "type": "string",
+      "description": "e.g. carbon_composite, aluminum_alloy, titanium, custom"
+    },
+    "geometry_class": {
+      "type": "string",
+      "enum": ["fixed_body", "fixed_panel", "deployable_panel", "custom"]
+    },
+    "deployment_class": {
+      "type": "string",
+      "enum": ["body_mounted", "boom_deployed", "roll_out", "inflatable", "custom"]
+    },
+    "packaging_notes": { "type": "string" },
+    "reserve_margin_fraction": {
+      "type": "number",
+      "minimum": 0,
+      "default": 0.15,
+      "description": "Default 0.15 per §40."
+    },
+    "areal_mass_density_kg_per_m2": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "For mass estimation."
+    },
+    "sourcing_status": {
+      "type": "string",
+      "enum": ["operator-estimated", "sourced", "inferred", "research-required"]
+    },
+    "notes": { "type": "string" }
+  }
+}

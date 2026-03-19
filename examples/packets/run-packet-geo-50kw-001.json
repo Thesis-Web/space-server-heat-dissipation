@@ -1,0 +1,35 @@
+{
+  "packet_id": "pkt-geo-50kw-001",
+  "schema_version": "v0.1.0",
+  "blueprint_version": "v0.1.1",
+  "engineering_spec_version": "v0.1.0",
+  "runtime_version": "v0.1.0",
+  "schema_bundle_version": "v0.1.0",
+  "scenario_ref": "scenario-geo-50kw-h200-nominal.json",
+  "payload_file_refs": [
+    "scenario-geo-50kw-h200-nominal.json",
+    "compute-device-h200.json",
+    "compute-module-h200-rack-a.json",
+    "comms-payload-01.json",
+    "radiator-primary-600k.json",
+    "storage-pcm-01.json"
+  ],
+  "operator_notes": "Example run packet for 50 kW class GEO node with H200 compute and no active branches.",
+  "requested_outputs": ["structured_json", "summary_markdown", "flag_report"],
+  "branch_selection_summary": {},
+  "comparison_requests": [],
+  "ai_role_instructions": {
+    "claude_instructions": "Execute run packet using runtime/runner/run-packet.ts. Emit structured_json and summary_markdown. Do not supersede runtime numeric outputs. §38.2",
+    "chatgpt_instructions": "Conformance review and schema design support only. Do not replace runtime numeric authority. §38.1",
+    "perplexity_instructions": "Citation-first property research on any research-required fields. §38.3"
+  },
+  "generated_at": "2026-03-19T00:00:00.000Z",
+  "file_manifest": [
+    {"filename": "scenario-geo-50kw-h200-nominal.json", "byte_length": 892},
+    {"filename": "compute-device-h200.json", "byte_length": 1024},
+    {"filename": "compute-module-h200-rack-a.json", "byte_length": 640},
+    {"filename": "comms-payload-01.json", "byte_length": 380},
+    {"filename": "radiator-primary-600k.json", "byte_length": 512},
+    {"filename": "storage-pcm-01.json", "byte_length": 460}
+  ]
+}

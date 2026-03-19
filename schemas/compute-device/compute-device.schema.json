@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "schema_id": "compute-device",
+  "schema_version": "v0.1.0",
+  "title": "ComputeDevice",
+  "description": "Individual compute accelerator or processing unit thermal/electrical profile. Governed by §16.",
+  "type": "object",
+  "required": [
+    "device_id",
+    "schema_version",
+    "vendor",
+    "family",
+    "sku",
+    "device_type",
+    "nominal_tdp_w",
+    "peak_tdp_w",
+    "allowable_junction_temp_k",
+    "allowable_package_temp_k",
+    "allowable_coldplate_temp_min_k",
+    "allowable_coldplate_temp_max_k",
+    "heat_flux_w_per_cm2",
+    "power_idle_w",
+    "power_light_w",
+    "power_medium_w",
+    "power_full_w",
+    "package_mass_kg",
+    "packaging_notes"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "device_id": { "type": "string" },
+    "schema_version": { "type": "string", "pattern": "^v\\d+\\.\\d+\\.\\d+$" },
+    "vendor": { "type": "string" },
+    "family": { "type": "string" },
+    "sku": { "type": "string" },
+    "device_type": {
+      "type": "string",
+      "enum": ["gpu", "cpu", "asic", "fpga", "custom"]
+    },
+    "nominal_tdp_w": { "type": "number", "minimum": 0 },
+    "peak_tdp_w": { "type": "number", "minimum": 0 },
+    "allowable_junction_temp_k": { "type": "number", "exclusiveMinimum": 0 },
+    "allowable_package_temp_k": { "type": "number", "exclusiveMinimum": 0 },
+    "allowable_coldplate_temp_min_k": { "type": "number", "exclusiveMinimum": 0 },
+    "allowable_coldplate_temp_max_k": { "type": "number", "exclusiveMinimum": 0 },
+    "heat_flux_w_per_cm2": { "type": "number", "minimum": 0 },
+    "power_idle_w": { "type": "number", "minimum": 0 },
+    "power_light_w": { "type": "number", "minimum": 0 },
+    "power_medium_w": { "type": "number", "minimum": 0 },
+    "power_full_w": { "type": "number", "minimum": 0 },
+    "package_mass_kg": { "type": "number", "minimum": 0 },
+    "packaging_notes": { "type": "string" },
+    "sourcing_status": {
+      "type": "string",
+      "enum": ["operator-estimated", "sourced", "inferred", "research-required"]
+    }
+  }
+}

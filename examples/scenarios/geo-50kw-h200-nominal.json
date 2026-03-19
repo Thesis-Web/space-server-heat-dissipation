@@ -1,0 +1,23 @@
+{
+  "scenario_id": "geo-50kw-h200-nominal",
+  "schema_version": "v0.1.0",
+  "scenario_version": "v0.1.0",
+  "label": "GEO 50 kW H200 Nominal",
+  "orbit_class": "GEO",
+  "environment_profile": "geo_default_v0",
+  "mission_mode": "compute_plus_communications",
+  "node_class": "50kw",
+  "architecture_class": "cold_loop_plus_hot_backbone",
+  "utilization_profile": "full",
+  "thermal_policy": "nominal",
+  "selected_branches": ["none"],
+  "reporting_preferences": {
+    "summary_markdown": true,
+    "comparison_enabled": false
+  },
+  "compute_module_refs": ["compute-module-h200-rack-a.json"],
+  "communications_payload_ref": "comms-payload-01.json",
+  "radiator_ref": "radiator-primary-600k.json",
+  "storage_ref": "storage-pcm-01.json",
+  "operator_notes": "First-order sizing at 600 K radiator target. No active branches. Nominal thermal policy."
+}

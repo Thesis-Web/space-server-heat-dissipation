@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "schema_id": "storage",
+  "schema_version": "v0.1.0",
+  "title": "Storage",
+  "description": "Thermal energy storage block. E_storage_usable derived per §21.2 and §12.5.",
+  "type": "object",
+  "required": [
+    "storage_id",
+    "schema_version",
+    "label",
+    "storage_class",
+    "target_temp_k",
+    "temp_min_k",
+    "temp_max_k",
+    "cp_j_per_kgk",
+    "latent_heat_j_per_kg",
+    "latent_utilization_fraction",
+    "mass_kg",
+    "integration_zone",
+    "notes"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "storage_id": { "type": "string" },
+    "schema_version": { "type": "string", "pattern": "^v\\d+\\.\\d+\\.\\d+$" },
+    "label": { "type": "string" },
+    "storage_class": {
+      "type": "string",
+      "enum": ["sensible_solid", "sensible_liquid", "pcm_latent", "composite", "custom"]
+    },
+    "target_temp_k": { "type": "number", "exclusiveMinimum": 0 },
+    "temp_min_k": { "type": "number", "exclusiveMinimum": 0 },
+    "temp_max_k": { "type": "number", "exclusiveMinimum": 0 },
+    "cp_j_per_kgk": { "type": "number", "exclusiveMinimum": 0 },
+    "latent_heat_j_per_kg": { "type": "number", "minimum": 0 },
+    "latent_utilization_fraction": { "type": "number", "minimum": 0, "maximum": 1 },
+    "mass_kg": { "type": "number", "minimum": 0 },
+    "integration_zone": {
+      "type": "string",
+      "description": "zone_id this storage block is associated with."
+    },
+    "sourcing_status": {
+      "type": "string",
+      "enum": ["operator-estimated", "sourced", "inferred", "research-required"]
+    },
+    "notes": { "type": "string" }
+  }
+}

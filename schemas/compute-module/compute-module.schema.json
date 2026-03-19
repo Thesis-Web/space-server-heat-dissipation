@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "schema_id": "compute-module",
+  "schema_version": "v0.1.0",
+  "title": "ComputeModule",
+  "description": "Board-level compute assembly. Runtime derives W_dot_compute_module per §17.2.",
+  "type": "object",
+  "required": [
+    "module_id",
+    "schema_version",
+    "device_ref",
+    "device_count",
+    "board_count",
+    "memory_power_w",
+    "storage_power_w",
+    "network_power_w",
+    "power_conversion_overhead_w",
+    "control_overhead_w",
+    "redundancy_mode",
+    "target_load_state",
+    "thermal_grouping_label"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "module_id": { "type": "string" },
+    "schema_version": { "type": "string", "pattern": "^v\\d+\\.\\d+\\.\\d+$" },
+    "device_ref": {
+      "type": "string",
+      "description": "device_id of the referenced compute-device."
+    },
+    "device_count": { "type": "integer", "minimum": 1 },
+    "board_count": { "type": "integer", "minimum": 1 },
+    "memory_power_w": { "type": "number", "minimum": 0 },
+    "storage_power_w": { "type": "number", "minimum": 0 },
+    "network_power_w": { "type": "number", "minimum": 0 },
+    "power_conversion_overhead_w": { "type": "number", "minimum": 0 },
+    "control_overhead_w": { "type": "number", "minimum": 0 },
+    "redundancy_mode": {
+      "type": "string",
+      "enum": ["none", "n_plus_1", "n_plus_2", "dual_redundant", "custom"]
+    },
+    "target_load_state": {
+      "type": "string",
+      "description": "idle | light | medium | full | custom duty description."
+    },
+    "thermal_grouping_label": {
+      "type": "string",
+      "description": "Associates module with a thermal zone group."
+    },
+    "notes": { "type": "string" }
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "schema_id": "conversion-branch",
+  "schema_version": "v0.1.0",
+  "title": "ConversionBranch",
+  "description": "Optional conversion or export branch. Carnot bounds enforced at runtime per §24.3.",
+  "type": "object",
+  "required": [
+    "branch_id",
+    "schema_version",
+    "branch_type",
+    "enabled",
+    "mode_label",
+    "efficiency_or_cop",
+    "output_class",
+    "loss_partition_rule",
+    "notes"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "branch_id": { "type": "string" },
+    "schema_version": { "type": "string", "pattern": "^v\\d+\\.\\d+\\.\\d+$" },
+    "branch_type": {
+      "type": "string",
+      "enum": [
+        "none",
+        "reverse_brayton",
+        "brayton_power_cycle",
+        "stirling",
+        "tpv",
+        "teg",
+        "rf_export",
+        "laser_export",
+        "custom"
+      ]
+    },
+    "enabled": { "type": "boolean" },
+    "input_stage_ref": { "type": "string" },
+    "input_zone_ref": { "type": "string" },
+    "mode_label": { "type": "string" },
+    "efficiency_or_cop": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Interpreted as COP for heat-lift, efficiency for power-cycle."
+    },
+    "output_class": {
+      "type": "string",
+      "enum": ["electrical", "thermal_rejected", "directed_energy", "none"]
+    },
+    "loss_partition_rule": {
+      "type": "string",
+      "enum": ["all_on_node", "proportional", "explicit", "none"]
+    },
+    "t_cold_source_k": { "type": "number", "exclusiveMinimum": 0 },
+    "t_hot_delivery_k": { "type": "number", "exclusiveMinimum": 0 },
+    "t_hot_source_k": { "type": "number", "exclusiveMinimum": 0 },
+    "t_cold_sink_k": { "type": "number", "exclusiveMinimum": 0 },
+    "q_dot_input_w": { "type": "number", "minimum": 0 },
+    "notes": { "type": "string" }
+  }
+}

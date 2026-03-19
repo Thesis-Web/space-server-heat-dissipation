@@ -1,0 +1,158 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "schema_id": "scenario",
+  "schema_version": "v0.1.0",
+  "title": "Scenario",
+  "description": "Top-level orchestration schema for an orbital thermal trade scenario. Governed by §15 of engineering spec v0.1.0.",
+  "type": "object",
+  "required": [
+    "scenario_id",
+    "schema_version",
+    "scenario_version",
+    "label",
+    "orbit_class",
+    "environment_profile",
+    "mission_mode",
+    "node_class",
+    "architecture_class",
+    "utilization_profile",
+    "thermal_policy",
+    "selected_branches",
+    "reporting_preferences"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "scenario_id": {
+      "type": "string",
+      "description": "Stable identifier for one run definition."
+    },
+    "schema_version": {
+      "type": "string",
+      "pattern": "^v\\d+\\.\\d+\\.\\d+$",
+      "description": "Schema contract version."
+    },
+    "scenario_version": {
+      "type": "string",
+      "pattern": "^v\\d+\\.\\d+\\.\\d+$",
+      "description": "Operator-authored scenario revision."
+    },
+    "label": {
+      "type": "string",
+      "description": "Human-readable scenario label."
+    },
+    "orbit_class": {
+      "type": "string",
+      "enum": ["GEO"],
+      "description": "Must be GEO in v0.1.0 per §7.3."
+    },
+    "environment_profile": {
+      "description": "Inline environment object or named reference string.",
+      "oneOf": [
+        { "type": "string" },
+        {
+          "type": "object",
+          "properties": {
+            "solar_absorbed_w": { "type": "number", "minimum": 0 },
+            "earth_reflected_w": { "type": "number", "minimum": 0 },
+            "earth_ir_w": { "type": "number", "minimum": 0 },
+            "eclipse_fraction": { "type": "number", "minimum": 0, "maximum": 1 },
+            "background_sink_k": { "type": "number", "minimum": 0 },
+            "user_margin_w": { "type": "number", "minimum": 0 }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "mission_mode": {
+      "type": "string",
+      "enum": [
+        "compute_only",
+        "compute_plus_communications",
+        "communications_only",
+        "custom"
+      ]
+    },
+    "node_class": {
+      "type": "string",
+      "enum": ["50kw", "300kw", "1mw", "custom"]
+    },
+    "architecture_class": {
+      "type": "string",
+      "description": "Descriptive architecture label (e.g. cold_loop_plus_hot_backbone)."
+    },
+    "utilization_profile": {
+      "type": "string",
+      "description": "Named or custom duty family (idle, light, medium, full, custom)."
+    },
+    "thermal_policy": {
+      "type": "string",
+      "enum": ["conservative", "nominal", "aggressive", "experimental"]
+    },
+    "selected_branches": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "none",
+          "reverse_brayton",
+          "brayton_power_cycle",
+          "stirling",
+          "tpv",
+          "teg",
+          "rf_export",
+          "laser_export",
+          "custom"
+        ]
+      }
+    },
+    "reporting_preferences": {
+      "type": "object",
+      "required": ["summary_markdown", "comparison_enabled"],
+      "properties": {
+        "summary_markdown": { "type": "boolean" },
+        "comparison_enabled": { "type": "boolean" },
+        "comparison_scenario_refs": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "include_assumptions": { "type": "boolean" },
+        "include_flags": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "compute_module_refs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "References to compute-module payload files."
+    },
+    "communications_payload_ref": {
+      "type": "string",
+      "description": "Reference to communications-payload file."
+    },
+    "thermal_zone_refs": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "thermal_stage_refs": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "radiator_ref": {
+      "type": "string"
+    },
+    "storage_ref": {
+      "type": "string"
+    },
+    "working_fluid_refs": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "conversion_branch_refs": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "operator_notes": {
+      "type": "string"
+    }
+  }
+}
