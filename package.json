@@ -9,7 +9,7 @@
   "scripts": {
     "build": "tsc --project tsconfig.json",
     "test": "node --experimental-vm-modules node_modules/.bin/jest --runInBand",
-    "lint": "eslint 'runtime/**/*.ts' 'tools/**/*.ts'",
+    "lint": "eslint --no-error-on-unmatched-pattern 'runtime/**/*.ts' 'tools/**/*.ts'",
     "lint:schemas": "node tools/conformance/validate-schemas.js",
     "typecheck": "tsc --noEmit",
     "conformance": "npm run lint:schemas && npm run typecheck && npm run test",
