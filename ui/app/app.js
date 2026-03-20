@@ -595,6 +595,8 @@ function buildPacket() {
   // show download
   document.getElementById("download-packet-btn").style.display = "inline-block";
   document.getElementById("download-packet-btn").onclick = downloadBundle;
+  document.getElementById("run-packet-btn").style.display = "inline-block";
+  document.getElementById("run-packet-btn").onclick = openPacketOutput;
 
   // warnings
   if (warnings.length) {
@@ -621,6 +623,159 @@ async function downloadBundle() {
       downloadBlob(blob, "run-packet.json", "application/json");
     }
   }
+}
+
+function openPacketOutput() {
+  if (!_lastBundleFiles) return;
+
+  function esc(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  var rp  = _lastBundleFiles.find(function(f) { return f.name === "run-packet.json"; });
+  var sc  = _lastBundleFiles.find(function(f) { return f.name === "scenario.json"; });
+  var cm  = _lastBundleFiles.find(function(f) { return f.name === "compute-module-01.json"; });
+  var rad = _lastBundleFiles.find(function(f) { return f.name === "radiator-01.json"; });
+
+  var packet  = rp  ? JSON.parse(rp.content)  : {};
+  var scenario= sc  ? JSON.parse(sc.content)  : {};
+  var compute = cm  ? JSON.parse(cm.content)  : {};
+  var radiator= rad ? JSON.parse(rad.content) : {};
+
+  var loadMap = {idle:"power_idle_w",light:"power_light_w",medium:"power_medium_w",full:"power_full_w"};
+  var lk = loadMap[compute.target_load_state] || "power_full_w";
+  var deviceW = compute[lk] || 0;
+  var dc = compute.device_count || 1;
+  var overheads = (compute.memory_power_w||0)+(compute.storage_power_w||0)+
+    (compute.network_power_w||0)+(compute.power_conversion_overhead_w||0)+
+    (compute.control_overhead_w||0);
+  var moduleTotal = dc * deviceW + overheads;
+  var sigma = 5.670374419e-8;
+  var eps  = radiator.emissivity || 0;
+  var Trad = radiator.target_surface_temp_k || 0;
+  var Tsink= radiator.sink_temp_k || 0;
+  var mrg  = radiator.reserve_margin_fraction || 0.15;
+  var Aeff = 0, Amargin = 0;
+  if (Trad > 0 && eps > 0 && moduleTotal > 0) {
+    Aeff    = moduleTotal / (eps * sigma * (Math.pow(Trad,4) - Math.pow(Tsink,4)));
+    Amargin = Aeff * (1 + mrg);
+  }
+
+  var manifRows = (packet.file_manifest || []).map(function(f) {
+    return "<tr><td>"+esc(f.name)+"</td><td>"+f.byte_length+" B</td></tr>";
+  }).join("");
+  var traceItems = (packet.transform_trace || []).map(function(t) {
+    return "<li>"+esc(t)+"</li>";
+  }).join("");
+  var reqItems = (packet.research_required_items || []).length
+    ? (packet.research_required_items||[]).map(function(r){return "<li>"+esc(r)+"</li>";}).join("")
+    : "<li>None declared</li>";
+  var branchText = (Array.isArray(scenario.selected_branches) && scenario.selected_branches.length)
+    ? scenario.selected_branches.map(esc).join(", ") : "none";
+
+  var pv = " <span class='pv'>(preview)</span>";
+  var nowStr = esc(new Date().toISOString());
+  var packetId = esc(packet.packet_id || "—");
+  var filesJson = JSON.stringify(_lastBundleFiles);
+  var bundleName = "runbundle-" + (scenario.scenario_id || "packet") + "-" +
+    new Date().toISOString().slice(0,10) + ".zip";
+
+  var parts = [
+    "<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'>",
+    "<title>Run Packet Output \u2014 " + packetId + "<\/title>",
+    "<script src='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js'><\/script>",
+    "<style>",
+    "* { box-sizing:border-box; margin:0; padding:0; }",
+    "body { background:#0f1117; color:#c9d1d9; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:14px; padding:24px; }",
+    "h1 { font-size:18px; color:#58a6ff; margin-bottom:4px; }",
+    ".sub { font-size:12px; color:#8b949e; margin-bottom:18px; }",
+    ".warn { background:#2d1e00; border:1px solid #d97706; color:#fbbf24; border-radius:6px; padding:10px 16px; margin-bottom:18px; font-size:13px; }",
+    ".dl { background:#238636; color:#fff; border:none; padding:8px 22px; border-radius:6px; cursor:pointer; font-size:14px; margin-bottom:24px; }",
+    ".dl:hover { background:#2ea043; }",
+    ".sec { margin-bottom:22px; }",
+    ".st { font-size:11px; font-weight:600; color:#58a6ff; text-transform:uppercase; letter-spacing:.08em; margin-bottom:6px; border-bottom:1px solid #21262d; padding-bottom:4px; }",
+    "table { width:100%; border-collapse:collapse; font-size:13px; }",
+    "th { background:#161b22; color:#8b949e; text-align:left; padding:6px 10px; font-weight:500; border:1px solid #21262d; }",
+    "td { padding:6px 10px; border:1px solid #21262d; }",
+    "tr:nth-child(even) td { background:#0d1117; }",
+    ".pv { color:#8b949e; font-size:11px; font-style:italic; }",
+    "ul { list-style:disc; padding-left:20px; font-size:13px; line-height:1.9; }",
+    ".mono { font-family:monospace; font-size:12px; color:#79c0ff; word-break:break-all; }",
+    ".foot { margin-top:28px; font-size:11px; color:#444; border-top:1px solid #21262d; padding-top:10px; }",
+    "<\/style><\/head><body>",
+    "<h1>Orbital Thermal Trade System \u2014 Run Packet Output<\/h1>",
+    "<div class='sub'>Generated: "+nowStr+" &nbsp;|&nbsp; Runtime authority: server-side execution required<\/div>",
+    "<div class='warn'>&#9888; All numeric values are browser-side previews only. Authoritative outputs require server-side runtime execution per governing spec \u00a74.1 and \u00a714.<\/div>",
+    "<button class='dl' onclick='dlBundle()'>&#8595; Download Bundle (.zip)<\/button>",
+    "<div class='sec'><div class='st'>Packet Identity<\/div>",
+    "<table><tr><th>Field<\/th><th>Value<\/th><\/tr>",
+    "<tr><td>Packet ID<\/td><td class='mono'>"+packetId+"<\/td><\/tr>",
+    "<tr><td>Schema Version<\/td><td>"+esc(packet.schema_version||"—")+"<\/td><\/tr>",
+    "<tr><td>Blueprint Version<\/td><td>"+esc(packet.blueprint_version||"—")+"<\/td><\/tr>",
+    "<tr><td>Spec Version<\/td><td>"+esc(packet.engineering_spec_version||"—")+"<\/td><\/tr>",
+    "<tr><td>Generated<\/td><td>"+nowStr+"<\/td><\/tr>",
+    "<\/table><\/div>",
+    "<div class='sec'><div class='st'>Scenario Summary<\/div>",
+    "<table><tr><th>Field<\/th><th>Value<\/th><\/tr>",
+    "<tr><td>Scenario ID<\/td><td class='mono'>"+esc(scenario.scenario_id||"—")+"<\/td><\/tr>",
+    "<tr><td>Label<\/td><td>"+esc(scenario.label||"—")+"<\/td><\/tr>",
+    "<tr><td>Node Class<\/td><td>"+esc(scenario.node_class||"—")+"<\/td><\/tr>",
+    "<tr><td>Architecture Class<\/td><td>"+esc(scenario.architecture_class||"—")+"<\/td><\/tr>",
+    "<tr><td>Orbit Class<\/td><td>"+esc(scenario.orbit_class||"—")+"<\/td><\/tr>",
+    "<tr><td>Mission Mode<\/td><td>"+esc(scenario.mission_mode||"—")+"<\/td><\/tr>",
+    "<\/table><\/div>",
+    "<div class='sec'><div class='st'>Compute Payload<\/div>",
+    "<table><tr><th>Field<\/th><th>Value<\/th><\/tr>",
+    "<tr><td>Device Preset<\/td><td>"+esc(compute.compute_device_preset_id||"—")+"<\/td><\/tr>",
+    "<tr><td>Device Count<\/td><td>"+esc(dc)+"<\/td><\/tr>",
+    "<tr><td>Target Load State<\/td><td>"+esc(compute.target_load_state||"—")+"<\/td><\/tr>",
+    "<tr><td>Per-Device Load<\/td><td>"+deviceW.toFixed(1)+" W"+pv+"<\/td><\/tr>",
+    "<tr><td>Device Subtotal<\/td><td>"+(dc*deviceW).toFixed(1)+" W"+pv+"<\/td><\/tr>",
+    "<tr><td>Overheads (mem+stor+net+pdu+ctrl)<\/td><td>"+overheads.toFixed(1)+" W"+pv+"<\/td><\/tr>",
+    "<tr><td><strong>Compute Module Total<\/strong><\/td><td><strong>"+moduleTotal.toFixed(1)+" W"+pv+"<\/strong><\/td><\/tr>",
+    "<\/table><\/div>",
+    "<div class='sec'><div class='st'>Radiator Configuration<\/div>",
+    "<table><tr><th>Field<\/th><th>Value<\/th><\/tr>",
+    "<tr><td>Target Surface Temp<\/td><td>"+esc(Trad)+" K<\/td><\/tr>",
+    "<tr><td>Sink Temp<\/td><td>"+esc(Tsink)+" K<\/td><\/tr>",
+    "<tr><td>Emissivity<\/td><td>"+esc(eps)+"<\/td><\/tr>",
+    "<tr><td>Reserve Margin<\/td><td>"+(mrg*100).toFixed(1)+"%<\/td><\/tr>",
+    "<tr><td>Effective Area<\/td><td>"+Aeff.toFixed(5)+" m\u00b2"+pv+"<\/td><\/tr>",
+    "<tr><td>Area with Margin<\/td><td>"+Amargin.toFixed(5)+" m\u00b2"+pv+"<\/td><\/tr>",
+    "<tr><td>Material Family<\/td><td>"+esc(radiator.material_family_ref||"—")+"<\/td><\/tr>",
+    "<\/table><\/div>",
+    "<div class='sec'><div class='st'>Branches<\/div><p style='font-size:13px;padding:4px 0;'>"+esc(branchText)+"<\/p><\/div>",
+    "<div class='sec'><div class='st'>Research Required Items<\/div><ul>"+reqItems+"<\/ul><\/div>",
+    "<div class='sec'><div class='st'>Bundle Manifest<\/div>",
+    "<table><tr><th>File<\/th><th>Size<\/th><\/tr>"+manifRows+"<\/table><\/div>",
+    "<div class='sec'><div class='st'>Transform Trace<\/div><ul>"+traceItems+"<\/ul><\/div>",
+    "<div class='foot'>\u00a9 2026 Exnulla, a division of Lake Area LLC. All Rights Reserved. &nbsp;|&nbsp; Preview surface only \u2014 runtime-authoritative execution required.<\/div>",
+    "<script>",
+    "var _ef="+filesJson+";",
+    "var _bn="+json.dumps(bundleName)+";",
+    "async function dlBundle(){",
+    "  if(typeof JSZip!=='undefined'){",
+    "    var z=new JSZip();",
+    "    _ef.forEach(function(f){z.file(f.name,f.content);});",
+    "    z.generateAsync({type:'blob'}).then(function(b){",
+    "      var u=URL.createObjectURL(b);var a=document.createElement('a');",
+    "      a.href=u;a.download=_bn;a.click();",
+    "    });",
+    "  } else {",
+    "    var rp=_ef.find(function(f){return f.name==='run-packet.json';});",
+    "    if(rp){var b=new Blob([rp.content],{type:'application/json'});",
+    "      var u=URL.createObjectURL(b);var a=document.createElement('a');",
+    "      a.href=u;a.download='run-packet.json';a.click();}",
+    "  }",
+    "}",
+    "<\/script><\/body><\/html>"
+  ];
+
+  var html = parts.join("\n");
+  var blob = new Blob([html], {type: "text/html"});
+  var url = URL.createObjectURL(blob);
+  window.open(url, "_blank");
 }
 
 function downloadBlob(blob, filename, type) {

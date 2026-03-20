@@ -861,3 +861,54 @@ This extension does not:
 - validate specific material families beyond declared evidence state
 - replace baseline repo runtime with an unconstrained research solver
 - authorize language-model-only numeric reasoning
+
+---
+
+## 23. Local UI Server Launch Contract
+
+### 23.1 Required artifact
+A shell script `start-ui.sh` shall be created at the repo root with execute permission (chmod +x).
+
+### 23.2 Behavior
+The script shall:
+1. resolve its own directory to locate `ui/app/`
+2. verify `ui/app/` exists or exit with error
+3. detect platform: macOS uses `open`, Linux uses `xdg-open`, fallback prints URL
+4. spawn browser open with a 1-second delay to allow server startup
+5. start `python3 -m http.server $PORT` where PORT defaults to 8080
+6. accept `$PORT` override via environment variable
+
+### 23.3 No build step required
+The script shall not invoke `npm`, `tsc`, or any build tool. The UI is serveable as static files.
+
+### 23.4 Gate behavior
+The script is not a CI gate artifact. It is a convenience launcher. CI gates remain npm-only.
+
+---
+
+## 24. Run Packet Output Surface Contract
+
+### 24.1 Trigger
+After `buildPacket()` completes and `_lastBundleFiles` is populated, the button `id="run-packet-btn"` becomes visible alongside the download button in the Tab 7 button row.
+
+### 24.2 Implementation
+Clicking "Run Packet" invokes `openPacketOutput()`. This function:
+- reads `_lastBundleFiles` from module scope
+- parses `run-packet.json`, `scenario.json`, `compute-module-01.json`, `radiator-01.json` from the bundle
+- computes preview physics values (same equations as `updateOutputTab`)
+- builds a self-contained HTML string
+- embeds the `_lastBundleFiles` array as a JSON literal in a script block within the HTML
+- creates a Blob URL and opens it in a new tab
+
+### 24.3 Required content sections
+The output surface shall render: Packet Identity, Scenario Summary, Compute Payload, Radiator Configuration, Branches, Research Required Items, Bundle Manifest, Transform Trace, and a Download Bundle button.
+
+### 24.4 Non-authoritative declaration
+Every numeric value shall carry a visible `(preview)` label. A banner at the top shall read:
+"All numeric values are browser-side previews only. Authoritative outputs require server-side runtime execution per governing spec §4.1 and §14."
+
+### 24.5 Bundle download within output surface
+The embedded script block in the output HTML shall define `dlBundle()` using the embedded `_ef` array, using JSZip CDN if available, falling back to `run-packet.json` download.
+
+### 24.6 Required HTML element
+`index.html` shall include `<button class="btn btn-secondary" id="run-packet-btn" style="display:none;">&#9654; Run Packet</button>` in the Tab 7 button row, after `download-packet-btn`.

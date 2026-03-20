@@ -101,6 +101,45 @@ export function compileStateToPayloads(state, catalogs) {
     transform_trace.push(`generated-compatibility-artifact: ${fname}`);
   }
 
+  // --- UI-FIX-001: emit compute-module-01.json and radiator-01.json ---
+  const compute_module_obj = {
+    compute_module_id: "compute-module-01",
+    schema_version: "v0.1.5",
+    compute_device_preset_id: state.compute_device_preset_id || null,
+    device_type: state.device_type || null,
+    device_count: state.device_count || 1,
+    power_idle_w: state.power_idle_w ?? 0,
+    power_light_w: state.power_light_w ?? 0,
+    power_medium_w: state.power_medium_w ?? 0,
+    power_full_w: state.power_full_w ?? 0,
+    target_load_state: state.target_load_state || "full",
+    redundancy_mode: state.redundancy_mode || "none",
+    cooling_pickup_class: state.cooling_pickup_class || null,
+    pickup_geometry: state.pickup_geometry || null,
+    memory_power_w: state.memory_power_w ?? 0,
+    storage_power_w: state.storage_power_w ?? 0,
+    network_power_w: state.network_power_w ?? 0,
+    power_conversion_overhead_w: state.power_conversion_overhead_w ?? 0,
+    control_overhead_w: state.control_overhead_w ?? 0,
+  };
+  const compute_module_content = JSON.stringify(compute_module_obj, null, 2);
+  extra_files.push({ name: "compute-module-01.json", content: compute_module_content });
+  transform_trace.push("emitted-canonical-file: compute-module-01.json");
+
+  const radiator_obj = {
+    radiator_id: "radiator-01",
+    schema_version: "v0.1.5",
+    emissivity: state.emissivity ?? 0.9,
+    target_surface_temp_k: state.target_surface_temp_k ?? 0,
+    sink_temp_k: state.sink_temp_k ?? 0,
+    reserve_margin_fraction: state.reserve_margin_fraction ?? 0.15,
+    material_family_ref: state.radiator_material_family_ref || null,
+    geometry_class: state.radiator_geometry_class || null,
+  };
+  const radiator_content = JSON.stringify(radiator_obj, null, 2);
+  extra_files.push({ name: "radiator-01.json", content: radiator_content });
+  transform_trace.push("emitted-canonical-file: radiator-01.json");
+
   // schema normalisation trace
   transform_trace.push("schema-normalisation: v0.1.5");
 
@@ -137,6 +176,8 @@ export function compileStateToPayloads(state, catalogs) {
 
   const payload_file_refs = [
     "scenario.json",
+    "compute-module-01.json",
+    "radiator-01.json",
     ...(generated_aggregate_ref ? [`${generated_aggregate_ref}.json`] : []),
   ];
 

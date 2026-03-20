@@ -467,3 +467,77 @@ This extension does not:
 - replace the baseline thermal architecture model
 - authorize browser-only performance claims
 - bypass future materials and bench-research programs
+
+---
+
+## 18. Local UI Server Launch
+
+The UI must be launchable by a single user action without requiring the operator to manually invoke terminal server commands.
+
+The product shall ship a `start-ui.sh` script at the repo root that:
+- starts a local HTTP server serving `ui/app/` on port 8080
+- opens the browser to `http://localhost:8080` using the platform-appropriate open command
+- prints the URL to stdout regardless of auto-open availability
+- requires no build step and no npm invocation
+
+---
+
+## 19. Run Packet Output Surface
+
+After the operator builds a packet, a "Run Packet" button shall appear adjacent to the Download Bundle button.
+
+When the operator activates "Run Packet":
+- A new browser tab opens displaying a self-contained formatted HTML summary of the compiled packet
+- The surface clearly labels all numeric values as preview only
+- The raw JSON bundle is available as a "Download Bundle" artifact within that surface
+- The surface carries the runtime authority declaration per spec §4.1 and §14
+
+The formatted output surface shall render at minimum:
+- packet identity and timestamp
+- scenario summary table
+- compute payload summary with preview module total
+- radiator configuration summary with preview area sizing
+- branch summary
+- research-required items
+- bundle file manifest
+- transform trace
+- Download Bundle button
+
+The output surface shall not contain a solver. All numeric values are derived from UI-side state and are labeled display-only.
+
+---
+
+## 18. Local UI Server Launch
+
+The UI must be launchable by a single user action without requiring the operator to manually invoke terminal server commands.
+
+The product shall ship a `start-ui.sh` script at the repo root that:
+- starts a local HTTP server serving `ui/app/` on port 8080
+- opens the browser to `http://localhost:8080` using the platform-appropriate open command
+- prints the URL to stdout regardless of auto-open availability
+- requires no build step and no npm invocation
+
+---
+
+## 19. Run Packet Output Surface
+
+After the operator builds a packet, a "Run Packet" button shall appear adjacent to the Download Bundle button.
+
+When the operator activates "Run Packet":
+- A new browser tab opens displaying a self-contained formatted HTML summary of the compiled packet
+- The surface clearly labels all numeric values as preview only
+- The raw JSON bundle is available as a "Download Bundle" artifact within that surface
+- The surface carries the runtime authority declaration per spec §4.1 and §14
+
+The formatted output surface shall render at minimum:
+- packet identity and timestamp
+- scenario summary table
+- compute payload summary with preview module total
+- radiator configuration summary with preview area sizing
+- branch summary
+- research-required items
+- bundle file manifest
+- transform trace
+- Download Bundle button
+
+The output surface shall not contain a solver. All numeric values are derived from UI-side state and are labeled display-only.
