@@ -10,7 +10,7 @@ const result = runScenario({
   }],
   comms_payload: null, env_terms: null,
   radiator: { radiator_id: "rad-h200-baseline", target_surface_temp_k: 1200,
-    emissivity: 0.90, view_factor: 1.0, reserve_margin_fraction: 0.15,
+    emissivity: 0.90, reserve_margin_fraction: 0.15,
     areal_mass_density_kg_per_m2: 5 },
   storage: null, w_dot_parasitic_w: 0,
 });
