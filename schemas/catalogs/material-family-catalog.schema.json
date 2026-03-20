@@ -1,0 +1,90 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://space-server-heat-dissipation/schemas/catalogs/material-family-catalog.schema.json",
+  "schema_id": "material-family-catalog",
+  "schema_version": "v0.1.0",
+  "title": "MaterialFamilyCatalog",
+  "type": "object",
+  "required": [
+    "catalog_id",
+    "catalog_version",
+    "entries"
+  ],
+  "properties": {
+    "catalog_id": {
+      "type": "string"
+    },
+    "catalog_version": {
+      "type": "string"
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "material_family_id",
+          "label",
+          "material_class",
+          "nominal_temp_min_k",
+          "nominal_temp_max_k",
+          "default_emissivity",
+          "estimated_areal_density_kg_per_m2",
+          "corrosion_sensitivity",
+          "contamination_sensitivity",
+          "vibration_sensitivity",
+          "maturity_class",
+          "notes",
+          "research_required"
+        ],
+        "properties": {
+          "material_family_id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "material_class": {
+            "type": "string"
+          },
+          "nominal_temp_min_k": {
+            "type": "number",
+            "minimum": 0
+          },
+          "nominal_temp_max_k": {
+            "type": "number",
+            "minimum": 0
+          },
+          "default_emissivity": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "maximum": 1
+          },
+          "estimated_areal_density_kg_per_m2": {
+            "type": "number",
+            "minimum": 0
+          },
+          "corrosion_sensitivity": {
+            "type": "string"
+          },
+          "contamination_sensitivity": {
+            "type": "string"
+          },
+          "vibration_sensitivity": {
+            "type": "string"
+          },
+          "maturity_class": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "research_required": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

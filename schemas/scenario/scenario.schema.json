@@ -3,7 +3,7 @@
   "schema_id": "scenario",
   "schema_version": "v0.1.0",
   "title": "Scenario",
-  "description": "Top-level orchestration schema for an orbital thermal trade scenario. Governed by §15 of engineering spec v0.1.0.",
+  "description": "Top-level orchestration schema for an orbital thermal trade scenario. Governed by \u00a715 of engineering spec v0.1.0. UI-expansion additive fields per ui-expansion-spec-v0.1.5. SCHEMA-CONTRA-SC-001/002/003/004 logged \u2014 see field-level comments.",
   "type": "object",
   "required": [
     "scenario_id",
@@ -42,22 +42,45 @@
     },
     "orbit_class": {
       "type": "string",
-      "enum": ["GEO"],
-      "description": "Must be GEO in v0.1.0 per §7.3."
+      "enum": [
+        "GEO"
+      ],
+      "description": "Must be GEO in v0.1.0 per \u00a77.3. SCHEMA-CONTRA-SC-003: BASE allowed MEO/LEO/HEO; spec \u00a77.3 GEO-only governs."
     },
     "environment_profile": {
       "description": "Inline environment object or named reference string.",
       "oneOf": [
-        { "type": "string" },
+        {
+          "type": "string"
+        },
         {
           "type": "object",
           "properties": {
-            "solar_absorbed_w": { "type": "number", "minimum": 0 },
-            "earth_reflected_w": { "type": "number", "minimum": 0 },
-            "earth_ir_w": { "type": "number", "minimum": 0 },
-            "eclipse_fraction": { "type": "number", "minimum": 0, "maximum": 1 },
-            "background_sink_k": { "type": "number", "minimum": 0 },
-            "user_margin_w": { "type": "number", "minimum": 0 }
+            "solar_absorbed_w": {
+              "type": "number",
+              "minimum": 0
+            },
+            "earth_reflected_w": {
+              "type": "number",
+              "minimum": 0
+            },
+            "earth_ir_w": {
+              "type": "number",
+              "minimum": 0
+            },
+            "eclipse_fraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "background_sink_k": {
+              "type": "number",
+              "minimum": 0
+            },
+            "user_margin_w": {
+              "type": "number",
+              "minimum": 0
+            }
           },
           "additionalProperties": false
         }
@@ -70,11 +93,18 @@
         "compute_plus_communications",
         "communications_only",
         "custom"
-      ]
+      ],
+      "description": "SCHEMA-CONTRA-SC-002: BASE used full_compute/burst/standby/eclipse/safe_mode; ANCHOR values govern."
     },
     "node_class": {
       "type": "string",
-      "enum": ["50kw", "300kw", "1mw", "custom"]
+      "enum": [
+        "50kw",
+        "300kw",
+        "1mw",
+        "custom"
+      ],
+      "description": "SCHEMA-CONTRA-SC-001: BASE used node_s_50kw/node_m_100kw/node_l_1mw; ANCHOR values govern."
     },
     "architecture_class": {
       "type": "string",
@@ -86,7 +116,13 @@
     },
     "thermal_policy": {
       "type": "string",
-      "enum": ["conservative", "nominal", "aggressive", "experimental"]
+      "enum": [
+        "conservative",
+        "nominal",
+        "aggressive",
+        "experimental"
+      ],
+      "description": "SCHEMA-CONTRA-SC-004: BASE used thermal_policy_id (string, no enum); ANCHOR field name and enum govern."
     },
     "selected_branches": {
       "type": "array",
@@ -107,22 +143,37 @@
     },
     "reporting_preferences": {
       "type": "object",
-      "required": ["summary_markdown", "comparison_enabled"],
+      "required": [
+        "summary_markdown",
+        "comparison_enabled"
+      ],
       "properties": {
-        "summary_markdown": { "type": "boolean" },
-        "comparison_enabled": { "type": "boolean" },
+        "summary_markdown": {
+          "type": "boolean"
+        },
+        "comparison_enabled": {
+          "type": "boolean"
+        },
         "comparison_scenario_refs": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": {
+            "type": "string"
+          }
         },
-        "include_assumptions": { "type": "boolean" },
-        "include_flags": { "type": "boolean" }
+        "include_assumptions": {
+          "type": "boolean"
+        },
+        "include_flags": {
+          "type": "boolean"
+        }
       },
       "additionalProperties": false
     },
     "compute_module_refs": {
       "type": "array",
-      "items": { "type": "string" },
+      "items": {
+        "type": "string"
+      },
       "description": "References to compute-module payload files."
     },
     "communications_payload_ref": {
@@ -131,11 +182,15 @@
     },
     "thermal_zone_refs": {
       "type": "array",
-      "items": { "type": "string" }
+      "items": {
+        "type": "string"
+      }
     },
     "thermal_stage_refs": {
       "type": "array",
-      "items": { "type": "string" }
+      "items": {
+        "type": "string"
+      }
     },
     "radiator_ref": {
       "type": "string"
@@ -145,14 +200,82 @@
     },
     "working_fluid_refs": {
       "type": "array",
-      "items": { "type": "string" }
+      "items": {
+        "type": "string"
+      }
     },
     "conversion_branch_refs": {
       "type": "array",
-      "items": { "type": "string" }
+      "items": {
+        "type": "string"
+      }
     },
     "operator_notes": {
       "type": "string"
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "scenario_preset_id": {
+      "type": "string"
+    },
+    "scenario_preset_version": {
+      "type": "string"
+    },
+    "catalog_versions_used": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "catalog_checksums_sha256": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "branch_block_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "non_compute_payload_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "material_family_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "topology_ref": {
+      "type": "string"
+    },
+    "generated_aggregate_payload_ref": {
+      "type": "string"
+    },
+    "transform_trace": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "research_required_items": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "thermal_policy_id": {
+      "type": "string",
+      "description": "UI layer alias for thermal_policy per ui-expansion-spec-v0.1.5 \u00a7133. Optional. Runtime uses thermal_policy enum."
     }
   }
 }

@@ -1,163 +1,116 @@
 /**
- * radiation.ts
- * Canonical radiator emission formulas.
- * Governing equations: §12.2 (Stefan-Boltzmann), §32.3 (margin).
- * No formula substitution permitted without spec revision per §4.2.
+ * Radiation formula module — orbital-thermal-trade-system v0.1.5
+ * Governing law: engineering-spec-v0.1.0 §26.2, ui-expansion-spec-v0.1.5 §18.5–18.6, §18.10
+ *
+ * All formulas are authoritative runtime computations.
+ * UI display-only previews are subordinate to these results.
  */
 
-import { SIGMA_W_M2_K4, T_SINK_EFFECTIVE_DEFAULT_K, EPSILON_RAD_DEFAULT, RESERVE_MARGIN_DEFAULT } from '../constants/constants';
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-export interface RadiatorEmissionInput {
-  /** Radiator surface temperature (K). Must be > T_sink_effective_k. */
-  t_radiator_target_k: number;
-  /** Effective radiating area (m²). Must be > 0. */
-  a_radiator_effective_m2: number;
-  /** Emissivity (dimensionless, 0 < ε ≤ 1). Defaults to EPSILON_RAD_DEFAULT. */
-  emissivity?: number;
-  /** Effective sink temperature (K). Defaults to T_SINK_EFFECTIVE_DEFAULT_K. */
-  t_sink_effective_k?: number;
-}
-
-export interface RadiatorEmissionResult {
-  /** Radiative heat rejection rate (W). */
-  q_dot_rad_w: number;
-  /** Inputs echoed for output traceability. */
-  t_radiator_target_k: number;
-  a_radiator_effective_m2: number;
-  emissivity: number;
-  t_sink_effective_k: number;
-}
+import { STEFAN_BOLTZMANN } from "../constants/constants";
 
 export interface RadiatorSizingInput {
-  /** Required heat rejection rate (W). Must be > 0. */
-  q_dot_required_w: number;
-  /** Radiator surface temperature (K). */
-  t_radiator_target_k: number;
-  /** Emissivity. Defaults to EPSILON_RAD_DEFAULT. */
-  emissivity?: number;
-  /** Effective sink temperature (K). Defaults to 0. */
-  t_sink_effective_k?: number;
-  /** Reserve margin fraction. Defaults to RESERVE_MARGIN_DEFAULT. */
-  reserve_margin_fraction?: number;
-}
-
-export interface RadiatorSizingResult {
-  /** Effective area required to meet q_dot_required_w (m²), before margin. */
-  a_radiator_effective_m2: number;
-  /** Effective area with reserve margin applied (m²). §32.3 */
-  a_radiator_with_margin_m2: number;
-  reserve_margin_fraction: number;
+  q_dot_w: number;
   emissivity: number;
-  t_sink_effective_k: number;
+  view_factor: number;
   t_radiator_target_k: number;
-  q_dot_required_w: number;
+  t_sink_k: number;
+  reserve_margin_fraction: number;
 }
 
-// ─── Core emission equation §12.2 ────────────────────────────────────────────
-
-/**
- * Q_dot_rad = epsilon * sigma * A * (T_rad^4 - T_sink^4)
- * §12.2 — no substitution allowed.
- */
-export function computeRadiatorEmission(input: RadiatorEmissionInput): RadiatorEmissionResult {
-  const emissivity = input.emissivity ?? EPSILON_RAD_DEFAULT;
-  const t_sink = input.t_sink_effective_k ?? T_SINK_EFFECTIVE_DEFAULT_K;
-
-  if (emissivity <= 0 || emissivity > 1) {
-    throw new RangeError(`emissivity must be in (0, 1]. Got ${emissivity}`);
-  }
-  if (input.t_radiator_target_k <= 0) {
-    throw new RangeError(`t_radiator_target_k must be > 0 K. Got ${input.t_radiator_target_k}`);
-  }
-  if (input.a_radiator_effective_m2 <= 0) {
-    throw new RangeError(`a_radiator_effective_m2 must be > 0. Got ${input.a_radiator_effective_m2}`);
-  }
-  if (t_sink < 0) {
-    throw new RangeError(`t_sink_effective_k must be >= 0. Got ${t_sink}`);
-  }
-
-  const q_dot_rad_w =
-    emissivity *
-    SIGMA_W_M2_K4 *
-    input.a_radiator_effective_m2 *
-    (Math.pow(input.t_radiator_target_k, 4) - Math.pow(t_sink, 4));
-
-  return {
-    q_dot_rad_w,
-    t_radiator_target_k: input.t_radiator_target_k,
-    a_radiator_effective_m2: input.a_radiator_effective_m2,
-    emissivity,
-    t_sink_effective_k: t_sink,
-  };
+export interface RadiatorSizingOutput {
+  a_radiator_effective_m2: number;
+  a_with_margin_m2: number;
+  q_dot_check_w: number;
+  sigma: number;
 }
 
-// ─── Sizing rearrangement §12.2 ───────────────────────────────────────────────
-
 /**
- * A_radiator_effective = Q_dot_rad / (epsilon * sigma * (T_rad^4 - T_sink^4))
- * §12.2 first-order sizing rearrangement.
- * Applies reserve margin per §32.3.
+ * Compute effective radiator area required to reject q_dot_w.
+ * Law: A = Q / (ε × σ × F × (T^4 - T_sink^4))
+ * Spec §18.5
  */
-export function computeRadiatorArea(input: RadiatorSizingInput): RadiatorSizingResult {
-  const emissivity = input.emissivity ?? EPSILON_RAD_DEFAULT;
-  const t_sink = input.t_sink_effective_k ?? T_SINK_EFFECTIVE_DEFAULT_K;
-  const margin = input.reserve_margin_fraction ?? RESERVE_MARGIN_DEFAULT;
-
-  if (input.q_dot_required_w <= 0) {
-    throw new RangeError(`q_dot_required_w must be > 0. Got ${input.q_dot_required_w}`);
-  }
-  if (emissivity <= 0 || emissivity > 1) {
-    throw new RangeError(`emissivity must be in (0, 1]. Got ${emissivity}`);
-  }
-  if (input.t_radiator_target_k <= t_sink) {
-    throw new RangeError(
-      `t_radiator_target_k (${input.t_radiator_target_k} K) must exceed t_sink_effective_k (${t_sink} K)`
-    );
-  }
-  if (margin < 0) {
-    throw new RangeError(`reserve_margin_fraction must be >= 0. Got ${margin}`);
-  }
-
-  const denominator =
-    emissivity * SIGMA_W_M2_K4 * (Math.pow(input.t_radiator_target_k, 4) - Math.pow(t_sink, 4));
-
-  const a_effective = input.q_dot_required_w / denominator;
-  const a_with_margin = a_effective * (1 + margin);
-
+export function radiatorEffectiveArea(input: RadiatorSizingInput): RadiatorSizingOutput {
+  const { q_dot_w, emissivity, view_factor, t_radiator_target_k, t_sink_k, reserve_margin_fraction } = input;
+  const denom = emissivity * STEFAN_BOLTZMANN * view_factor * (Math.pow(t_radiator_target_k, 4) - Math.pow(t_sink_k, 4));
+  const a_effective = q_dot_w / denom;
+  const a_with_margin = a_effective * (1 + reserve_margin_fraction);
+  const q_check = emissivity * STEFAN_BOLTZMANN * view_factor * a_effective * (Math.pow(t_radiator_target_k, 4) - Math.pow(t_sink_k, 4));
   return {
     a_radiator_effective_m2: a_effective,
-    a_radiator_with_margin_m2: a_with_margin,
-    reserve_margin_fraction: margin,
-    emissivity,
-    t_sink_effective_k: t_sink,
-    t_radiator_target_k: input.t_radiator_target_k,
-    q_dot_required_w: input.q_dot_required_w,
+    a_with_margin_m2: a_with_margin,
+    q_dot_check_w: q_check,
+    sigma: STEFAN_BOLTZMANN,
   };
 }
 
 /**
- * Cross-check: given a user-supplied area, compute achievable rejection
- * and the mismatch against requirement. §22.2.
+ * Compute achieved rejection for a known radiator area.
+ * Q = ε × σ × F × A × (T^4 - T_sink^4)
  */
-export function computeAchievedRejection(
+export function radiatorAchievedRejection(
+  emissivity: number,
+  view_factor: number,
   area_m2: number,
   t_radiator_k: number,
-  q_dot_required_w: number,
-  emissivity?: number,
-  t_sink_k?: number
-): { achieved_w: number; mismatch_w: number; mismatch_fraction: number } {
-  const result = computeRadiatorEmission({
-    t_radiator_target_k: t_radiator_k,
-    a_radiator_effective_m2: area_m2,
-    emissivity,
-    t_sink_effective_k: t_sink_k,
+  t_sink_k: number
+): number {
+  return emissivity * STEFAN_BOLTZMANN * view_factor * area_m2 * (Math.pow(t_radiator_k, 4) - Math.pow(t_sink_k, 4));
+}
+
+/**
+ * Regression anchor verification per ui-expansion-spec-v0.1.5 §18.10.
+ * Q=50000 W, ε=0.90, F=1.0, T=1200 K, T_sink=0 K → A = 0.4725 m² (4 decimals)
+ */
+export function verifyRegressionAnchor(): { pass: boolean; computed: number; expected: number } {
+  const result = radiatorEffectiveArea({
+    q_dot_w: 50_000,
+    emissivity: 0.90,
+    view_factor: 1.0,
+    t_radiator_target_k: 1200,
+    t_sink_k: 0,
+    reserve_margin_fraction: 0,
   });
-  const mismatch = result.q_dot_rad_w - q_dot_required_w;
+  const computed = Math.round(result.a_radiator_effective_m2 * 10_000) / 10_000;
+  return { pass: computed === 0.4725, computed, expected: 0.4725 };
+}
+
+// ─── FIX-002: computeRadiatorArea adapter ─────────────────────────────────────
+// run-scenario.ts (ANCHOR runner) expects computeRadiatorArea with a different
+// input shape than radiatorEffectiveArea. This adapter maps the runner's call
+// to the canonical radiatorEffectiveArea function.
+// view_factor defaults to 1.0 per spec §40 GEO-only scope.
+// FIX-002: required by run-scenario.ts.
+
+export interface RadiatorAreaInput {
+  q_dot_required_w: number;
+  t_radiator_target_k: number;
+  emissivity: number;
+  t_sink_effective_k: number;
+  reserve_margin_fraction: number;
+  view_factor?: number;
+}
+
+export interface RadiatorAreaResult {
+  a_radiator_effective_m2: number;
+  a_radiator_with_margin_m2: number;
+}
+
+/**
+ * Compute required radiator area for a given rejection requirement.
+ * Delegates to radiatorEffectiveArea. view_factor defaults to 1.0 per §40.
+ * FIX-002: adapter required by ANCHOR runner (run-scenario.ts).
+ */
+export function computeRadiatorArea(input: RadiatorAreaInput): RadiatorAreaResult {
+  const result = radiatorEffectiveArea({
+    q_dot_w: input.q_dot_required_w,
+    emissivity: input.emissivity,
+    view_factor: input.view_factor ?? 1.0,
+    t_radiator_target_k: input.t_radiator_target_k,
+    t_sink_k: input.t_sink_effective_k,
+    reserve_margin_fraction: input.reserve_margin_fraction,
+  });
   return {
-    achieved_w: result.q_dot_rad_w,
-    mismatch_w: mismatch,
-    mismatch_fraction: mismatch / q_dot_required_w,
+    a_radiator_effective_m2: result.a_radiator_effective_m2,
+    a_radiator_with_margin_m2: result.a_with_margin_m2,
   };
 }

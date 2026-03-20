@@ -3,7 +3,7 @@
   "schema_id": "radiator",
   "schema_version": "v0.1.0",
   "title": "Radiator",
-  "description": "Radiator configuration. Area computed or validated per §22.2 and §12.2. Margin per §32.3.",
+  "description": "Radiator configuration. Area computed or validated per §22.2 and §12.2. Margin per §32.3. UI-expansion additive fields per ui-expansion-spec-v0.1.5.",
   "type": "object",
   "required": [
     "radiator_id",
@@ -22,6 +22,12 @@
     "schema_version": { "type": "string", "pattern": "^v\\d+\\.\\d+\\.\\d+$" },
     "target_surface_temp_k": { "type": "number", "exclusiveMinimum": 0 },
     "emissivity": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+    "view_factor": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 1,
+      "description": "Radiator view factor F per §12.2. Carried from BASE v0.1.5; not in ANCHOR v0.1.0."
+    },
     "effective_area_m2": {
       "type": "number",
       "exclusiveMinimum": 0,
@@ -57,9 +63,28 @@
       "exclusiveMinimum": 0,
       "description": "For mass estimation."
     },
+    "material_limit_temp_k": { "type": "number", "exclusiveMinimum": 0 },
+    "label": { "type": "string" },
+    "preset_id": { "type": "string" },
+    "material_family_ref": { "type": "string" },
+    "service_domain_type": {
+      "type": "string",
+      "enum": [
+        "primary_rejector",
+        "payload_service_domain",
+        "branch_sink_domain",
+        "custom"
+      ]
+    },
     "sourcing_status": {
       "type": "string",
       "enum": ["operator-estimated", "sourced", "inferred", "research-required"]
+    },
+    "maturity_class": { "type": "string" },
+    "research_required": { "type": "boolean" },
+    "risk_notes": {
+      "type": "array",
+      "items": { "type": "string" }
     },
     "notes": { "type": "string" }
   }

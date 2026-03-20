@@ -1,54 +1,82 @@
 /**
- * power-cycle.test.ts
- * Reference cases for power-cycle Carnot bounds.
- * Governing spec: §12.7, §14.4, Appendix B cases 4, 7.
- * §46 prohibition tested here (case 7).
+ * Power cycle formula tests — orbital-thermal-trade-system v0.1.5
+ * Governing law: ui-expansion-spec-v0.1.5 §18.7–18.9
  */
 
-import { computeCarnotEngineBound, computePowerCycle } from '../runtime/formulas/power-cycle';
+import {
+  carnotEfficiency,
+  carnotCopHeatLift,
+  validatePowerCycleEfficiency,
+  validateHeatLiftCop,
+  checkNoSilentUplift,
+} from "../runtime/formulas/power-cycle";
 
-describe('Reference cases — power cycle (Appendix B, §46)', () => {
-
-  // ── Appendix B case 4 — Carnot engine bound ───────────────────────────────
-  it('Appendix B case 4: Carnot engine at T_hot=350K, T_cold=300K', () => {
-    const r = computeCarnotEngineBound({ t_hot_k: 350, t_cold_k: 300 });
-    // eta = 1 - 300/350 = 0.142857...
-    expect(Math.abs(r.eta_carnot_engine - (1 - 300 / 350))).toBeLessThan(1e-9);
-  });
-
-  // ── Appendix B case 7 — §46 rejection of invalid source logic ────────────
-  it('Appendix B case 7: rejects power-cycle with T_hot <= T_cold (§30.1)', () => {
-    expect(() =>
-      computePowerCycle({
-        q_dot_hot_source_w: 100_000,
-        eta_cycle_actual: 0.1,
-        t_hot_source_k: 300,
-        t_cold_sink_k: 300,
-      })
-    ).toThrow(/PROHIBITED.*§30.1/);
-  });
-
-  it('Appendix B case 7b: rejects eta > Carnot (§46)', () => {
-    const carnot = computeCarnotEngineBound({ t_hot_k: 800, t_cold_k: 330 });
-    expect(() =>
-      computePowerCycle({
-        q_dot_hot_source_w: 100_000,
-        eta_cycle_actual: carnot.eta_carnot_engine + 0.001,
-        t_hot_source_k: 800,
-        t_cold_sink_k: 330,
-      })
-    ).toThrow(/PROHIBITED.*§46/);
-  });
-
-  // ── Power-cycle energy balance §12.10 ─────────────────────────────────────
-  it('W_dot_cycle = eta * Q_dot_hot_source (§12.10)', () => {
-    const r = computePowerCycle({
-      q_dot_hot_source_w: 200_000,
-      eta_cycle_actual: 0.25,
-      t_hot_source_k: 800,
-      t_cold_sink_k: 330,
+describe("power-cycle formula module", () => {
+  describe("carnotEfficiency — spec §18.7", () => {
+    test("η = 1 - T_cold/T_hot", () => {
+      expect(carnotEfficiency(1200, 300)).toBeCloseTo(0.75, 6);
     });
-    expect(Math.abs(r.w_dot_cycle_w - 50_000)).toBeLessThan(0.01);
-    expect(Math.abs(r.q_dot_waste_w - 150_000)).toBeLessThan(0.01);
+    test("throws if T_hot <= T_cold", () => {
+      expect(() => carnotEfficiency(300, 300)).toThrow();
+      expect(() => carnotEfficiency(200, 300)).toThrow();
+    });
+  });
+
+  describe("carnotCopHeatLift — spec §18.8", () => {
+    test("COP = T_hot / (T_hot - T_cold)", () => {
+      expect(carnotCopHeatLift(400, 300)).toBeCloseTo(4.0, 6);
+    });
+    test("throws if T_hot <= T_cold", () => {
+      expect(() => carnotCopHeatLift(300, 300)).toThrow();
+    });
+  });
+
+  describe("validatePowerCycleEfficiency — spec §18.7", () => {
+    test("valid when 0 < η <= η_carnot", () => {
+      const r = validatePowerCycleEfficiency(0.30, 1200, 300);
+      expect(r.valid).toBe(true);
+    });
+    test("invalid when η > η_carnot", () => {
+      const r = validatePowerCycleEfficiency(0.99, 1200, 300);
+      expect(r.valid).toBe(false);
+    });
+    test("invalid when η <= 0", () => {
+      const r = validatePowerCycleEfficiency(0, 1200, 300);
+      expect(r.valid).toBe(false);
+    });
+  });
+
+  describe("validateHeatLiftCop — spec §18.8", () => {
+    test("valid when 1 < COP <= COP_carnot", () => {
+      const r = validateHeatLiftCop(3.0, 400, 300);
+      expect(r.valid).toBe(true);
+    });
+    test("invalid when COP > COP_carnot", () => {
+      const r = validateHeatLiftCop(99, 400, 300);
+      expect(r.valid).toBe(false);
+    });
+    test("invalid when COP <= 1", () => {
+      const r = validateHeatLiftCop(1.0, 400, 300);
+      expect(r.valid).toBe(false);
+    });
+  });
+
+  describe("checkNoSilentUplift — spec §18.9", () => {
+    test("non-heat_lift mode is always compliant", () => {
+      const r = checkNoSilentUplift({ mode_label: "power_cycle", work_input_w: 0, external_heat_input_w: 0, storage_drawdown_w: 0, research_required: false });
+      expect(r.compliant).toBe(true);
+    });
+    test("heat_lift with work_input_w > 0 is compliant", () => {
+      const r = checkNoSilentUplift({ mode_label: "heat_lift", work_input_w: 100, external_heat_input_w: 0, storage_drawdown_w: 0, research_required: false });
+      expect(r.compliant).toBe(true);
+    });
+    test("heat_lift with research_required=true is compliant", () => {
+      const r = checkNoSilentUplift({ mode_label: "heat_lift", work_input_w: 0, external_heat_input_w: 0, storage_drawdown_w: 0, research_required: true });
+      expect(r.compliant).toBe(true);
+    });
+    test("heat_lift with no source and no research flag is not compliant", () => {
+      const r = checkNoSilentUplift({ mode_label: "heat_lift", work_input_w: 0, external_heat_input_w: 0, storage_drawdown_w: 0, research_required: false });
+      expect(r.compliant).toBe(false);
+    });
   });
 });

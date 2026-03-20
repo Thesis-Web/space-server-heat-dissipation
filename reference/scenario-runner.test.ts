@@ -3,6 +3,12 @@
  * End-to-end reference case: 50 kW class node, H200-class GPU, nominal config.
  * Validates §27 execution order, §34 output contract, §41.3 runtime gate.
  * Based on Appendix A scenario shape and §45 50 kW guidance.
+ *
+ * BS-C03-06: Aligned compute_modules and comms_payload field names to
+ * match ComputeModuleSpec and CommsPayloadSpec runtime interfaces.
+ * Changes: device_load_points->device_powers, target_load_state->load_state,
+ * removed redundancy_mode/thermal_grouping_label (schema-only fields),
+ * duty_cycle_profile:'full'->duty_mode:'continuous',duty_fraction:1.0.
  */
 
 import { runScenario } from '../runtime/runner/run-scenario';
@@ -24,16 +30,14 @@ describe('End-to-end scenario runner — 50 kW class (§45, Appendix A)', () => 
       load_state: 'full',
       compute_modules: [
         {
+          device_powers: h200DevicePoints,
           device_count: 8,
-          device_load_points: h200DevicePoints,
+          load_state: 'full',
           memory_power_w: 500,
           storage_power_w: 100,
           network_power_w: 200,
           power_conversion_overhead_w: 300,
           control_overhead_w: 100,
-          redundancy_mode: 'n_plus_1',
-          target_load_state: 'full',
-          thermal_grouping_label: 'compute_vault_A',
         },
       ],
       comms_payload: {
@@ -41,7 +45,8 @@ describe('End-to-end scenario runner — 50 kW class (§45, Appendix A)', () => 
         telemetry_power_w: 100,
         radar_power_w: 0,
         optical_crosslink_power_w: 200,
-        duty_cycle_profile: 'full',
+        duty_mode: 'continuous',
+        duty_fraction: 1.0,
       },
       env_terms: null,
       radiator: {

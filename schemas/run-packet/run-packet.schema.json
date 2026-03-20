@@ -3,7 +3,7 @@
   "schema_id": "run-packet",
   "schema_version": "v0.1.0",
   "title": "RunPacket",
-  "description": "Deterministic handoff artifact from browser UI to hub AI workflow. Governed by §25.",
+  "description": "Deterministic handoff artifact from browser UI to hub AI workflow. Governed by \u00a725. UI-expansion additive fields per ui-expansion-spec-v0.1.5. SCHEMA-CONTRA-RP-001: branch_selection_summary ANCHOR=object, BASE=string; ANCHOR wins. SCHEMA-CONTRA-RP-002: ai_role_instructions ANCHOR=object, BASE=string; ANCHOR wins. SCHEMA-CONTRA-RP-003 RESOLVED: file_manifest item key is name per ui-expansion-spec-v0.1.5 \u00a7180.",
   "type": "object",
   "required": [
     "packet_id",
@@ -20,22 +20,43 @@
   ],
   "additionalProperties": false,
   "properties": {
-    "packet_id": { "type": "string" },
-    "schema_version": { "type": "string", "pattern": "^v\\d+\\.\\d+\\.\\d+$" },
-    "blueprint_version": { "type": "string", "pattern": "^v\\d+\\.\\d+\\.\\d+$" },
-    "engineering_spec_version": { "type": "string", "pattern": "^v\\d+\\.\\d+\\.\\d+$" },
-    "runtime_version": { "type": "string", "pattern": "^v\\d+\\.\\d+\\.\\d+$" },
-    "schema_bundle_version": { "type": "string", "pattern": "^v\\d+\\.\\d+\\.\\d+$" },
+    "packet_id": {
+      "type": "string"
+    },
+    "schema_version": {
+      "type": "string",
+      "pattern": "^v\\d+\\.\\d+\\.\\d+$"
+    },
+    "blueprint_version": {
+      "type": "string",
+      "pattern": "^v\\d+\\.\\d+\\.\\d+$"
+    },
+    "engineering_spec_version": {
+      "type": "string",
+      "pattern": "^v\\d+\\.\\d+\\.\\d+$"
+    },
+    "runtime_version": {
+      "type": "string",
+      "pattern": "^v\\d+\\.\\d+\\.\\d+$"
+    },
+    "schema_bundle_version": {
+      "type": "string",
+      "pattern": "^v\\d+\\.\\d+\\.\\d+$"
+    },
     "scenario_ref": {
       "type": "string",
       "description": "Filename of the primary scenario JSON in this bundle."
     },
     "payload_file_refs": {
       "type": "array",
-      "items": { "type": "string" },
+      "items": {
+        "type": "string"
+      },
       "description": "All payload filenames included in this bundle."
     },
-    "operator_notes": { "type": "string" },
+    "operator_notes": {
+      "type": "string"
+    },
     "requested_outputs": {
       "type": "array",
       "items": {
@@ -51,18 +72,29 @@
     },
     "branch_selection_summary": {
       "type": "object",
-      "additionalProperties": { "type": "boolean" },
-      "description": "Map of branch_id to enabled boolean."
+      "additionalProperties": {
+        "type": "boolean"
+      },
+      "description": "Map of branch_id to enabled boolean. SCHEMA-CONTRA-RP-001: ANCHOR wins over BASE string type."
     },
     "comparison_requests": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["base_scenario_ref", "variant_scenario_ref"],
+        "required": [
+          "base_scenario_ref",
+          "variant_scenario_ref"
+        ],
         "properties": {
-          "base_scenario_ref": { "type": "string" },
-          "variant_scenario_ref": { "type": "string" },
-          "label": { "type": "string" }
+          "base_scenario_ref": {
+            "type": "string"
+          },
+          "variant_scenario_ref": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
         },
         "additionalProperties": false
       }
@@ -70,11 +102,18 @@
     "ai_role_instructions": {
       "type": "object",
       "properties": {
-        "claude_instructions": { "type": "string" },
-        "chatgpt_instructions": { "type": "string" },
-        "perplexity_instructions": { "type": "string" }
+        "claude_instructions": {
+          "type": "string"
+        },
+        "chatgpt_instructions": {
+          "type": "string"
+        },
+        "perplexity_instructions": {
+          "type": "string"
+        }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "SCHEMA-CONTRA-RP-002: ANCHOR wins over BASE string type."
     },
     "generated_at": {
       "type": "string",
@@ -84,14 +123,69 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["filename", "byte_length"],
+        "required": [
+          "name",
+          "byte_length"
+        ],
         "properties": {
-          "filename": { "type": "string" },
-          "byte_length": { "type": "integer", "minimum": 0 }
+          "byte_length": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "name": {
+            "type": "string"
+          }
         },
         "additionalProperties": false
       },
-      "description": "Integrity manifest per §37.3."
+      "description": "Integrity manifest per \u00a737.3. SCHEMA-CONTRA-RP-003: key is filename (ANCHOR) not name (BASE)."
+    },
+    "runtime_authority_declaration": {
+      "type": "string",
+      "const": "runtime",
+      "description": "Carried from BASE v0.1.5 per ui-expansion-spec-v0.1.5."
+    },
+    "catalog_ids_used": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "catalog_versions_used": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "catalog_checksums_sha256": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "transform_trace": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "branding_metadata": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "validation_summary": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "risk_summary": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "research_required_items": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     }
   }
 }

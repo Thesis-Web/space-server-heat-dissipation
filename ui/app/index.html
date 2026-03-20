@@ -1,676 +1,541 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Orbital Thermal Trade — Packet Builder v0.1.0</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Orbital Thermal Trade System — Packet Builder v0.1.5</title>
 <style>
-:root {
-  --bg: #0d1117; --surface: #161b22; --border: #30363d;
-  --accent: #58a6ff; --accent2: #3fb950; --warn: #d29922; --err: #f85149;
-  --text: #e6edf3; --muted: #8b949e; --input-bg: #0d1117;
-  --tab-active: #1f2937; --radius: 6px;
-}
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; min-height: 100vh; }
-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 16px; }
-header h1 { font-size: 16px; font-weight: 600; color: var(--accent); }
-header .ver { font-size: 11px; color: var(--muted); background: #21262d; padding: 2px 8px; border-radius: 12px; }
-.tab-bar { display: flex; overflow-x: auto; border-bottom: 1px solid var(--border); background: var(--surface); padding: 0 16px; gap: 2px; }
-.tab-btn { background: none; border: none; color: var(--muted); padding: 10px 16px; cursor: pointer; font-size: 13px; border-bottom: 2px solid transparent; white-space: nowrap; transition: color .15s; }
-.tab-btn:hover { color: var(--text); }
-.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); background: var(--tab-active); border-radius: var(--radius) var(--radius) 0 0; }
-.tab-panel { display: none; padding: 24px; max-width: 900px; }
-.tab-panel.active { display: block; }
-.section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 18px; }
-.section h2 { font-size: 13px; font-weight: 600; color: var(--accent); margin-bottom: 14px; text-transform: uppercase; letter-spacing: .5px; }
-.section h3 { font-size: 12px; font-weight: 600; color: var(--muted); margin: 12px 0 8px; text-transform: uppercase; }
-.field-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
-.field { display: flex; flex-direction: column; gap: 5px; }
-.field label { font-size: 11px; color: var(--muted); }
-.field input, .field select, .field textarea {
-  background: var(--input-bg); border: 1px solid var(--border); color: var(--text);
-  border-radius: 4px; padding: 7px 10px; font-size: 13px; outline: none;
-  transition: border-color .15s;
-}
-.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); }
-.field textarea { resize: vertical; min-height: 60px; }
-.field .unit { font-size: 10px; color: var(--muted); margin-top: 1px; }
-.row { display: flex; gap: 12px; flex-wrap: wrap; }
-.row .field { flex: 1; min-width: 160px; }
-.btn { padding: 8px 18px; border-radius: var(--radius); border: none; cursor: pointer; font-size: 13px; font-weight: 500; transition: opacity .15s; }
-.btn-primary { background: var(--accent); color: #0d1117; }
-.btn-success { background: var(--accent2); color: #0d1117; }
-.btn-warn { background: var(--warn); color: #0d1117; }
-.btn:hover { opacity: .85; }
-.btn:disabled { opacity: .4; cursor: not-allowed; }
-.flag-box { border-radius: var(--radius); padding: 10px 14px; margin: 6px 0; font-size: 12px; }
-.flag-error { background: rgba(248,81,73,.1); border-left: 3px solid var(--err); }
-.flag-warning { background: rgba(210,153,34,.1); border-left: 3px solid var(--warn); }
-.flag-ok { background: rgba(63,185,80,.1); border-left: 3px solid var(--accent2); }
-.output-area { background: var(--input-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; font-family: 'Courier New', monospace; font-size: 12px; white-space: pre-wrap; max-height: 400px; overflow-y: auto; color: var(--text); }
-.notice { font-size: 11px; color: var(--muted); background: #161b22; border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 14px; margin-bottom: 14px; }
-.notice strong { color: var(--warn); }
-.badge { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 10px; margin-left: 6px; }
-.badge-geo { background: #1f3a5f; color: var(--accent); }
-.badge-required { background: #3a1f1f; color: var(--err); }
-.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
-.status-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 6px 20px; display: flex; gap: 20px; font-size: 11px; color: var(--muted); }
-.status-bar span { color: var(--text); }
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: #2e3350;
+    --accent: #4a7cf7;
+    --accent-dim: #2a4a9a;
+    --warn: #f0a020;
+    --error: #e05050;
+    --ok: #40b060;
+    --text: #dde3f0;
+    --text-dim: #7a84a0;
+    --label: #a0aac0;
+    --tab-h: 44px;
+    --radius: 6px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font: 14px/1.5 "Inter", "Segoe UI", system-ui, sans-serif; min-height: 100vh; }
+  #app { display: flex; flex-direction: column; height: 100vh; }
+
+  /* ── Header ── */
+  #header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 10px 20px; display: flex; align-items: center; gap: 12px; }
+  #header h1 { font-size: 15px; font-weight: 600; color: var(--text); }
+  #header .version { font-size: 12px; color: var(--text-dim); }
+  #header .authority { margin-left: auto; font-size: 11px; color: var(--warn); background: #2a1a00; border: 1px solid #5a3a00; padding: 3px 8px; border-radius: 4px; }
+
+  /* ── Tab bar ── */
+  #tabbar { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; overflow-x: auto; }
+  .tab { height: var(--tab-h); padding: 0 16px; border: none; background: none; color: var(--text-dim); font: inherit; font-size: 13px; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; flex-shrink: 0; }
+  .tab:hover { color: var(--text); background: var(--surface2); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* ── Content area ── */
+  #content { flex: 1; overflow: auto; padding: 20px; }
+  .pane { display: none; }
+  .pane.active { display: block; }
+
+  /* ── Form primitives ── */
+  .section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; }
+  .section-title { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--text-dim); margin-bottom: 12px; }
+  .field-row { display: grid; grid-template-columns: 200px 1fr; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .field-row label { font-size: 12px; color: var(--label); }
+  .field-row input, .field-row select, .field-row textarea { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 5px 8px; border-radius: 4px; font: inherit; font-size: 13px; width: 100%; }
+  .field-row input:focus, .field-row select:focus { outline: none; border-color: var(--accent); }
+  .field-row textarea { min-height: 56px; resize: vertical; }
+  .note { font-size: 11px; color: var(--text-dim); background: var(--surface2); border-left: 3px solid var(--accent-dim); padding: 6px 10px; border-radius: 0 4px 4px 0; margin-bottom: 10px; }
+  .warn-note { border-left-color: var(--warn); }
+  .maturity-tag { display: inline-block; font-size: 10px; padding: 2px 6px; border-radius: 3px; font-weight: 600; text-transform: uppercase; }
+  .maturity-experimental { background: #3a1010; color: var(--error); }
+  .maturity-prototype { background: #3a2800; color: var(--warn); }
+  .maturity-qualified_estimate { background: #1a2a3a; color: #60a0e0; }
+  .maturity-flight_proven_analog { background: #102a10; color: var(--ok); }
+  .maturity-flight_proven { background: #082008; color: #60e060; }
+
+  /* ── Buttons ── */
+  .btn { padding: 6px 14px; border-radius: 4px; border: none; font: inherit; font-size: 13px; cursor: pointer; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #5a8cff; }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { border-color: var(--accent); }
+  .btn-danger { background: #3a1010; color: var(--error); border: 1px solid #5a2020; }
+  .btn-sm { padding: 3px 8px; font-size: 12px; }
+  .btn-row { display: flex; gap: 8px; margin-top: 10px; }
+
+  /* ── Block editor (Tab 3, Tab 6) ── */
+  .block-list { display: flex; flex-direction: column; gap: 10px; }
+  .block-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; }
+  .block-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 12px; font-weight: 600; color: var(--text-dim); }
+  .block-header span { flex: 1; }
+  .block-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+  .block-field { display: flex; flex-direction: column; gap: 3px; }
+  .block-field label { font-size: 11px; color: var(--label); }
+  .block-field input, .block-field select { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 4px 7px; border-radius: 4px; font: inherit; font-size: 12px; }
+
+  /* ── Output pane ── */
+  #output-preview { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; font: 12px/1.6 "Fira Mono", "Consolas", monospace; white-space: pre-wrap; word-break: break-all; color: var(--text); max-height: 340px; overflow: auto; }
+  .validation-item { display: flex; align-items: flex-start; gap: 6px; padding: 5px 0; font-size: 12px; }
+  .validation-item .icon { flex-shrink: 0; width: 16px; }
+  .v-block { color: var(--error); }
+  .v-warn  { color: var(--warn); }
+  .v-ok    { color: var(--ok); }
+  .summary-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .summary-table td, .summary-table th { padding: 5px 8px; border-bottom: 1px solid var(--border); text-align: left; }
+  .summary-table th { color: var(--text-dim); font-weight: 600; }
+
+  /* ── Footer ── */
+  #footer { background: var(--surface); border-top: 1px solid var(--border); padding: 6px 20px; font-size: 11px; color: var(--text-dim); display: flex; gap: 16px; }
 </style>
 </head>
 <body>
+<div id="app">
 
-<header>
-  <h1>⚛ Orbital Thermal Trade — Packet Builder</h1>
-  <span class="ver">v0.1.0</span>
-  <span class="ver badge-geo">GEO Only</span>
-  <span style="flex:1"></span>
-  <span style="font-size:11px;color:var(--muted)">Spec: engineering-spec-v0.1.0 | Blueprint: v0.1.1</span>
-</header>
-
-<div class="tab-bar">
-  <button class="tab-btn active" onclick="showTab('t1',this)">1 · Scenario</button>
-  <button class="tab-btn" onclick="showTab('t2',this)">2 · Compute Payload</button>
-  <button class="tab-btn" onclick="showTab('t3',this)">3 · Non-Compute Payload</button>
-  <button class="tab-btn" onclick="showTab('t4',this)">4 · Thermal Architecture</button>
-  <button class="tab-btn" onclick="showTab('t5',this)">5 · Radiator &amp; Storage</button>
-  <button class="tab-btn" onclick="showTab('t6',this)">6 · Optional Branches</button>
-  <button class="tab-btn" onclick="showTab('t7',this)">7 · Output &amp; Packet</button>
+<!-- Header -->
+<div id="header">
+  <h1>Orbital Thermal Trade System</h1>
+  <span class="version">Packet Builder v0.1.5</span>
+  <span class="authority">Runtime authority: server-side execution required for authoritative outputs</span>
 </div>
 
-<!-- TAB 1 — SCENARIO §36.2 -->
-<div id="t1" class="tab-panel active">
+<!-- Tab bar — 7 tabs per spec §6, no 8th tab in this patch -->
+<div id="tabbar">
+  <button class="tab active" data-pane="pane-scenario">1 · Scenario</button>
+  <button class="tab" data-pane="pane-compute">2 · Compute Payload</button>
+  <button class="tab" data-pane="pane-noncompute">3 · Non-Compute Payload</button>
+  <button class="tab" data-pane="pane-thermal">4 · Thermal Architecture</button>
+  <button class="tab" data-pane="pane-radiator">5 · Radiator &amp; Storage</button>
+  <button class="tab" data-pane="pane-branches">6 · Optional Branches</button>
+  <button class="tab" data-pane="pane-output">7 · Output &amp; Packet</button>
+</div>
+
+<!-- Content -->
+<div id="content">
+
+<!-- ════════════════════════════════════════════════════════════
+     TAB 1 — SCENARIO  (spec §7.1, §17.1)
+═══════════════════════════════════════════════════════════════ -->
+<div id="pane-scenario" class="pane active">
   <div class="section">
-    <h2>Scenario Definition <span class="badge badge-required">Required</span></h2>
-    <div class="notice"><strong>§7.3 Law:</strong> orbit_class must be GEO in v0.1.0. All other orbit classes are rejected by the runtime validator.</div>
-    <div class="field-grid">
-      <div class="field">
-        <label>Scenario ID <span class="badge badge-required">required</span></label>
-        <input type="text" id="scenario_id" value="geo-50kw-h200-nominal" placeholder="geo-50kw-h200-nominal">
-      </div>
-      <div class="field">
-        <label>Label</label>
-        <input type="text" id="scenario_label" value="GEO 50 kW H200 Nominal">
-      </div>
-      <div class="field">
-        <label>Scenario Version</label>
-        <input type="text" id="scenario_version" value="v0.1.0" pattern="v\d+\.\d+\.\d+">
-      </div>
-      <div class="field">
-        <label>Orbit Class</label>
-        <select id="orbit_class">
-          <option value="GEO" selected>GEO (only supported in v0.1.0)</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Node Class</label>
-        <select id="node_class">
-          <option value="50kw">50 kW class</option>
-          <option value="300kw">300 kW class</option>
-          <option value="1mw">1 MW class</option>
-          <option value="custom">Custom</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Mission Mode</label>
-        <select id="mission_mode">
-          <option value="compute_plus_communications">Compute + Communications</option>
-          <option value="compute_only">Compute Only</option>
-          <option value="communications_only">Communications Only</option>
-          <option value="custom">Custom</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Architecture Class</label>
-        <input type="text" id="architecture_class" value="cold_loop_plus_hot_backbone">
-      </div>
-      <div class="field">
-        <label>Utilization Profile</label>
-        <select id="utilization_profile">
-          <option value="full">Full</option>
-          <option value="medium">Medium</option>
-          <option value="light">Light</option>
-          <option value="idle">Idle</option>
-          <option value="custom">Custom</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Thermal Policy</label>
-        <select id="thermal_policy">
-          <option value="nominal" selected>Nominal (15% margin)</option>
-          <option value="conservative">Conservative (25% margin)</option>
-          <option value="aggressive">Aggressive (5% margin)</option>
-          <option value="experimental">Experimental (0% margin)</option>
-        </select>
-      </div>
+    <div class="section-title">Scenario Preset</div>
+    <div class="note">Select a preset to seed coherent initial state. All defaults remain inspectable and serialisable per spec §4.5.</div>
+    <div class="field-row"><label>Scenario Preset</label>
+      <select id="scenario_preset_id">
+        <option value="">Loading…</option>
+      </select>
     </div>
-    <hr class="divider">
-    <h3>Environment Profile (GEO §7.2)</h3>
-    <div class="notice">Leave at 0 for first-order sizing (T_sink_effective = 0 K default per §40). Populate for higher-fidelity GEO environment model.</div>
-    <div class="field-grid">
-      <div class="field"><label>Solar Absorbed (W)</label><input type="number" id="env_solar" value="0" min="0"><span class="unit">SI: W</span></div>
-      <div class="field"><label>Earth Reflected (W)</label><input type="number" id="env_earth_refl" value="0" min="0"><span class="unit">SI: W</span></div>
-      <div class="field"><label>Earth IR (W)</label><input type="number" id="env_earth_ir" value="0" min="0"><span class="unit">SI: W</span></div>
-      <div class="field"><label>User Margin (W)</label><input type="number" id="env_margin" value="0" min="0"><span class="unit">SI: W</span></div>
+    <div id="preset-summary" class="note" style="display:none;"></div>
+  </div>
+  <div class="section">
+    <div class="section-title">Scenario Header</div>
+    <div class="field-row"><label>Label</label><input id="label" type="text" placeholder="Scenario label" /></div>
+    <div class="field-row"><label>Node Class</label>
+      <select id="node_class">
+        <option value="node_s_50kw">node_s_50kw — 50 kW class</option>
+        <option value="node_m_100kw">node_m_100kw — 100 kW class</option>
+        <option value="node_l_1mw">node_l_1mw — 1 MW class</option>
+        <option value="custom">custom</option>
+      </select>
     </div>
-    <hr class="divider">
-    <div class="field"><label>Operator Notes</label><textarea id="operator_notes" placeholder="Optional scenario notes..."></textarea></div>
-    <div class="row" style="margin-top:14px">
-      <div class="field"><label>Summary Markdown Output</label><select id="rp_summary"><option value="true">Yes</option><option value="false">No</option></select></div>
-      <div class="field"><label>Comparison Enabled</label><select id="rp_comparison"><option value="false">No</option><option value="true">Yes</option></select></div>
+    <div class="field-row"><label>Mission Mode</label>
+      <select id="mission_mode">
+        <option value="full_compute">full_compute</option>
+        <option value="burst">burst</option>
+        <option value="standby">standby</option>
+        <option value="eclipse">eclipse</option>
+        <option value="safe_mode">safe_mode</option>
+        <option value="custom">custom</option>
+      </select>
     </div>
+    <div class="field-row"><label>Architecture Class</label>
+      <select id="architecture_class">
+        <option value="cold_loop_plus_hot_backbone">cold_loop_plus_hot_backbone</option>
+        <option value="cold_loop_plus_dual_hot_island">cold_loop_plus_dual_hot_island</option>
+        <option value="cold_loop_plus_dual_hot_island_plus_exchange_hub">cold_loop_plus_dual_hot_island_plus_exchange_hub</option>
+        <option value="cold_loop_plus_dual_hot_island_plus_solar_polish">cold_loop_plus_dual_hot_island_plus_solar_polish</option>
+        <option value="custom">custom</option>
+      </select>
+    </div>
+    <div class="field-row"><label>Orbit Class</label>
+      <select id="orbit_class">
+        <option value="GEO">GEO</option>
+        <option value="MEO">MEO</option>
+        <option value="LEO">LEO</option>
+        <option value="HEO">HEO</option>
+        <option value="custom">custom</option>
+      </select>
+    </div>
+    <div class="field-row"><label>Scenario ID (generated)</label><input id="scenario_id_display" type="text" readonly style="color:var(--text-dim);" /></div>
+  </div>
+  <div class="section">
+    <div class="section-title">Assumptions</div>
+    <div class="field-row"><label>Assumptions (one per line)</label><textarea id="assumptions" rows="4" placeholder="Enter assumptions here…"></textarea></div>
   </div>
 </div>
 
-<!-- TAB 2 — COMPUTE PAYLOAD §36.2 -->
-<div id="t2" class="tab-panel">
+<!-- ════════════════════════════════════════════════════════════
+     TAB 2 — COMPUTE PAYLOAD  (spec §7.2, §17.2)
+═══════════════════════════════════════════════════════════════ -->
+<div id="pane-compute" class="pane">
   <div class="section">
-    <h2>Compute Device Profile <span class="badge badge-required">Required</span></h2>
-    <div class="notice">All temperatures in Kelvin (SI). §10.1 canonical units enforced. Load states must be monotonically non-decreasing per §16.2.</div>
-    <div class="field-grid">
-      <div class="field"><label>Device ID</label><input type="text" id="dev_id" value="nvidia-h200-sxm5"></div>
-      <div class="field"><label>Vendor</label><input type="text" id="dev_vendor" value="NVIDIA"></div>
-      <div class="field"><label>Family</label><input type="text" id="dev_family" value="H200"></div>
-      <div class="field"><label>SKU</label><input type="text" id="dev_sku" value="H200-SXM5-141GB"></div>
-      <div class="field"><label>Device Type</label><select id="dev_type"><option value="gpu">GPU</option><option value="cpu">CPU</option><option value="asic">ASIC</option><option value="fpga">FPGA</option><option value="custom">Custom</option></select></div>
-      <div class="field"><label>Nominal TDP (W)</label><input type="number" id="dev_nominal_tdp" value="700" min="0"><span class="unit">SI: W</span></div>
-      <div class="field"><label>Peak TDP (W)</label><input type="number" id="dev_peak_tdp" value="700" min="0"><span class="unit">SI: W  (must ≥ nominal)</span></div>
-      <div class="field"><label>Allowable Junction Temp (K)</label><input type="number" id="dev_tj" value="358" min="0"><span class="unit">SI: K  (must > package)</span></div>
-      <div class="field"><label>Allowable Package Temp (K)</label><input type="number" id="dev_tpkg" value="343" min="0"><span class="unit">SI: K</span></div>
-      <div class="field"><label>Coldplate Temp Min (K)</label><input type="number" id="dev_tcp_min" value="273" min="0"><span class="unit">SI: K</span></div>
-      <div class="field"><label>Coldplate Temp Max (K)</label><input type="number" id="dev_tcp_max" value="333" min="0"><span class="unit">SI: K  (must ≤ package)</span></div>
-      <div class="field"><label>Heat Flux (W/cm²)</label><input type="number" id="dev_flux" value="80" min="0"><span class="unit">W/cm²</span></div>
-      <div class="field"><label>Package Mass (kg)</label><input type="number" id="dev_mass" value="1.35" min="0"><span class="unit">SI: kg</span></div>
+    <div class="section-title">Compute Device Selection</div>
+    <div class="note">Device presets prefill fields. All values remain editable. Maturity class is shown for every preset per spec §4.4.</div>
+    <div class="field-row"><label>Device Family Preset</label>
+      <select id="compute_device_preset_id">
+        <option value="">Loading…</option>
+      </select>
     </div>
-    <hr class="divider">
-    <h3>Load State Powers §16.2 (must be non-decreasing)</h3>
-    <div class="field-grid">
-      <div class="field"><label>Idle (W)</label><input type="number" id="dev_idle" value="100" min="0"></div>
-      <div class="field"><label>Light (W)</label><input type="number" id="dev_light" value="250" min="0"></div>
-      <div class="field"><label>Medium (W)</label><input type="number" id="dev_medium" value="500" min="0"></div>
-      <div class="field"><label>Full (W)</label><input type="number" id="dev_full" value="700" min="0"></div>
-    </div>
-    <div id="load_state_warning" class="flag-box flag-error" style="display:none;margin-top:10px">⚠ Load states are not monotonically non-decreasing — §16.2 violation</div>
+    <div id="device-maturity-panel" class="note" style="display:none;"></div>
   </div>
   <div class="section">
-    <h2>Compute Module Configuration §17</h2>
-    <div class="field-grid">
-      <div class="field"><label>Module ID</label><input type="text" id="mod_id" value="mod-h200-rack-a"></div>
-      <div class="field"><label>Device Count</label><input type="number" id="mod_device_count" value="8" min="1"></div>
-      <div class="field"><label>Board Count</label><input type="number" id="mod_board_count" value="2" min="1"></div>
-      <div class="field"><label>Target Load State</label><select id="mod_load_state"><option value="full">Full</option><option value="medium">Medium</option><option value="light">Light</option><option value="idle">Idle</option></select></div>
-      <div class="field"><label>Memory Power (W)</label><input type="number" id="mod_mem" value="500" min="0"></div>
-      <div class="field"><label>Storage Power (W)</label><input type="number" id="mod_stor" value="100" min="0"></div>
-      <div class="field"><label>Network Power (W)</label><input type="number" id="mod_net" value="200" min="0"></div>
-      <div class="field"><label>Power Conv. Overhead (W)</label><input type="number" id="mod_pwr_conv" value="300" min="0"></div>
-      <div class="field"><label>Control Overhead (W)</label><input type="number" id="mod_ctrl" value="100" min="0"></div>
-      <div class="field"><label>Redundancy Mode</label><select id="mod_redundancy"><option value="n_plus_1">N+1</option><option value="none">None</option><option value="n_plus_2">N+2</option><option value="dual_redundant">Dual</option></select></div>
-      <div class="field"><label>Thermal Grouping Label</label><input type="text" id="mod_thermal_label" value="compute_vault_A"></div>
+    <div class="section-title">Device Parameters</div>
+    <div class="field-row"><label>Device Type</label>
+      <select id="device_type">
+        <option value="gpu">gpu</option>
+        <option value="cpu">cpu</option>
+        <option value="accelerator">accelerator</option>
+        <option value="asic">asic</option>
+        <option value="fpga">fpga</option>
+        <option value="custom">custom</option>
+      </select>
     </div>
-    <div id="mod_power_preview" class="flag-box flag-ok" style="margin-top:10px">W_dot_compute_module = — W  (§17.2)</div>
+    <div class="field-row"><label>Nominal TDP (W)</label><input id="nominal_tdp_w" type="number" min="0" /></div>
+    <div class="field-row"><label>Peak TDP (W)</label><input id="peak_tdp_w" type="number" min="0" /></div>
+    <div class="field-row"><label>Allowable Junction Temp (K)</label><input id="allowable_junction_temp_k" type="number" min="0" /></div>
+    <div class="field-row"><label>Allowable Package Temp (K)</label><input id="allowable_package_temp_k" type="number" min="0" /></div>
+    <div class="field-row"><label>Cold Plate Temp Min (K)</label><input id="allowable_coldplate_temp_min_k" type="number" min="0" /></div>
+    <div class="field-row"><label>Cold Plate Temp Max (K)</label><input id="allowable_coldplate_temp_max_k" type="number" min="0" /></div>
+    <div class="field-row"><label>Heat Flux (W/cm²)</label><input id="heat_flux_w_per_cm2" type="number" min="0" /></div>
+  </div>
+  <div class="section">
+    <div class="section-title">Load State Powers (W)</div>
+    <div class="field-row"><label>Idle</label><input id="power_idle_w" type="number" min="0" /></div>
+    <div class="field-row"><label>Light</label><input id="power_light_w" type="number" min="0" /></div>
+    <div class="field-row"><label>Medium</label><input id="power_medium_w" type="number" min="0" /></div>
+    <div class="field-row"><label>Full</label><input id="power_full_w" type="number" min="0" /></div>
+  </div>
+  <div class="section">
+    <div class="section-title">Module Configuration</div>
+    <div class="field-row"><label>Device Count</label><input id="device_count" type="number" min="1" value="8" /></div>
+    <div class="field-row"><label>Target Load State</label>
+      <select id="target_load_state">
+        <option value="full">full</option>
+        <option value="medium">medium</option>
+        <option value="light">light</option>
+        <option value="idle">idle</option>
+        <option value="custom">custom</option>
+      </select>
+    </div>
+    <div class="field-row"><label>Redundancy Mode</label>
+      <select id="redundancy_mode">
+        <option value="none">none</option>
+        <option value="n_plus_1">n+1</option>
+        <option value="n_plus_2">n+2</option>
+        <option value="custom">custom</option>
+      </select>
+    </div>
+    <div class="field-row"><label>Cooling Pickup Class</label>
+      <select id="cooling_pickup_class">
+        <option value="cold_plate">cold_plate</option>
+        <option value="immersed_block">immersed_block</option>
+        <option value="vapor_chamber_assisted">vapor_chamber_assisted</option>
+        <option value="custom">custom</option>
+      </select>
+    </div>
+    <div class="field-row"><label>Pickup Geometry</label>
+      <select id="pickup_geometry_compute">
+        <option value="single_sided_cold_plate">single_sided_cold_plate</option>
+        <option value="double_sided_cold_plate">double_sided_cold_plate</option>
+        <option value="vertical_stack_cube_slot">vertical_stack_cube_slot</option>
+        <option value="custom">custom</option>
+      </select>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">Module Overhead (W)</div>
+    <div class="field-row"><label>Memory</label><input id="w_dot_memory_w" type="number" min="0" value="0" /></div>
+    <div class="field-row"><label>Storage</label><input id="w_dot_storage_w" type="number" min="0" value="0" /></div>
+    <div class="field-row"><label>Network</label><input id="w_dot_network_w" type="number" min="0" value="0" /></div>
+    <div class="field-row"><label>Power Conversion</label><input id="w_dot_power_conversion_w" type="number" min="0" value="0" /></div>
+    <div class="field-row"><label>Control</label><input id="w_dot_control_w" type="number" min="0" value="0" /></div>
+  </div>
+  <div id="compute-preview" class="note" style="display:none;"></div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     TAB 3 — NON-COMPUTE PAYLOAD  (spec §7.3, §17.3)
+═══════════════════════════════════════════════════════════════ -->
+<div id="pane-noncompute" class="pane">
+  <div class="section">
+    <div class="section-title">Non-Compute Payload Blocks</div>
+    <div class="note">Add, remove, duplicate, or reorder payload blocks. Additive blocks compile to a generated aggregate comms-load object for runtime compatibility per spec §9.3–9.5.</div>
+    <div id="payload-block-list" class="block-list"></div>
+    <div class="btn-row">
+      <button class="btn btn-secondary btn-sm" id="add-payload-block">+ Add Payload Block</button>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">Aggregate Non-Compute Total (display only)</div>
+    <div class="note warn-note">Preview only. Authoritative value derived at runtime.</div>
+    <div id="noncompute-aggregate" class="note"></div>
   </div>
 </div>
 
-<!-- TAB 3 — NON-COMPUTE PAYLOAD §18, §36.2 -->
-<div id="t3" class="tab-panel">
+<!-- ════════════════════════════════════════════════════════════
+     TAB 4 — THERMAL ARCHITECTURE  (spec §7.4, §17.4)
+═══════════════════════════════════════════════════════════════ -->
+<div id="pane-thermal" class="pane">
   <div class="section">
-    <h2>Communications Payload §18</h2>
-    <div class="notice">W_dot_non_compute = rf + telemetry + radar + optical (with duty fractions). §18.2</div>
-    <div class="field-grid">
-      <div class="field"><label>Payload ID</label><input type="text" id="comms_id" value="comms-payload-01"></div>
-      <div class="field"><label>RF Comms Power (W)</label><input type="number" id="comms_rf" value="500" min="0"></div>
-      <div class="field"><label>Telemetry Power (W)</label><input type="number" id="comms_tel" value="100" min="0"></div>
-      <div class="field"><label>Radar Power (W)</label><input type="number" id="comms_radar" value="0" min="0"></div>
-      <div class="field"><label>Optical Crosslink Power (W)</label><input type="number" id="comms_optical" value="200" min="0"></div>
+    <div class="section-title">Thermal Zone Configuration</div>
+    <div class="note">Zone type family is canonical and preserved. Richer semantics are expressed through zone_subtype per spec §10.</div>
+    <div class="field-row"><label>Zone Type</label>
+      <select id="zone_type">
+        <option value="compute_vault">compute_vault</option>
+        <option value="hx_boundary">hx_boundary</option>
+        <option value="high_temp_backbone">high_temp_backbone</option>
+        <option value="radiator_emitter">radiator_emitter</option>
+        <option value="custom">custom</option>
+      </select>
     </div>
-    <hr class="divider">
-    <h3>Duty Cycle Profile §18.2</h3>
-    <div class="field-grid">
-      <div class="field"><label>RF Fraction [0-1]</label><input type="number" id="dc_rf" value="1.0" min="0" max="1" step="0.01"></div>
-      <div class="field"><label>Telemetry Fraction [0-1]</label><input type="number" id="dc_tel" value="1.0" min="0" max="1" step="0.01"></div>
-      <div class="field"><label>Radar Fraction [0-1]</label><input type="number" id="dc_radar" value="0.0" min="0" max="1" step="0.01"></div>
-      <div class="field"><label>Optical Fraction [0-1]</label><input type="number" id="dc_optical" value="1.0" min="0" max="1" step="0.01"></div>
+    <div class="field-row"><label>Zone Subtype</label>
+      <select id="zone_subtype">
+        <option value="">— none —</option>
+        <option value="controlled_compute_vault">controlled_compute_vault</option>
+        <option value="chipset_pickup_stage1">chipset_pickup_stage1</option>
+        <option value="low_gradient_loop">low_gradient_loop</option>
+        <option value="eutectic_exchange_hub">eutectic_exchange_hub</option>
+        <option value="regen_hot_island">regen_hot_island</option>
+        <option value="active_hot_island">active_hot_island</option>
+        <option value="radiator_service_domain">radiator_service_domain</option>
+        <option value="payload_emitter_zone">payload_emitter_zone</option>
+        <option value="branch_sink_zone">branch_sink_zone</option>
+        <option value="custom">custom</option>
+      </select>
     </div>
-    <div id="comms_preview" class="flag-box flag-ok" style="margin-top:10px">W_dot_non_compute = — W  (§18.2)</div>
-  </div>
-</div>
-
-<!-- TAB 4 — THERMAL ARCHITECTURE §36.2 -->
-<div id="t4" class="tab-panel">
-  <div class="section">
-    <h2>Thermal Zones §19</h2>
-    <div class="notice">Zone temperature bounds: temp_min_k ≤ target_temp_k ≤ temp_max_k. §19.3</div>
-    <div id="zone_list"></div>
-    <button class="btn btn-primary" onclick="addZone()" style="margin-top:10px">+ Add Zone</button>
-  </div>
-  <div class="section">
-    <h2>Thermal Stages §23</h2>
-    <div class="notice">Stages form a DAG — no cyclic execution in v0.1.0. §28.1. Losses must be ≥ 0. §23.3.</div>
-    <div id="stage_list"></div>
-    <button class="btn btn-primary" onclick="addStage()" style="margin-top:10px">+ Add Stage</button>
-  </div>
-  <div class="section">
-    <h2>Working Fluids §20</h2>
-    <div class="field-grid">
-      <div class="field"><label>Fluid ID</label><input type="text" id="fluid_id" value="he-xe-mix-01"></div>
-      <div class="field"><label>Label</label><input type="text" id="fluid_label" value="He/Xe 80/20 Mix"></div>
-      <div class="field"><label>Medium Class</label><select id="fluid_class"><option value="gas" selected>Gas</option><option value="liquid">Liquid</option><option value="two_phase">Two-Phase</option><option value="liquid_metal">Liquid Metal</option><option value="molten_salt">Molten Salt</option><option value="custom">Custom</option></select></div>
-      <div class="field"><label>Temp Min (K)</label><input type="number" id="fluid_tmin" value="250" min="0"></div>
-      <div class="field"><label>Temp Max (K)</label><input type="number" id="fluid_tmax" value="1200" min="0"></div>
-      <div class="field"><label>Cp (J/kg·K)</label><input type="number" id="fluid_cp" value="5193" min="0"><span class="unit">He ≈ 5193, Xe ≈ 158</span></div>
-      <div class="field"><label>Maturity Class</label><select id="fluid_maturity"><option value="flight_proven">Flight Proven</option><option value="trl_6_plus">TRL 6+</option><option value="trl_4_5">TRL 4-5</option><option value="conceptual">Conceptual</option><option value="research_required">Research Required</option></select></div>
+    <div class="field-row"><label>Service Role</label>
+      <select id="service_role">
+        <option value="pickup">pickup</option>
+        <option value="transport">transport</option>
+        <option value="exchange">exchange</option>
+        <option value="storage">storage</option>
+        <option value="rejection">rejection</option>
+        <option value="payload">payload</option>
+        <option value="branch_sink">branch_sink</option>
+        <option value="custom">custom</option>
+      </select>
+    </div>
+    <div class="field-row"><label>Pickup Geometry</label>
+      <select id="pickup_geometry_zone">
+        <option value="">— n/a —</option>
+        <option value="single_sided_cold_plate">single_sided_cold_plate</option>
+        <option value="double_sided_cold_plate">double_sided_cold_plate</option>
+        <option value="vertical_stack_cube_slot">vertical_stack_cube_slot</option>
+        <option value="custom">custom</option>
+      </select>
+    </div>
+    <div class="field-row"><label>Target Temp (K)</label><input id="zone_target_temp_k" type="number" min="0" placeholder="e.g. 330" /></div>
+    <div class="field-row"><label>Material Family Ref</label>
+      <select id="zone_material_family_ref">
+        <option value="">Loading…</option>
+      </select>
+    </div>
+    <div class="field-row"><label>Research Required</label>
+      <select id="zone_research_required">
+        <option value="false">No</option>
+        <option value="true">Yes — flag for review</option>
+      </select>
     </div>
   </div>
-</div>
-
-<!-- TAB 5 — RADIATOR & STORAGE §36.2 -->
-<div id="t5" class="tab-panel">
   <div class="section">
-    <h2>Radiator Configuration §22, §32</h2>
-    <div class="notice">If effective_area_m2 is left empty, runtime computes required area from rejection requirement (§22.2). Reserve margin default = 0.15 per §40.</div>
-    <div class="field-grid">
-      <div class="field"><label>Radiator ID</label><input type="text" id="rad_id" value="rad-primary-01"></div>
-      <div class="field"><label>Target Surface Temp (K)</label><input type="number" id="rad_temp" value="600" min="0"><span class="unit">SI: K — drives area by T⁴</span></div>
-      <div class="field"><label>Emissivity [0-1]</label><input type="number" id="rad_eps" value="0.9" min="0" max="1" step="0.01"><span class="unit">Default: 0.9 §40</span></div>
-      <div class="field"><label>User-Specified Area (m²)</label><input type="number" id="rad_area" value="" min="0" placeholder="Leave blank to auto-size"><span class="unit">Optional §22.2</span></div>
-      <div class="field"><label>Reserve Margin Fraction</label><input type="number" id="rad_margin" value="0.15" min="0" step="0.01"><span class="unit">Default: 0.15 §40</span></div>
-      <div class="field"><label>Geometry Class</label><select id="rad_geom"><option value="deployable_panel">Deployable Panel</option><option value="fixed_panel">Fixed Panel</option><option value="fixed_body">Fixed Body</option><option value="custom">Custom</option></select></div>
-      <div class="field"><label>Deployment Class</label><select id="rad_deploy"><option value="boom_deployed">Boom Deployed</option><option value="roll_out">Roll-Out</option><option value="body_mounted">Body Mounted</option><option value="inflatable">Inflatable</option><option value="custom">Custom</option></select></div>
-      <div class="field"><label>Material Family</label><input type="text" id="rad_material" value="carbon_composite"></div>
-      <div class="field"><label>Areal Mass Density (kg/m²)</label><input type="number" id="rad_mass_density" value="5" min="0"><span class="unit">For mass estimates §34.4</span></div>
+    <div class="section-title">Two-Hot-Island / Exchange-Hub / Solar-Polish Topology</div>
+    <div class="note warn-note">These architecture families are representational and accounting-aware. They are not endorsements of flight-readiness. Declaring sources is required for hot-island configurations per spec §4.3, §12.</div>
+    <div class="field-row"><label>Two-Hot-Island Topology</label>
+      <select id="topology_type">
+        <option value="single_backbone">single_backbone</option>
+        <option value="dual_hot_island">dual_hot_island</option>
+        <option value="dual_hot_island_with_exchange_hub">dual_hot_island_with_exchange_hub</option>
+        <option value="dual_hot_island_with_solar_polish">dual_hot_island_with_solar_polish</option>
+        <option value="custom">custom</option>
+      </select>
     </div>
-    <div id="rad_preview" class="flag-box flag-ok" style="margin-top:10px">Radiator preview — generate packet to compute area</div>
-  </div>
-  <div class="section">
-    <h2>Thermal Storage §21</h2>
-    <div class="notice">E_storage_usable = m·cp·ΔT + m·L·φ_latent. §12.5 / §21.2</div>
-    <div class="field-grid">
-      <div class="field"><label>Storage ID</label><input type="text" id="stor_id" value="pcm-stor-01"></div>
-      <div class="field"><label>Storage Class</label><select id="stor_class"><option value="sensible_solid">Sensible Solid</option><option value="sensible_liquid">Sensible Liquid</option><option value="pcm_latent">PCM Latent</option><option value="composite">Composite</option></select></div>
-      <div class="field"><label>Mass (kg)</label><input type="number" id="stor_mass" value="50" min="0"></div>
-      <div class="field"><label>Cp (J/kg·K)</label><input type="number" id="stor_cp" value="800" min="0"></div>
-      <div class="field"><label>Temp Min (K)</label><input type="number" id="stor_tmin" value="580" min="0"></div>
-      <div class="field"><label>Target Temp (K)</label><input type="number" id="stor_ttarget" value="600" min="0"></div>
-      <div class="field"><label>Temp Max (K)</label><input type="number" id="stor_tmax" value="620" min="0"></div>
-      <div class="field"><label>Latent Heat (J/kg)</label><input type="number" id="stor_latent" value="0" min="0"><span class="unit">0 if sensible only</span></div>
-      <div class="field"><label>Latent Utilization [0-1]</label><input type="number" id="stor_phi" value="0" min="0" max="1" step="0.01"></div>
-      <div class="field"><label>Integration Zone</label><input type="text" id="stor_zone" value="high_temp_backbone"></div>
+    <div class="field-row"><label>Exchange Hub Present</label>
+      <select id="exchange_hub_present">
+        <option value="false">No</option>
+        <option value="true">Yes</option>
+      </select>
     </div>
-    <div id="stor_preview" class="flag-box flag-ok" style="margin-top:10px">E_storage_usable = — J</div>
-  </div>
-</div>
-
-<!-- TAB 6 — BRANCHES §36.2, §24 -->
-<div id="t6" class="tab-panel">
-  <div class="section">
-    <h2>Optional Conversion Branches §24</h2>
-    <div class="notice"><strong>§46 Law:</strong> For heat-lift branches COP_actual must not exceed Carnot bound. For power-cycle branches efficiency must not exceed Carnot. Runtime enforces these — violations will appear as error flags.</div>
-    <div id="branch_list"></div>
-    <button class="btn btn-primary" onclick="addBranch()" style="margin-top:10px">+ Add Branch</button>
-    <div style="margin-top:16px">
-      <button class="btn" style="background:var(--surface);border:1px solid var(--border);color:var(--text)" onclick="addBranch('none')">Add None Branch</button>
-      <button class="btn" style="background:var(--surface);border:1px solid var(--border);color:var(--text);margin-left:8px" onclick="addBranch('teg')">Add TEG Branch</button>
+    <div class="field-row"><label>Solar Thermal Polishing Source</label>
+      <select id="solar_polish_enabled">
+        <option value="false">No</option>
+        <option value="true">Yes — source characterisation required</option>
+      </select>
+    </div>
+    <div id="solar-polish-warning" class="note warn-note" style="display:none;">
+      ⚠ Solar-polish architecture selected. Source characterisation is required; this will surface as a warning in validation.
     </div>
   </div>
 </div>
 
-<!-- TAB 7 — OUTPUT & PACKET §36.2, §36.3 -->
-<div id="t7" class="tab-panel">
+<!-- ════════════════════════════════════════════════════════════
+     TAB 5 — RADIATOR & STORAGE  (spec §7.5, §17.5)
+═══════════════════════════════════════════════════════════════ -->
+<div id="pane-radiator" class="pane">
   <div class="section">
-    <h2>Packet Generation §37</h2>
-    <div class="notice">The browser UI generates machine payload files and a run-packet JSON. It does not execute the runtime solver — that is the authoritative Node.js runtime. §36.4: UI must not produce runtime outputs independently. §36.3.</div>
-    <div class="field-grid">
-      <div class="field"><label>Packet ID</label><input type="text" id="packet_id" value="pkt-geo-50kw-001"></div>
-      <div class="field"><label>Blueprint Version</label><input type="text" id="pkt_bp_ver" value="v0.1.1"></div>
-      <div class="field"><label>Spec Version</label><input type="text" id="pkt_spec_ver" value="v0.1.0"></div>
+    <div class="section-title">Radiator</div>
+    <div class="note warn-note">Radiator area preview below is display-only. All authoritative sizing is performed by the runtime engine per spec §4.1, §14.</div>
+    <div class="field-row"><label>Material Family</label>
+      <select id="radiator_material_family_ref">
+        <option value="">Loading…</option>
+      </select>
     </div>
-    <hr class="divider">
-    <h3>Requested Outputs</h3>
-    <div class="row">
-      <label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="out_json" checked> structured_json</label>
-      <label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="out_md" checked> summary_markdown</label>
-      <label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="out_flags"> flag_report</label>
-      <label style="display:flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="out_compare"> comparison_report</label>
+    <div id="radiator-material-note" class="note" style="display:none;"></div>
+    <div class="field-row"><label>Service Domain Type</label>
+      <select id="radiator_service_domain_type">
+        <option value="primary_rejector">primary_rejector</option>
+        <option value="payload_service_domain">payload_service_domain</option>
+        <option value="branch_sink_domain">branch_sink_domain</option>
+        <option value="custom">custom</option>
+      </select>
     </div>
-    <hr class="divider">
-    <div id="validation_results" style="margin-bottom:14px"></div>
-    <div class="row" style="gap:10px">
-      <button class="btn btn-warn" onclick="validatePacket()">Validate Fields</button>
-      <button class="btn btn-primary" onclick="generatePacket()">Generate Scenario JSON</button>
-      <button class="btn btn-success" onclick="generateRunPacket()">Generate Run Packet</button>
-      <button class="btn" style="background:var(--surface);border:1px solid var(--border);color:var(--text)" onclick="downloadAll()">Download Bundle</button>
-    </div>
+    <div class="field-row"><label>Emissivity (ε)</label><input id="emissivity" type="number" min="0.001" max="1.0" step="0.01" value="0.90" /></div>
+    <div class="field-row"><label>View Factor (F)</label><input id="view_factor" type="number" min="0.001" max="1.0" step="0.01" value="1.0" /></div>
+    <div class="field-row"><label>Target Surface Temp (K)</label><input id="target_surface_temp_k" type="number" min="1" value="1200" /></div>
+    <div class="field-row"><label>Sink Temp (K)</label><input id="sink_temp_k" type="number" min="0" value="0" /></div>
+    <div class="field-row"><label>Reserve Margin Fraction</label><input id="reserve_margin_fraction" type="number" min="0" step="0.01" value="0.15" /></div>
+    <div class="field-row"><label>Material Limit Temp (K)</label><input id="material_limit_temp_k" type="number" min="1" value="1800" /></div>
+    <div id="radiator-area-preview" class="note" style="display:none;"></div>
   </div>
   <div class="section">
-    <h2>Scenario Payload Preview</h2>
-    <div id="scenario_output" class="output-area">— click Generate Scenario JSON —</div>
-  </div>
-  <div class="section">
-    <h2>Run Packet Preview</h2>
-    <div id="packet_output" class="output-area">— click Generate Run Packet —</div>
+    <div class="section-title">Thermal Storage</div>
+    <div class="field-row"><label>Storage Class</label>
+      <select id="storage_class">
+        <option value="sensible_solid">sensible_solid</option>
+        <option value="sensible_liquid">sensible_liquid</option>
+        <option value="pcm_latent">pcm_latent</option>
+        <option value="eutectic_metal">eutectic_metal</option>
+        <option value="mixed">mixed</option>
+        <option value="custom">custom</option>
+      </select>
+    </div>
+    <div class="field-row"><label>Storage Preset</label>
+      <select id="storage_preset_id">
+        <option value="">— none —</option>
+        <option value="pcm_eutectic_store">pcm_eutectic_store</option>
+        <option value="sensible_refractory_store">sensible_refractory_store</option>
+        <option value="custom">custom</option>
+      </select>
+    </div>
+    <div class="field-row"><label>Capacity (J)</label><input id="storage_capacity_j" type="number" min="0" value="0" /></div>
+    <div class="field-row"><label>Charge Power Limit (W)</label><input id="storage_charge_w" type="number" min="0" value="0" /></div>
+    <div class="field-row"><label>Discharge Power Limit (W)</label><input id="storage_discharge_w" type="number" min="0" value="0" /></div>
+    <div class="field-row"><label>Hot-Island Storage Role</label>
+      <select id="storage_topology_role">
+        <option value="">— n/a —</option>
+        <option value="regen_hot_island_buffer">regen_hot_island_buffer</option>
+        <option value="active_hot_island_buffer">active_hot_island_buffer</option>
+        <option value="exchange_hub_buffer">exchange_hub_buffer</option>
+        <option value="custom">custom</option>
+      </select>
+    </div>
+    <div class="field-row"><label>Research Required</label>
+      <select id="storage_research_required">
+        <option value="false">No</option>
+        <option value="true">Yes — flag for review</option>
+      </select>
+    </div>
   </div>
 </div>
 
-<div class="status-bar">
-  <div>Schema: <span>v0.1.0</span></div>
-  <div>Spec: <span>v0.1.0</span></div>
-  <div>Blueprint: <span>v0.1.1</span></div>
-  <div>Orbit: <span style="color:var(--accent)">GEO only</span></div>
-  <div>UI law: §36 — packet builder only, no solver</div>
+<!-- ════════════════════════════════════════════════════════════
+     TAB 6 — OPTIONAL BRANCHES  (spec §7.6, §17.6)
+═══════════════════════════════════════════════════════════════ -->
+<div id="pane-branches" class="pane">
+  <div class="section">
+    <div class="section-title">Conversion Branch Blocks</div>
+    <div class="note">Add, remove, duplicate, or reorder branch blocks. Variants change declared assumptions and required source terms — not thermodynamic law per spec §11.</div>
+    <div id="branch-block-list" class="block-list"></div>
+    <div class="btn-row">
+      <button class="btn btn-secondary btn-sm" id="add-branch-block">+ Add Branch Block</button>
+    </div>
+  </div>
 </div>
 
-<script>
-// ─── Tab navigation ──────────────────────────────────────────────────────────
-function showTab(id, btn) {
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  btn.classList.add('active');
-}
+<!-- ════════════════════════════════════════════════════════════
+     TAB 7 — OUTPUT & PACKET  (spec §7.7, §17.7)
+═══════════════════════════════════════════════════════════════ -->
+<div id="pane-output" class="pane">
+  <div class="section">
+    <div class="section-title">Validation Summary</div>
+    <div id="validation-panel"></div>
+  </div>
+  <div class="section">
+    <div class="section-title">Derived Summary (display only — not authoritative)</div>
+    <div class="note warn-note">All values below are display previews. Authoritative outputs require runtime execution.</div>
+    <table class="summary-table" id="derived-summary-table">
+      <tr><th>Item</th><th>Value</th></tr>
+      <tr><td>Scenario ID</td><td id="sum-scenario-id">—</td></tr>
+      <tr><td>Node Class</td><td id="sum-node-class">—</td></tr>
+      <tr><td>Architecture Class</td><td id="sum-arch-class">—</td></tr>
+      <tr><td>Device Count × Load Power</td><td id="sum-device-total">—</td></tr>
+      <tr><td>Compute Module Total (preview)</td><td id="sum-compute-total">—</td></tr>
+      <tr><td>Non-Compute Total (preview)</td><td id="sum-noncompute-total">—</td></tr>
+      <tr><td>Radiator Target Temp</td><td id="sum-radiator-temp">—</td></tr>
+      <tr><td>Radiator Effective Area (preview)</td><td id="sum-radiator-area">—</td></tr>
+      <tr><td>Area with Margin (preview)</td><td id="sum-radiator-margin">—</td></tr>
+    </table>
+  </div>
+  <div class="section">
+    <div class="section-title">Bundle File Manifest Preview</div>
+    <div id="manifest-preview" class="note"></div>
+  </div>
+  <div class="section">
+    <div class="section-title">Transform Trace</div>
+    <div id="transform-trace-preview" class="note" style="font-family:monospace;font-size:11px;"></div>
+  </div>
+  <div class="section">
+    <div class="section-title">Research Required Items</div>
+    <div id="research-required-preview" class="note"></div>
+  </div>
+  <div class="section">
+    <div class="section-title">Branding / Confidentiality</div>
+    <div class="note">Branding fields are report-only and do not alter runtime results or validation logic per spec §23.</div>
+    <div class="field-row"><label>Organisation Name</label><input id="org_name" type="text" placeholder="Organisation name" /></div>
+    <div class="field-row"><label>Contact Name</label><input id="contact_name" type="text" /></div>
+    <div class="field-row"><label>Contact Email</label><input id="contact_email" type="email" /></div>
+    <div class="field-row"><label>Confidentiality Notice</label><input id="confidentiality_notice" type="text" value="Pre-decisional engineering trade study. Distribution controlled." /></div>
+  </div>
+  <div class="section">
+    <div class="section-title">Runtime Authority Declaration</div>
+    <div class="note">
+      <strong>runtime</strong> — All authoritative engineering outputs are derived by the server-side runtime formula engine.
+      Browser previews shown in this tool are display-only and subordinate to runtime results per spec §4.1 and §14.
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">Packet Preview</div>
+    <pre id="output-preview">Build the packet to preview…</pre>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-primary" id="build-packet-btn">Build Packet</button>
+    <button class="btn btn-secondary" id="download-packet-btn" style="display:none;">⬇ Download Bundle</button>
+  </div>
+</div>
 
-// ─── Load state validation §16.2 ─────────────────────────────────────────────
-function checkLoadStates() {
-  const vals = ['dev_idle','dev_light','dev_medium','dev_full'].map(id => +document.getElementById(id).value);
-  const ok = vals.every((v,i) => i === 0 || v >= vals[i-1]);
-  document.getElementById('load_state_warning').style.display = ok ? 'none' : 'block';
-  updateModPreview();
-}
-['dev_idle','dev_light','dev_medium','dev_full'].forEach(id => document.getElementById(id).addEventListener('input', checkLoadStates));
+</div><!-- /content -->
 
-// ─── Module power preview §17.2 ──────────────────────────────────────────────
-function updateModPreview() {
-  const loadState = document.getElementById('mod_load_state').value;
-  const powers = {idle:+document.getElementById('dev_idle').value, light:+document.getElementById('dev_light').value, medium:+document.getElementById('dev_medium').value, full:+document.getElementById('dev_full').value};
-  const devPow = powers[loadState] || powers.full;
-  const count = +document.getElementById('mod_device_count').value || 1;
-  const total = count*devPow + (+document.getElementById('mod_mem').value||0) + (+document.getElementById('mod_stor').value||0) + (+document.getElementById('mod_net').value||0) + (+document.getElementById('mod_pwr_conv').value||0) + (+document.getElementById('mod_ctrl').value||0);
-  document.getElementById('mod_power_preview').textContent = `W_dot_compute_module = ${total.toFixed(1)} W  (§17.2: ${count} devices × ${devPow}W + ${total - count*devPow}W overheads)`;
-}
-['mod_device_count','mod_load_state','mod_mem','mod_stor','mod_net','mod_pwr_conv','mod_ctrl'].forEach(id => document.getElementById(id).addEventListener('input', updateModPreview));
-updateModPreview();
+<!-- Footer -->
+<div id="footer">
+  <span id="footer-catalog-versions">Catalogs: loading…</span>
+  <span style="margin-left:auto;">Runtime authority: server-side execution required</span>
+</div>
 
-// ─── Comms power preview §18.2 ───────────────────────────────────────────────
-function updateCommsPreview() {
-  const rf = +document.getElementById('comms_rf').value * +document.getElementById('dc_rf').value;
-  const tel = +document.getElementById('comms_tel').value * +document.getElementById('dc_tel').value;
-  const radar = +document.getElementById('comms_radar').value * +document.getElementById('dc_radar').value;
-  const opt = +document.getElementById('comms_optical').value * +document.getElementById('dc_optical').value;
-  document.getElementById('comms_preview').textContent = `W_dot_non_compute = ${(rf+tel+radar+opt).toFixed(1)} W  (§18.2)`;
-}
-['comms_rf','comms_tel','comms_radar','comms_optical','dc_rf','dc_tel','dc_radar','dc_optical'].forEach(id => document.getElementById(id).addEventListener('input', updateCommsPreview));
-updateCommsPreview();
-
-// ─── Storage energy preview §12.5 ────────────────────────────────────────────
-function updateStorPreview() {
-  const m = +document.getElementById('stor_mass').value;
-  const cp = +document.getElementById('stor_cp').value;
-  const tmin = +document.getElementById('stor_tmin').value;
-  const tmax = +document.getElementById('stor_tmax').value;
-  const L = +document.getElementById('stor_latent').value;
-  const phi = +document.getElementById('stor_phi').value;
-  if (tmax <= tmin) { document.getElementById('stor_preview').textContent = '⚠ temp_max must be > temp_min (§21.3)'; document.getElementById('stor_preview').className = 'flag-box flag-error'; return; }
-  const E = m*cp*(tmax-tmin) + m*L*phi;
-  document.getElementById('stor_preview').textContent = `E_storage_usable = ${(E/1e6).toFixed(3)} MJ  (${E.toFixed(0)} J)  §12.5`;
-  document.getElementById('stor_preview').className = 'flag-box flag-ok';
-}
-['stor_mass','stor_cp','stor_tmin','stor_tmax','stor_latent','stor_phi'].forEach(id => document.getElementById(id).addEventListener('input', updateStorPreview));
-updateStorPreview();
-
-// ─── Dynamic zone / stage / branch lists ─────────────────────────────────────
-let zoneCount=0, stageCount=0, branchCount=0;
-
-function addZone() {
-  zoneCount++;
-  const div = document.createElement('div');
-  div.className = 'section';
-  div.style.marginBottom = '12px';
-  div.innerHTML = `<h3>Zone ${zoneCount}</h3><div class="field-grid">
-    <div class="field"><label>Zone ID</label><input type="text" value="zone-${zoneCount}" class="z_id"></div>
-    <div class="field"><label>Zone Label</label><input type="text" value="Zone ${zoneCount}" class="z_label"></div>
-    <div class="field"><label>Zone Type</label><select class="z_type"><option value="compute_vault">compute_vault</option><option value="hx_boundary">hx_boundary</option><option value="high_temp_backbone">high_temp_backbone</option><option value="radiator_emitter">radiator_emitter</option><option value="custom">custom</option></select></div>
-    <div class="field"><label>Target Temp (K)</label><input type="number" value="330" class="z_ttarget" min="0"></div>
-    <div class="field"><label>Temp Min (K)</label><input type="number" value="300" class="z_tmin" min="0"></div>
-    <div class="field"><label>Temp Max (K)</label><input type="number" value="360" class="z_tmax" min="0"></div>
-  </div><button class="btn" style="margin-top:8px;font-size:11px;background:var(--surface);border:1px solid var(--err);color:var(--err)" onclick="this.closest('.section').remove()">Remove</button>`;
-  document.getElementById('zone_list').appendChild(div);
-}
-
-function addStage() {
-  stageCount++;
-  const div = document.createElement('div');
-  div.className = 'section';
-  div.style.marginBottom = '12px';
-  div.innerHTML = `<h3>Stage ${stageCount}</h3><div class="field-grid">
-    <div class="field"><label>Stage ID</label><input type="text" value="stage-${stageCount}" class="st_id"></div>
-    <div class="field"><label>Stage Type</label><select class="st_type"><option value="capture">capture</option><option value="transport">transport</option><option value="exchanger">exchanger</option><option value="storage">storage</option><option value="lift">lift</option><option value="power_cycle">power_cycle</option><option value="emission">emission</option><option value="rejection">rejection</option><option value="branch_interface">branch_interface</option></select></div>
-    <div class="field"><label>Input Zone Ref</label><input type="text" class="st_in_zone"></div>
-    <div class="field"><label>Output Zone Ref</label><input type="text" class="st_out_zone"></div>
-    <div class="field"><label>Input Temp (K)</label><input type="number" value="330" class="st_tin" min="0"></div>
-    <div class="field"><label>Output Temp (K)</label><input type="number" value="600" class="st_tout" min="0"></div>
-    <div class="field"><label>Work Input (W)</label><input type="number" value="0" class="st_win" min="0"></div>
-    <div class="field"><label>Work Output (W)</label><input type="number" value="0" class="st_wout" min="0"></div>
-    <div class="field"><label>Loss (W)</label><input type="number" value="0" class="st_loss" min="0"></div>
-  </div><button class="btn" style="margin-top:8px;font-size:11px;background:var(--surface);border:1px solid var(--err);color:var(--err)" onclick="this.closest('.section').remove()">Remove</button>`;
-  document.getElementById('stage_list').appendChild(div);
-}
-
-function addBranch(type) {
-  branchCount++;
-  const div = document.createElement('div');
-  div.className = 'section';
-  div.style.marginBottom = '12px';
-  div.innerHTML = `<h3>Branch ${branchCount}</h3><div class="field-grid">
-    <div class="field"><label>Branch ID</label><input type="text" value="branch-${branchCount}" class="br_id"></div>
-    <div class="field"><label>Branch Type</label><select class="br_type"><option value="none" ${type==='none'?'selected':''}>none</option><option value="teg" ${type==='teg'?'selected':''}>teg</option><option value="reverse_brayton">reverse_brayton</option><option value="brayton_power_cycle">brayton_power_cycle</option><option value="stirling">stirling</option><option value="tpv">tpv</option><option value="rf_export">rf_export</option><option value="laser_export">laser_export</option><option value="custom">custom</option></select></div>
-    <div class="field"><label>Enabled</label><select class="br_enabled"><option value="true">Yes</option><option value="false">No</option></select></div>
-    <div class="field"><label>Mode Label</label><input type="text" value="scavenging" class="br_label"></div>
-    <div class="field"><label>Efficiency or COP</label><input type="number" value="0.05" class="br_eta" step="0.001" min="0"><span class="unit">COP for heat-lift; η for power-cycle §24.3</span></div>
-    <div class="field"><label>Output Class</label><select class="br_output"><option value="electrical">electrical</option><option value="thermal_rejected">thermal_rejected</option><option value="directed_energy">directed_energy</option><option value="none">none</option></select></div>
-    <div class="field"><label>T_cold (K)</label><input type="number" value="330" class="br_tcold" min="0"></div>
-    <div class="field"><label>T_hot (K)</label><input type="number" value="600" class="br_thot" min="0"></div>
-  </div><button class="btn" style="margin-top:8px;font-size:11px;background:var(--surface);border:1px solid var(--err);color:var(--err)" onclick="this.closest('.section').remove()">Remove</button>`;
-  document.getElementById('branch_list').appendChild(div);
-}
-
-// ─── Collect form data ────────────────────────────────────────────────────────
-function collectScenario() {
-  const getV = id => document.getElementById(id).value;
-  const getN = id => +document.getElementById(id).value;
-  const envTerms = {solar_absorbed_w:getN('env_solar'), earth_reflected_w:getN('env_earth_refl'), earth_ir_w:getN('env_earth_ir'), user_margin_w:getN('env_margin')};
-  const hasEnv = Object.values(envTerms).some(v => v > 0);
-  const zones = [...document.querySelectorAll('#zone_list .section')].map(el => ({
-    zone_id: el.querySelector('.z_id').value,
-    schema_version: 'v0.1.0',
-    zone_label: el.querySelector('.z_label').value,
-    zone_type: el.querySelector('.z_type').value,
-    target_temp_k: +el.querySelector('.z_ttarget').value,
-    temp_min_k: +el.querySelector('.z_tmin').value,
-    temp_max_k: +el.querySelector('.z_tmax').value,
-    notes: ''
-  }));
-  const stages = [...document.querySelectorAll('#stage_list .section')].map(el => ({
-    stage_id: el.querySelector('.st_id').value,
-    schema_version: 'v0.1.0',
-    stage_type: el.querySelector('.st_type').value,
-    input_zone_ref: el.querySelector('.st_in_zone').value,
-    output_zone_ref: el.querySelector('.st_out_zone').value,
-    input_temp_k: +el.querySelector('.st_tin').value,
-    output_temp_k: +el.querySelector('.st_tout').value,
-    work_input_w: +el.querySelector('.st_win').value,
-    work_output_w: +el.querySelector('.st_wout').value,
-    loss_w: +el.querySelector('.st_loss').value,
-    notes: ''
-  }));
-  const branches = [...document.querySelectorAll('#branch_list .section')].map(el => ({
-    branch_id: el.querySelector('.br_id').value,
-    schema_version: 'v0.1.0',
-    branch_type: el.querySelector('.br_type').value,
-    enabled: el.querySelector('.br_enabled').value === 'true',
-    mode_label: el.querySelector('.br_label').value,
-    efficiency_or_cop: +el.querySelector('.br_eta').value,
-    output_class: el.querySelector('.br_output').value,
-    t_cold_source_k: +el.querySelector('.br_tcold').value,
-    t_hot_delivery_k: +el.querySelector('.br_thot').value,
-    loss_partition_rule: 'all_on_node',
-    notes: ''
-  }));
-
-  return {
-    schema_version: 'v0.1.0',
-    scenario_id: getV('scenario_id'),
-    scenario_version: getV('scenario_version'),
-    label: getV('scenario_label'),
-    orbit_class: getV('orbit_class'),
-    environment_profile: hasEnv ? envTerms : 'geo_default_v0',
-    mission_mode: getV('mission_mode'),
-    node_class: getV('node_class'),
-    architecture_class: getV('architecture_class'),
-    utilization_profile: getV('utilization_profile'),
-    thermal_policy: getV('thermal_policy'),
-    selected_branches: branches.filter(b=>b.enabled).map(b=>b.branch_type),
-    reporting_preferences: { summary_markdown: getV('rp_summary')==='true', comparison_enabled: getV('rp_comparison')==='true' },
-    compute_device: {
-      device_id: getV('dev_id'), schema_version:'v0.1.0', vendor:getV('dev_vendor'), family:getV('dev_family'), sku:getV('dev_sku'), device_type:getV('dev_type'),
-      nominal_tdp_w:getN('dev_nominal_tdp'), peak_tdp_w:getN('dev_peak_tdp'),
-      allowable_junction_temp_k:getN('dev_tj'), allowable_package_temp_k:getN('dev_tpkg'),
-      allowable_coldplate_temp_min_k:getN('dev_tcp_min'), allowable_coldplate_temp_max_k:getN('dev_tcp_max'),
-      heat_flux_w_per_cm2:getN('dev_flux'), package_mass_kg:getN('dev_mass'),
-      power_idle_w:getN('dev_idle'), power_light_w:getN('dev_light'), power_medium_w:getN('dev_medium'), power_full_w:getN('dev_full'),
-      packaging_notes: ''
-    },
-    compute_module: {
-      module_id:getV('mod_id'), schema_version:'v0.1.0', device_ref:getV('dev_id'),
-      device_count:getN('mod_device_count'), board_count:getN('mod_board_count'),
-      memory_power_w:getN('mod_mem'), storage_power_w:getN('mod_stor'), network_power_w:getN('mod_net'),
-      power_conversion_overhead_w:getN('mod_pwr_conv'), control_overhead_w:getN('mod_ctrl'),
-      redundancy_mode:getV('mod_redundancy'), target_load_state:getV('mod_load_state'),
-      thermal_grouping_label:getV('mod_thermal_label')
-    },
-    communications_payload: {
-      payload_id:getV('comms_id'), schema_version:'v0.1.0',
-      rf_comms_power_w:getN('comms_rf'), telemetry_power_w:getN('comms_tel'),
-      radar_power_w:getN('comms_radar'), optical_crosslink_power_w:getN('comms_optical'),
-      duty_cycle_profile:{rf_comms_fraction:getN('dc_rf'), telemetry_fraction:getN('dc_tel'), radar_fraction:getN('dc_radar'), optical_crosslink_fraction:getN('dc_optical')},
-      notes:''
-    },
-    thermal_zones: zones,
-    thermal_stages: stages,
-    conversion_branches: branches,
-    radiator: {
-      radiator_id:getV('rad_id'), schema_version:'v0.1.0', target_surface_temp_k:getN('rad_temp'),
-      emissivity:getN('rad_eps'), material_family:getV('rad_material'),
-      geometry_class:getV('rad_geom'), deployment_class:getV('rad_deploy'),
-      reserve_margin_fraction:getN('rad_margin'), packaging_notes:'',
-      ...(document.getElementById('rad_area').value ? {effective_area_m2:getN('rad_area')} : {}),
-      ...(document.getElementById('rad_mass_density').value ? {areal_mass_density_kg_per_m2:getN('rad_mass_density')} : {})
-    },
-    storage: {
-      storage_id:getV('stor_id'), schema_version:'v0.1.0', label:'Primary thermal storage',
-      storage_class:getV('stor_class'), target_temp_k:getN('stor_ttarget'),
-      temp_min_k:getN('stor_tmin'), temp_max_k:getN('stor_tmax'),
-      cp_j_per_kgk:getN('stor_cp'), latent_heat_j_per_kg:getN('stor_latent'),
-      latent_utilization_fraction:getN('stor_phi'), mass_kg:getN('stor_mass'),
-      integration_zone:getV('stor_zone'), notes:''
-    },
-    working_fluid: {
-      fluid_id:getV('fluid_id'), schema_version:'v0.1.0', label:getV('fluid_label'),
-      medium_class:getV('fluid_class'), intended_use_domain:'cold_loop',
-      temp_min_k:getN('fluid_tmin'), temp_max_k:getN('fluid_tmax'),
-      pressure_notes:'operator-estimated', compatibility_notes:'', hazards:'',
-      maturity_class:getV('fluid_maturity'),
-      default_cp_j_per_kgk:getN('fluid_cp')
-    },
-    operator_notes: getV('operator_notes')
-  };
-}
-
-// ─── Validate §36.3 ──────────────────────────────────────────────────────────
-function validatePacket() {
-  const flags = [];
-  const getV = id => document.getElementById(id).value;
-  const getN = id => +document.getElementById(id).value;
-  if (!getV('scenario_id')) flags.push({sev:'error', msg:'scenario_id is required (§15.1)'});
-  if (getV('orbit_class') !== 'GEO') flags.push({sev:'error', msg:'orbit_class must be GEO in v0.1.0 (§7.3)'});
-  if (!getV('scenario_version').match(/^v\d+\.\d+\.\d+$/)) flags.push({sev:'error', msg:'scenario_version must be vMAJOR.MINOR.PATCH (§6.1)'});
-  const idle=getN('dev_idle'), light=getN('dev_light'), med=getN('dev_medium'), full=getN('dev_full');
-  if (light<idle||med<light||full<med) flags.push({sev:'error', msg:'Device load states are not monotonically non-decreasing (§16.2)'});
-  if (getN('dev_peak_tdp') < getN('dev_nominal_tdp')) flags.push({sev:'error', msg:'peak_tdp_w must be >= nominal_tdp_w (§16.2)'});
-  if (getN('dev_tj') <= getN('dev_tpkg')) flags.push({sev:'error', msg:'allowable_junction_temp_k must be > allowable_package_temp_k (§16.2)'});
-  if (getN('dev_tcp_max') > getN('dev_tpkg')) flags.push({sev:'error', msg:'allowable_coldplate_temp_max_k must be <= allowable_package_temp_k (§16.2)'});
-  if (getN('rad_eps') <= 0 || getN('rad_eps') > 1) flags.push({sev:'error', msg:'emissivity must be in (0,1] (§22.3)'});
-  if (getN('stor_tmin') >= getN('stor_tmax')) flags.push({sev:'error', msg:'storage temp_min_k must be < temp_max_k (§21.3)'});
-  if (getN('stor_phi') < 0 || getN('stor_phi') > 1) flags.push({sev:'error', msg:'latent_utilization_fraction must be in [0,1] (§21.3)'});
-  if (!getV('packet_id')) flags.push({sev:'warning', msg:'packet_id is empty'});
-
-  const container = document.getElementById('validation_results');
-  if (flags.length === 0) {
-    container.innerHTML = '<div class="flag-box flag-ok">✓ Pre-flight validation passed — no field violations detected</div>';
-  } else {
-    container.innerHTML = flags.map(f =>
-      `<div class="flag-box flag-${f.sev==='error'?'error':'warning'}">${f.sev==='error'?'🔴':'🟡'} ${f.msg}</div>`
-    ).join('');
-  }
-  return flags.filter(f=>f.sev==='error').length === 0;
-}
-
-// ─── Generate scenario JSON §36.3 ────────────────────────────────────────────
-function generatePacket() {
-  const scenario = collectScenario();
-  document.getElementById('scenario_output').textContent = JSON.stringify(scenario, null, 2);
-}
-
-// ─── Generate run packet §37 ─────────────────────────────────────────────────
-function generateRunPacket() {
-  if (!validatePacket()) {
-    document.getElementById('packet_output').textContent = '— Fix validation errors before generating run packet —';
-    return;
-  }
-  const scenario = collectScenario();
-  const outputs = [];
-  if (document.getElementById('out_json').checked) outputs.push('structured_json');
-  if (document.getElementById('out_md').checked) outputs.push('summary_markdown');
-  if (document.getElementById('out_flags').checked) outputs.push('flag_report');
-  if (document.getElementById('out_compare').checked) outputs.push('comparison_report');
-  const packetId = document.getElementById('packet_id').value || `pkt-${Date.now()}`;
-  const scenarioFilename = `scenario-${scenario.scenario_id}.json`;
-  const payloadRefs = [scenarioFilename];
-
-  const packet = {
-    packet_id: packetId,
-    schema_version: 'v0.1.0',
-    blueprint_version: document.getElementById('pkt_bp_ver').value,
-    engineering_spec_version: document.getElementById('pkt_spec_ver').value,
-    scenario_ref: scenarioFilename,
-    payload_file_refs: payloadRefs,
-    operator_notes: scenario.operator_notes || '',
-    requested_outputs: outputs,
-    branch_selection_summary: Object.fromEntries((scenario.conversion_branches||[]).map(b=>[b.branch_id, b.enabled])),
-    comparison_requests: [],
-    ai_role_instructions: {
-      claude_instructions: 'Execute run packet using runtime/runner/run-packet.ts. Emit structured_json and summary_markdown. Do not supersede runtime numeric outputs.',
-      chatgpt_instructions: 'Conformance review only. Do not replace runtime numeric authority.',
-      perplexity_instructions: 'Citation-first property research on research-required fields only.'
-    },
-    generated_at: new Date().toISOString(),
-    file_manifest: [{ filename: scenarioFilename, byte_length: JSON.stringify(scenario).length }]
-  };
-  document.getElementById('packet_output').textContent = JSON.stringify(packet, null, 2);
-}
-
-// ─── Download bundle §37 ─────────────────────────────────────────────────────
-function downloadAll() {
-  const scenario = collectScenario();
-  const packetText = document.getElementById('packet_output').textContent;
-  if (!packetText || packetText.startsWith('—')) { alert('Generate Run Packet first'); return; }
-  const scenarioBlob = new Blob([JSON.stringify(scenario, null, 2)], {type:'application/json'});
-  const packetBlob = new Blob([packetText], {type:'application/json'});
-  [{ blob: scenarioBlob, name: `scenario-${scenario.scenario_id}.json` },
-   { blob: packetBlob, name: `run-packet-${document.getElementById('packet_id').value||'pkt'}.json` }
-  ].forEach(({blob, name}) => {
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click();
-  });
-}
-</script>
+</div><!-- /app -->
+<script type="module" src="app.js"></script>
 </body>
 </html>

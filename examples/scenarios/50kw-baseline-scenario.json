@@ -1,0 +1,39 @@
+{
+  "scenario_id": "sc-50kw-baseline-geo-full",
+  "scenario_version": "v0.1.5",
+  "label": "50 kW Baseline Node — GEO Full Compute",
+  "orbit_class": "GEO",
+  "mission_mode": "full_compute",
+  "node_class": "node_s_50kw",
+  "architecture_class": "cold_loop_plus_hot_backbone",
+  "thermal_policy_id": "default",
+  "compute_module_ref": "compute-module-h200-8x",
+  "non_compute_load_ref": "comms-load-ttc-baseline",
+  "thermal_architecture_ref": "thermal-arch-50kw-backbone",
+  "selected_branches": [],
+  "radiator_ref": "radiator-1200k-primary",
+  "storage_ref": "storage-pcm-baseline",
+  "comms_load_ref": "comms-load-ttc-baseline",
+  "assumptions": [
+    "GEO orbit; deep-space radiative sink at 0 K (conservative)",
+    "H200-class device TDP assumed from terrestrial datasheet; space qualification TBD",
+    "Radiator at 1200 K requires high-temperature material qualification",
+    "No eclipse thermal management in this baseline scenario"
+  ],
+  "scenario_preset_id": "50kw_baseline",
+  "scenario_preset_version": "v0.1.0",
+  "catalog_versions_used": {
+    "scenario-presets": "v0.1.0",
+    "compute-device-presets": "v0.1.0"
+  },
+  "transform_trace": [
+    "scenario-preset-application: preset=50kw_baseline",
+    "compute-device-preset-application: preset=gpu_h200_class",
+    "schema-normalisation: v0.1.5"
+  ],
+  "research_required_items": [
+    "H200-class device space qualification",
+    "1200 K radiator material selection and qualification",
+    "GEO eclipse thermal management strategy"
+  ]
+}

@@ -1,19 +1,19 @@
 {
   "name": "space-server-heat-dissipation",
   "version": "0.1.2",
-  "description": "Orbital thermal trade system — GEO compute node heat dissipation runtime",
+  "description": "Orbital thermal trade system — schema, runtime, and browser packet-builder",
   "private": true,
   "engines": {
     "node": ">=20.0.0"
   },
   "scripts": {
     "build": "tsc --project tsconfig.json",
-    "test": "node --experimental-vm-modules node_modules/.bin/jest --runInBand",
+    "test": "jest --runInBand",
     "lint": "eslint --no-error-on-unmatched-pattern 'runtime/**/*.ts' 'tools/**/*.ts'",
-    "lint:schemas": "node tools/conformance/validate-schemas.js",
+    "lint:schemas": "node tools/conformance/lint-schemas.mjs",
     "typecheck": "tsc --noEmit",
     "conformance": "npm run lint:schemas && npm run typecheck && npm run test",
-    "ci": "npm run conformance"
+    "ci": "npm run conformance && npm run build"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
@@ -21,6 +21,7 @@
     "@typescript-eslint/eslint-plugin": "^7.7.1",
     "@typescript-eslint/parser": "^7.7.1",
     "ajv": "^8.12.0",
+    "ajv-formats": "^3.0.1",
     "eslint": "^8.57.0",
     "jest": "^29.7.0",
     "ts-jest": "^29.1.2",

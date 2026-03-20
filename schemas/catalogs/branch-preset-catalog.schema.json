@@ -1,0 +1,98 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://space-server-heat-dissipation/schemas/catalogs/branch-preset-catalog.schema.json",
+  "schema_id": "branch-preset-catalog",
+  "schema_version": "v0.1.0",
+  "title": "BranchPresetCatalog",
+  "type": "object",
+  "required": [
+    "catalog_id",
+    "catalog_version",
+    "entries"
+  ],
+  "properties": {
+    "catalog_id": {
+      "type": "string"
+    },
+    "catalog_version": {
+      "type": "string"
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "preset_id",
+          "label",
+          "branch_type",
+          "branch_variant",
+          "mode_label",
+          "output_class",
+          "requires_work_input",
+          "allows_external_heat_source",
+          "requires_carnot_check",
+          "default_efficiency_fraction",
+          "default_efficiency_or_cop",
+          "default_loss_partition_rule",
+          "risk_notes",
+          "maturity_class",
+          "research_required"
+        ],
+        "properties": {
+          "preset_id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "branch_type": {
+            "type": "string"
+          },
+          "branch_variant": {
+            "type": "string"
+          },
+          "mode_label": {
+            "type": "string"
+          },
+          "output_class": {
+            "type": "string"
+          },
+          "requires_work_input": {
+            "type": "boolean"
+          },
+          "allows_external_heat_source": {
+            "type": "boolean"
+          },
+          "requires_carnot_check": {
+            "type": "boolean"
+          },
+          "default_efficiency_fraction": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "default_efficiency_or_cop": {
+            "type": "number"
+          },
+          "default_loss_partition_rule": {
+            "type": "string"
+          },
+          "risk_notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "maturity_class": {
+            "type": "string"
+          },
+          "research_required": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

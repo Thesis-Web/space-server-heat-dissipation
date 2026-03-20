@@ -1,0 +1,65 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://space-server-heat-dissipation/schemas/catalogs/branding-catalog.schema.json",
+  "schema_id": "branding-catalog",
+  "schema_version": "v0.1.0",
+  "title": "BrandingCatalog",
+  "type": "object",
+  "required": [
+    "catalog_id",
+    "catalog_version",
+    "entries"
+  ],
+  "properties": {
+    "catalog_id": {
+      "type": "string"
+    },
+    "catalog_version": {
+      "type": "string"
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "branding_id",
+          "organization_name",
+          "contact_name",
+          "contact_email",
+          "rights_notice",
+          "confidentiality_notice",
+          "recipient_notice",
+          "default_packet_footer"
+        ],
+        "properties": {
+          "branding_id": {
+            "type": "string"
+          },
+          "organization_name": {
+            "type": "string"
+          },
+          "contact_name": {
+            "type": "string"
+          },
+          "contact_email": {
+            "type": "string"
+          },
+          "rights_notice": {
+            "type": "string"
+          },
+          "confidentiality_notice": {
+            "type": "string"
+          },
+          "recipient_notice": {
+            "type": "string"
+          },
+          "default_packet_footer": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

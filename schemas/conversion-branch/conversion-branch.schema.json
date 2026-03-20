@@ -3,7 +3,7 @@
   "schema_id": "conversion-branch",
   "schema_version": "v0.1.0",
   "title": "ConversionBranch",
-  "description": "Optional conversion or export branch. Carnot bounds enforced at runtime per §24.3.",
+  "description": "Optional conversion or export branch. Carnot bounds enforced at runtime per §24.3. UI-expansion additive fields per ui-expansion-spec-v0.1.5.",
   "type": "object",
   "required": [
     "branch_id",
@@ -37,7 +37,16 @@
     "enabled": { "type": "boolean" },
     "input_stage_ref": { "type": "string" },
     "input_zone_ref": { "type": "string" },
-    "mode_label": { "type": "string" },
+    "mode_label": {
+      "type": "string",
+      "enum": [
+        "heat_lift",
+        "power_cycle",
+        "electrical_conversion",
+        "directed_energy_emission",
+        "scavenging"
+      ]
+    },
     "efficiency_or_cop": {
       "type": "number",
       "exclusiveMinimum": 0,
@@ -56,6 +65,27 @@
     "t_hot_source_k": { "type": "number", "exclusiveMinimum": 0 },
     "t_cold_sink_k": { "type": "number", "exclusiveMinimum": 0 },
     "q_dot_input_w": { "type": "number", "minimum": 0 },
+    "efficiency_fraction": { "type": "number", "minimum": 0, "maximum": 1 },
+    "source_zone_ref": { "type": "string" },
+    "sink_zone_ref": { "type": "string" },
+    "requires_work_input": { "type": "boolean" },
+    "allows_external_heat_source": { "type": "boolean" },
+    "work_input_w": { "type": "number", "minimum": 0 },
+    "external_heat_input_w": { "type": "number", "minimum": 0 },
+    "storage_drawdown_w": { "type": "number", "minimum": 0 },
+    "requires_carnot_check": { "type": "boolean" },
+    "label": { "type": "string" },
+    "preset_id": { "type": "string" },
+    "branch_variant": {
+      "type": "string",
+      "enum": ["base", "with_regen", "solar_polish", "custom"]
+    },
+    "maturity_class": { "type": "string" },
+    "research_required": { "type": "boolean" },
+    "risk_notes": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
     "notes": { "type": "string" }
   }
 }

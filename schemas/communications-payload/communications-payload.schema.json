@@ -3,7 +3,7 @@
   "schema_id": "communications-payload",
   "schema_version": "v0.1.0",
   "title": "CommunicationsPayload",
-  "description": "Non-compute mission load definition. W_dot_non_compute derived per §18.2.",
+  "description": "Non-compute mission load definition. W_dot_non_compute derived per §18.2. UI-expansion additive fields per ui-expansion-spec-v0.1.5. SCHEMA-CONTRA-CP-001: ANCHOR uses duty_cycle_profile (oneOf); BASE uses flat duty_mode+duty_fraction; ANCHOR wins; BASE flat fields carried as optional.",
   "type": "object",
   "required": [
     "payload_id",
@@ -24,7 +24,7 @@
     "radar_power_w": { "type": "number", "minimum": 0 },
     "optical_crosslink_power_w": { "type": "number", "minimum": 0 },
     "duty_cycle_profile": {
-      "description": "Named duty profile or inline fraction object.",
+      "description": "Named duty profile or inline fraction object. SCHEMA-CONTRA-CP-001: ANCHOR wins over BASE flat duty_mode+duty_fraction model.",
       "oneOf": [
         { "type": "string" },
         {
@@ -39,9 +39,27 @@
         }
       ]
     },
+    "duty_mode": {
+      "type": "string",
+      "enum": ["continuous", "uniform", "per_subsystem"],
+      "description": "Carried from BASE v0.1.5 as optional field for UI compatibility. SCHEMA-CONTRA-CP-001."
+    },
+    "duty_fraction": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Carried from BASE v0.1.5 as optional field for UI compatibility. SCHEMA-CONTRA-CP-001."
+    },
     "sourcing_status": {
       "type": "string",
       "enum": ["operator-estimated", "sourced", "inferred", "research-required"]
+    },
+    "label": { "type": "string" },
+    "thermal_coupling_zone_ref": { "type": "string" },
+    "generated_from_additive_blocks": { "type": "boolean" },
+    "source_block_ids": {
+      "type": "array",
+      "items": { "type": "string" }
     },
     "notes": { "type": "string" }
   }

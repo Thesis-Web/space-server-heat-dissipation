@@ -1,0 +1,84 @@
+{
+  "catalog_id": "payload-archetypes",
+  "catalog_version": "v0.1.0",
+  "entries": [
+    {
+      "archetype_id": "ttc_baseline",
+      "label": "TT&C Baseline",
+      "rf_comms_power_w": 40,
+      "telemetry_power_w": 10,
+      "radar_power_w": 0,
+      "optical_crosslink_power_w": 0,
+      "default_duty_mode": "continuous",
+      "default_duty_fraction": 1.0,
+      "default_thermal_coupling_zone_ref": "hx_boundary",
+      "notes": "Standard tracking, telemetry, and command load. Continuous duty assumed for baseline.",
+      "research_required": false
+    },
+    {
+      "archetype_id": "rf_relay",
+      "label": "RF Relay Payload",
+      "rf_comms_power_w": 200,
+      "telemetry_power_w": 15,
+      "radar_power_w": 0,
+      "optical_crosslink_power_w": 0,
+      "default_duty_mode": "uniform",
+      "default_duty_fraction": 0.7,
+      "default_thermal_coupling_zone_ref": "hx_boundary",
+      "notes": "High-power RF relay. Duty fraction reflects typical link scheduling. Peak power may be higher during active relay periods.",
+      "research_required": false
+    },
+    {
+      "archetype_id": "optical_crosslink",
+      "label": "Optical Inter-Satellite Link",
+      "rf_comms_power_w": 20,
+      "telemetry_power_w": 10,
+      "radar_power_w": 0,
+      "optical_crosslink_power_w": 150,
+      "default_duty_mode": "uniform",
+      "default_duty_fraction": 0.5,
+      "default_thermal_coupling_zone_ref": "hx_boundary",
+      "notes": "Optical ISL with moderate duty cycle. Thermal pointing loads not included. PAT system overhead excluded from this archetype.",
+      "research_required": false
+    },
+    {
+      "archetype_id": "radar_payload",
+      "label": "Synthetic Aperture Radar (SAR) Class",
+      "rf_comms_power_w": 30,
+      "telemetry_power_w": 15,
+      "radar_power_w": 1500,
+      "optical_crosslink_power_w": 0,
+      "default_duty_mode": "uniform",
+      "default_duty_fraction": 0.1,
+      "default_thermal_coupling_zone_ref": "hx_boundary",
+      "notes": "SAR-class radar; very high instantaneous power, low duty cycle. Thermal storage critical for burst management. Values are class estimates; specific system varies widely.",
+      "research_required": true
+    },
+    {
+      "archetype_id": "mixed_mission",
+      "label": "Mixed Mission (TT&C + RF + Optical)",
+      "rf_comms_power_w": 120,
+      "telemetry_power_w": 20,
+      "radar_power_w": 0,
+      "optical_crosslink_power_w": 80,
+      "default_duty_mode": "uniform",
+      "default_duty_fraction": 0.6,
+      "default_thermal_coupling_zone_ref": "hx_boundary",
+      "notes": "Representative mixed payload combining TT&C, RF relay, and optical crosslink functions. Duty fraction is an aggregate estimate.",
+      "research_required": false
+    },
+    {
+      "archetype_id": "custom",
+      "label": "Custom Payload (Operator-Specified)",
+      "rf_comms_power_w": 0,
+      "telemetry_power_w": 0,
+      "radar_power_w": 0,
+      "optical_crosslink_power_w": 0,
+      "default_duty_mode": "continuous",
+      "default_duty_fraction": 1.0,
+      "default_thermal_coupling_zone_ref": "",
+      "notes": "All values must be specified by operator.",
+      "research_required": true
+    }
+  ]
+}

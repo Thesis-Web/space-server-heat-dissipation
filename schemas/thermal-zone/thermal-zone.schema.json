@@ -3,7 +3,7 @@
   "schema_id": "thermal-zone",
   "schema_version": "v0.1.0",
   "title": "ThermalZone",
-  "description": "Thermal zone definition. Governed by §19.",
+  "description": "Thermal zone definition. Governed by §19. UI-expansion additive fields per ui-expansion-spec-v0.1.5. SCHEMA-CONTRA-TZ-001: ANCHOR field name zone_label wins over BASE field name label; runtime must reconcile in Batch 3.",
   "type": "object",
   "required": [
     "zone_id",
@@ -19,7 +19,10 @@
   "properties": {
     "zone_id": { "type": "string" },
     "schema_version": { "type": "string", "pattern": "^v\\d+\\.\\d+\\.\\d+$" },
-    "zone_label": { "type": "string" },
+    "zone_label": {
+      "type": "string",
+      "description": "Human-readable zone label. SCHEMA-CONTRA-TZ-001: ANCHOR name wins over BASE 'label'."
+    },
     "zone_type": {
       "type": "string",
       "enum": ["compute_vault", "hx_boundary", "high_temp_backbone", "radiator_emitter", "custom"]
@@ -29,6 +32,42 @@
     "temp_max_k": { "type": "number", "exclusiveMinimum": 0 },
     "pressure_min_pa": { "type": "number", "minimum": 0 },
     "pressure_max_pa": { "type": "number", "minimum": 0 },
+    "zone_subtype": {
+      "type": "string",
+      "enum": [
+        "controlled_compute_vault",
+        "chipset_pickup_stage1",
+        "low_gradient_loop",
+        "eutectic_exchange_hub",
+        "regen_hot_island",
+        "active_hot_island",
+        "radiator_service_domain",
+        "payload_emitter_zone",
+        "branch_sink_zone",
+        "custom"
+      ]
+    },
+    "pickup_geometry": { "type": "string" },
+    "service_role": {
+      "type": "string",
+      "enum": [
+        "pickup",
+        "transport",
+        "exchange",
+        "storage",
+        "rejection",
+        "payload",
+        "branch_sink",
+        "custom"
+      ]
+    },
+    "material_family_ref": { "type": "string" },
+    "coupled_zone_refs": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "topology_role": { "type": "string" },
+    "research_required": { "type": "boolean" },
     "notes": { "type": "string" }
   }
 }

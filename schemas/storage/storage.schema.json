@@ -3,7 +3,7 @@
   "schema_id": "storage",
   "schema_version": "v0.1.0",
   "title": "Storage",
-  "description": "Thermal energy storage block. E_storage_usable derived per §21.2 and §12.5.",
+  "description": "Thermal energy storage block. E_storage_usable derived per §21.2 and §12.5. SCHEMA-CONTRA-ST-001: ANCHOR requires material-property fields; BASE requires capacity-model fields; ANCHOR wins; BASE capacity fields carried as optional. Runtime must reconcile in Batch 3.",
   "type": "object",
   "required": [
     "storage_id",
@@ -27,7 +27,7 @@
     "label": { "type": "string" },
     "storage_class": {
       "type": "string",
-      "enum": ["sensible_solid", "sensible_liquid", "pcm_latent", "composite", "custom"]
+      "enum": ["sensible_solid", "sensible_liquid", "pcm_latent", "composite", "eutectic_metal", "mixed", "custom"]
     },
     "target_temp_k": { "type": "number", "exclusiveMinimum": 0 },
     "temp_min_k": { "type": "number", "exclusiveMinimum": 0 },
@@ -44,6 +44,22 @@
       "type": "string",
       "enum": ["operator-estimated", "sourced", "inferred", "research-required"]
     },
+    "capacity_j": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Optional direct capacity override. Carried from BASE v0.1.5. SCHEMA-CONTRA-ST-001: BASE required this; ANCHOR derives it from cp_j_per_kgk and mass_kg."
+    },
+    "charge_power_limit_w": { "type": "number", "minimum": 0 },
+    "discharge_power_limit_w": { "type": "number", "minimum": 0 },
+    "min_temp_k": { "type": "number", "exclusiveMinimum": 0 },
+    "max_temp_k": { "type": "number", "exclusiveMinimum": 0 },
+    "preset_id": { "type": "string" },
+    "material_family_ref": { "type": "string" },
+    "charge_role": { "type": "string" },
+    "discharge_role": { "type": "string" },
+    "topology_role": { "type": "string" },
+    "storage_state_basis": { "type": "string" },
+    "research_required": { "type": "boolean" },
     "notes": { "type": "string" }
   }
 }

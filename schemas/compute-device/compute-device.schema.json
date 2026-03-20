@@ -3,7 +3,7 @@
   "schema_id": "compute-device",
   "schema_version": "v0.1.0",
   "title": "ComputeDevice",
-  "description": "Individual compute accelerator or processing unit thermal/electrical profile. Governed by §16.",
+  "description": "Individual compute accelerator or processing unit thermal/electrical profile. Governed by §16. UI-expansion additive fields per ui-expansion-spec-v0.1.5.",
   "type": "object",
   "required": [
     "device_id",
@@ -35,7 +35,7 @@
     "sku": { "type": "string" },
     "device_type": {
       "type": "string",
-      "enum": ["gpu", "cpu", "asic", "fpga", "custom"]
+      "enum": ["gpu", "cpu", "accelerator", "asic", "fpga", "custom"]
     },
     "nominal_tdp_w": { "type": "number", "minimum": 0 },
     "peak_tdp_w": { "type": "number", "minimum": 0 },
@@ -53,6 +53,39 @@
     "sourcing_status": {
       "type": "string",
       "enum": ["operator-estimated", "sourced", "inferred", "research-required"]
+    },
+    "preset_id": { "type": "string" },
+    "maturity_class": {
+      "type": "string",
+      "enum": [
+        "experimental",
+        "prototype",
+        "qualified_estimate",
+        "flight_proven_analog",
+        "flight_proven"
+      ]
+    },
+    "thermal_grade": { "type": "string" },
+    "package_type": { "type": "string" },
+    "cooling_pickup_class": {
+      "type": "string",
+      "enum": ["cold_plate", "immersed_block", "vapor_chamber_assisted", "custom"]
+    },
+    "pickup_geometry": {
+      "type": "string",
+      "enum": [
+        "single_sided_cold_plate",
+        "double_sided_cold_plate",
+        "vertical_stack_cube_slot",
+        "custom"
+      ]
+    },
+    "performance_basis_note": { "type": "string" },
+    "thermal_basis_note": { "type": "string" },
+    "research_required": { "type": "boolean" },
+    "risk_notes": {
+      "type": "array",
+      "items": { "type": "string" }
     }
   }
 }

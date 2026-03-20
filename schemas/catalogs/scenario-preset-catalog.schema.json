@@ -1,0 +1,109 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://space-server-heat-dissipation/schemas/catalogs/scenario-preset-catalog.schema.json",
+  "schema_id": "scenario-preset-catalog",
+  "schema_version": "v0.1.0",
+  "title": "ScenarioPresetCatalog",
+  "type": "object",
+  "required": [
+    "catalog_id",
+    "catalog_version",
+    "entries"
+  ],
+  "properties": {
+    "catalog_id": {
+      "type": "string"
+    },
+    "catalog_version": {
+      "type": "string"
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "preset_id",
+          "label",
+          "version",
+          "node_class",
+          "scenario_id_seed",
+          "mission_mode_default",
+          "architecture_class_default",
+          "risk_notes",
+          "research_required"
+        ],
+        "properties": {
+          "preset_id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "node_class": {
+            "type": "string"
+          },
+          "scenario_id_seed": {
+            "type": "string"
+          },
+          "mission_mode_default": {
+            "type": "string"
+          },
+          "architecture_class_default": {
+            "type": "string"
+          },
+          "compute_device_preset_id": {
+            "type": "string"
+          },
+          "compute_module_defaults": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "payload_archetype_defaults": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "thermal_zone_defaults": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "radiator_defaults": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "storage_defaults": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "branch_defaults": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "reporting_defaults": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "risk_notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "research_required": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

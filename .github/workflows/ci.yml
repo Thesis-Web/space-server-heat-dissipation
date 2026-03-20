@@ -28,9 +28,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Gate §41.2 — Schema gate
-      - name: Schema lint (validate JSON schemas are syntactically valid)
-        run: node tools/conformance/validate-schemas.js
+      # Gate §41.2 — Schema gate (tools/conformance/lint-schemas.mjs)
+      - name: Schema lint
+        run: npm run lint:schemas
 
       # Gate §41.1 / §41.7 — Typecheck (drift gate)
       - name: TypeScript typecheck

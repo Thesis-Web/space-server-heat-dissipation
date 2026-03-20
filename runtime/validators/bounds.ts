@@ -1,81 +1,141 @@
 /**
- * bounds.ts
- * Physical bounds validation for all schema domain types.
- * Governed by §26.3, §16.2, §19.3, §21.3, §22.3, §23.3.
+ * Bounds validator — orbital-thermal-trade-system v0.1.5
+ * Governing law: ui-expansion-spec-v0.1.5 §21
+ * Blocking cases: §21.1
+ * Warning cases: §21.2
  */
 
-import { Flag, makeFlagError } from '../emitters/flag-emitter';
-
-export interface BoundsViolation {
-  field: string;
+export interface ValidationIssue {
+  severity: "blocking" | "warning";
+  code: string;
   message: string;
-  value: number;
-  bound?: number;
+  field?: string;
 }
 
-// ─── Compute device bounds §16.2 ─────────────────────────────────────────────
+export interface ValidationResult {
+  blocking: ValidationIssue[];
+  warnings: ValidationIssue[];
+  research_required_items: string[];
+  export_allowed: boolean;
+}
 
-export function validateComputeDeviceBounds(device: {
-  nominal_tdp_w: number;
-  peak_tdp_w: number;
-  allowable_junction_temp_k: number;
-  allowable_package_temp_k: number;
-  allowable_coldplate_temp_max_k: number;
-  power_idle_w: number;
-  power_light_w: number;
-  power_medium_w: number;
-  power_full_w: number;
-}): BoundsViolation[] {
-  const violations: BoundsViolation[] = [];
+function issue(severity: "blocking" | "warning", code: string, message: string, field?: string): ValidationIssue {
+  return { severity, code, message, field };
+}
 
-  if (device.peak_tdp_w < device.nominal_tdp_w) {
-    violations.push({
-      field: 'peak_tdp_w',
-      message: 'peak_tdp_w must be >= nominal_tdp_w',
-      value: device.peak_tdp_w,
-      bound: device.nominal_tdp_w,
-    });
+/**
+ * Run all blocking and warning validations per spec §21.
+ * Returns a ValidationResult. export_allowed=false if any blocking issues exist.
+ */
+export function validatePacketForExport(params: {
+  scenario_id?: string;
+  packet_id?: string;
+  device_count?: number;
+  power_fields?: number[];
+  radiator_target_temp_k?: number;
+  emissivity?: number;
+  view_factor?: number;
+  target_surface_temp_k?: number;
+  material_limit_temp_k?: number;
+  branch_mode_labels?: string[];
+  t_hot_source_k?: number;
+  t_cold_sink_k?: number;
+  heat_lift_has_source_term?: boolean;
+  heat_lift_research_required?: boolean;
+  has_speculative_device?: boolean;
+  has_speculative_material?: boolean;
+  has_solar_polish_without_source?: boolean;
+  has_per_subsystem_duty_simplification?: boolean;
+  research_required_items?: string[];
+}): ValidationResult {
+  const blocking: ValidationIssue[] = [];
+  const warnings: ValidationIssue[] = [];
+  const { research_required_items = [] } = params;
+
+  // §21.1 — blocking cases
+  if (!params.scenario_id) blocking.push(issue("blocking", "MISSING_SCENARIO_ID", "scenario_id is required", "scenario_id"));
+  if (!params.packet_id) blocking.push(issue("blocking", "MISSING_PACKET_ID", "packet_id is required", "packet_id"));
+  if (params.device_count !== undefined && params.device_count < 1) {
+    blocking.push(issue("blocking", "DEVICE_COUNT_LT_1", "device_count must be >= 1", "device_count"));
   }
-  if (device.allowable_junction_temp_k <= device.allowable_package_temp_k) {
-    violations.push({
-      field: 'allowable_junction_temp_k',
-      message: 'allowable_junction_temp_k must be > allowable_package_temp_k',
-      value: device.allowable_junction_temp_k,
-      bound: device.allowable_package_temp_k,
-    });
+  if (params.power_fields) {
+    for (const p of params.power_fields) {
+      if (p < 0) {
+        blocking.push(issue("blocking", "NEGATIVE_POWER", "Power fields must be >= 0", "power_fields"));
+        break;
+      }
+    }
   }
-  if (device.allowable_coldplate_temp_max_k > device.allowable_package_temp_k) {
-    violations.push({
-      field: 'allowable_coldplate_temp_max_k',
-      message: 'allowable_coldplate_temp_max_k must be <= allowable_package_temp_k',
-      value: device.allowable_coldplate_temp_max_k,
-      bound: device.allowable_package_temp_k,
-    });
+  if (params.radiator_target_temp_k !== undefined && params.radiator_target_temp_k <= 0) {
+    blocking.push(issue("blocking", "RADIATOR_TEMP_INVALID", "radiator target temperature must be > 0 K", "radiator_target_temp_k"));
   }
-  // Monotonically non-decreasing load states §16.2
-  const powers = [
-    device.power_idle_w,
-    device.power_light_w,
-    device.power_medium_w,
-    device.power_full_w,
-  ];
-  const names = ['power_idle_w', 'power_light_w', 'power_medium_w', 'power_full_w'];
-  for (let i = 1; i < powers.length; i++) {
-    if (powers[i] < powers[i - 1]) {
-      violations.push({
-        field: names[i],
-        message: `Load states must be monotonically non-decreasing. ${names[i]} < ${names[i - 1]}`,
-        value: powers[i],
-        bound: powers[i - 1],
-      });
+  if (params.emissivity !== undefined && (params.emissivity <= 0 || params.emissivity > 1)) {
+    blocking.push(issue("blocking", "EMISSIVITY_OUT_OF_RANGE", "emissivity must be in (0, 1]", "emissivity"));
+  }
+  if (params.view_factor !== undefined && (params.view_factor <= 0 || params.view_factor > 1)) {
+    blocking.push(issue("blocking", "VIEW_FACTOR_OUT_OF_RANGE", "view_factor must be in (0, 1]", "view_factor"));
+  }
+  if (params.target_surface_temp_k !== undefined && params.material_limit_temp_k !== undefined) {
+    if (params.target_surface_temp_k > params.material_limit_temp_k) {
+      blocking.push(issue("blocking", "TEMP_EXCEEDS_MATERIAL_LIMIT", "target_surface_temp_k > material_limit_temp_k", "target_surface_temp_k"));
+    }
+  }
+  if (params.branch_mode_labels?.includes("power_cycle")) {
+    if (params.t_hot_source_k !== undefined && params.t_cold_sink_k !== undefined) {
+      if (params.t_hot_source_k <= params.t_cold_sink_k) {
+        blocking.push(issue("blocking", "POWER_CYCLE_TEMP_INVALID", "power_cycle branch requires t_hot > t_cold", "t_hot_source_k"));
+      }
+    }
+  }
+  if (params.branch_mode_labels?.includes("heat_lift")) {
+    if (!params.heat_lift_has_source_term && !params.heat_lift_research_required) {
+      blocking.push(issue("blocking", "HEAT_LIFT_NO_SOURCE", "heat_lift branch must declare source term or research_required=true"));
     }
   }
 
-  return violations;
+  // §21.2 — warning cases
+  if (params.branch_mode_labels?.includes("heat_lift") && params.branch_mode_labels?.includes("power_cycle")) {
+    warnings.push(issue("warning", "SIMULTANEOUS_HEAT_LIFT_POWER_CYCLE", "Simultaneous heat_lift and power_cycle branch selections require careful accounting"));
+  }
+  if (params.has_speculative_device) {
+    warnings.push(issue("warning", "SPECULATIVE_DEVICE", "One or more speculative device presets are in use"));
+  }
+  if (params.has_speculative_material) {
+    warnings.push(issue("warning", "SPECULATIVE_MATERIAL", "One or more speculative material presets are in use"));
+  }
+  if (params.has_solar_polish_without_source) {
+    warnings.push(issue("warning", "SOLAR_POLISH_NO_SOURCE", "Solar-polish architecture selected without solar source characterization"));
+  }
+  if (params.has_per_subsystem_duty_simplification) {
+    warnings.push(issue("warning", "PER_SUBSYSTEM_DUTY_SIMPLIFIED", "Per-subsystem duty mode simplified to aggregate duty fraction for compatibility export"));
+  }
+
+  return {
+    blocking,
+    warnings,
+    research_required_items,
+    export_allowed: blocking.length === 0,
+  };
 }
 
-// ─── Thermal zone bounds §19.3 ───────────────────────────────────────────────
+// ─── FIX-004: Domain-specific bounds validators ───────────────────────────────
+// run-scenario.ts (ANCHOR runner) expects validateThermalZoneBounds,
+// validateStorageBounds, validateRadiatorBounds, and boundsViolationsToFlags.
+// These are additive validators based on spec §19.3, §21.3, §22.3.
+// FIX-004: required by run-scenario.ts.
 
+import { makeFlagError, makeFlagWarning, FLAG_IDS, type Flag } from '../emitters/flag-emitter';
+
+export interface BoundsViolation {
+  severity: 'error' | 'warning';
+  field: string;
+  message: string;
+}
+
+/**
+ * Validate thermal zone temperature bounds per spec §19.3.
+ * FIX-004.
+ */
 export function validateThermalZoneBounds(zone: {
   zone_id: string;
   target_temp_k: number;
@@ -84,159 +144,69 @@ export function validateThermalZoneBounds(zone: {
   pressure_min_pa?: number;
   pressure_max_pa?: number;
 }): BoundsViolation[] {
-  const violations: BoundsViolation[] = [];
-
-  if (zone.temp_min_k > zone.target_temp_k) {
-    violations.push({
-      field: 'temp_min_k',
-      message: `temp_min_k (${zone.temp_min_k}) must be <= target_temp_k (${zone.target_temp_k})`,
-      value: zone.temp_min_k,
-      bound: zone.target_temp_k,
-    });
-  }
-  if (zone.target_temp_k > zone.temp_max_k) {
-    violations.push({
-      field: 'target_temp_k',
-      message: `target_temp_k (${zone.target_temp_k}) must be <= temp_max_k (${zone.temp_max_k})`,
-      value: zone.target_temp_k,
-      bound: zone.temp_max_k,
-    });
-  }
-  if (
-    zone.pressure_min_pa !== undefined &&
-    zone.pressure_max_pa !== undefined &&
-    zone.pressure_min_pa > zone.pressure_max_pa
-  ) {
-    violations.push({
-      field: 'pressure_min_pa',
-      message: 'pressure_min_pa must be <= pressure_max_pa',
-      value: zone.pressure_min_pa,
-      bound: zone.pressure_max_pa,
-    });
-  }
-
-  return violations;
+  const v: BoundsViolation[] = [];
+  if (zone.target_temp_k <= 0)
+    v.push({ severity: 'error', field: 'target_temp_k', message: `Zone ${zone.zone_id}: target_temp_k must be > 0 K` });
+  if (zone.temp_min_k <= 0)
+    v.push({ severity: 'error', field: 'temp_min_k', message: `Zone ${zone.zone_id}: temp_min_k must be > 0 K` });
+  if (zone.temp_max_k <= zone.temp_min_k)
+    v.push({ severity: 'error', field: 'temp_max_k', message: `Zone ${zone.zone_id}: temp_max_k must be > temp_min_k` });
+  if (zone.target_temp_k < zone.temp_min_k || zone.target_temp_k > zone.temp_max_k)
+    v.push({ severity: 'warning', field: 'target_temp_k', message: `Zone ${zone.zone_id}: target_temp_k outside [temp_min_k, temp_max_k]` });
+  return v;
 }
 
-// ─── Storage bounds §21.3 ────────────────────────────────────────────────────
-
+/**
+ * Validate storage bounds per spec §21.3.
+ * FIX-004.
+ */
 export function validateStorageBounds(storage: {
+  storage_id?: string;
   mass_kg: number;
+  cp_j_per_kgk: number;
   temp_min_k: number;
   temp_max_k: number;
   latent_utilization_fraction: number;
 }): BoundsViolation[] {
-  const violations: BoundsViolation[] = [];
-
-  if (storage.mass_kg < 0) {
-    violations.push({ field: 'mass_kg', message: 'mass_kg must be >= 0', value: storage.mass_kg });
-  }
-  if (storage.temp_min_k >= storage.temp_max_k) {
-    violations.push({
-      field: 'temp_min_k',
-      message: 'temp_min_k must be < temp_max_k',
-      value: storage.temp_min_k,
-      bound: storage.temp_max_k,
-    });
-  }
-  if (storage.latent_utilization_fraction < 0 || storage.latent_utilization_fraction > 1) {
-    violations.push({
-      field: 'latent_utilization_fraction',
-      message: 'latent_utilization_fraction must be in [0, 1]',
-      value: storage.latent_utilization_fraction,
-    });
-  }
-
-  return violations;
+  const v: BoundsViolation[] = [];
+  if (storage.mass_kg < 0)
+    v.push({ severity: 'error', field: 'mass_kg', message: 'Storage mass_kg must be >= 0' });
+  if (storage.cp_j_per_kgk <= 0)
+    v.push({ severity: 'error', field: 'cp_j_per_kgk', message: 'cp_j_per_kgk must be > 0' });
+  if (storage.temp_min_k >= storage.temp_max_k)
+    v.push({ severity: 'error', field: 'temp_min_k', message: 'temp_min_k must be < temp_max_k per §21.3' });
+  if (storage.latent_utilization_fraction < 0 || storage.latent_utilization_fraction > 1)
+    v.push({ severity: 'error', field: 'latent_utilization_fraction', message: 'latent_utilization_fraction must be in [0, 1] per §21.3' });
+  return v;
 }
 
-// ─── Radiator bounds §22.3 ───────────────────────────────────────────────────
-
+/**
+ * Validate radiator configuration bounds per spec §22.3.
+ * FIX-004.
+ */
 export function validateRadiatorBounds(radiator: {
   emissivity: number;
   target_surface_temp_k: number;
   reserve_margin_fraction: number;
 }): BoundsViolation[] {
-  const violations: BoundsViolation[] = [];
-
-  if (radiator.emissivity <= 0 || radiator.emissivity > 1) {
-    violations.push({
-      field: 'emissivity',
-      message: 'emissivity must be in (0, 1]',
-      value: radiator.emissivity,
-    });
-  }
-  if (radiator.target_surface_temp_k <= 0) {
-    violations.push({
-      field: 'target_surface_temp_k',
-      message: 'target_surface_temp_k must be > 0 K',
-      value: radiator.target_surface_temp_k,
-    });
-  }
-  if (radiator.reserve_margin_fraction < 0) {
-    violations.push({
-      field: 'reserve_margin_fraction',
-      message: 'reserve_margin_fraction must be >= 0',
-      value: radiator.reserve_margin_fraction,
-    });
-  }
-
-  return violations;
-}
-
-// ─── Thermal stage bounds §23.3 ──────────────────────────────────────────────
-
-export function validateThermalStageBounds(stage: {
-  stage_id: string;
-  stage_type: string;
-  work_input_w: number;
-  loss_w: number;
-  input_temp_k: number;
-  output_temp_k: number;
-  cop_actual?: number;
-  efficiency?: number;
-  effectiveness?: number;
-}): BoundsViolation[] {
-  const violations: BoundsViolation[] = [];
-
-  if (stage.loss_w < 0) {
-    violations.push({ field: 'loss_w', message: 'loss_w must be >= 0', value: stage.loss_w });
-  }
-  if (stage.stage_type === 'lift' && stage.work_input_w < 0) {
-    violations.push({
-      field: 'work_input_w',
-      message: 'lift stage must have work_input_w >= 0',
-      value: stage.work_input_w,
-    });
-  }
-  if (stage.cop_actual !== undefined && stage.cop_actual < 0) {
-    violations.push({ field: 'cop_actual', message: 'cop_actual must be >= 0', value: stage.cop_actual });
-  }
-  if (stage.efficiency !== undefined && (stage.efficiency < 0 || stage.efficiency > 1)) {
-    violations.push({ field: 'efficiency', message: 'efficiency must be in [0, 1]', value: stage.efficiency });
-  }
-  if (stage.effectiveness !== undefined && (stage.effectiveness < 0 || stage.effectiveness > 1)) {
-    violations.push({ field: 'effectiveness', message: 'effectiveness must be in [0, 1]', value: stage.effectiveness });
-  }
-
-  return violations;
+  const v: BoundsViolation[] = [];
+  if (radiator.emissivity <= 0 || radiator.emissivity > 1)
+    v.push({ severity: 'error', field: 'emissivity', message: 'emissivity must be in (0, 1]' });
+  if (radiator.target_surface_temp_k <= 0)
+    v.push({ severity: 'error', field: 'target_surface_temp_k', message: 'target_surface_temp_k must be > 0 K' });
+  if (radiator.reserve_margin_fraction < 0)
+    v.push({ severity: 'warning', field: 'reserve_margin_fraction', message: 'reserve_margin_fraction < 0 is unusual' });
+  return v;
 }
 
 /**
- * Convert BoundsViolations to Flags for the flag emitter.
+ * Convert BoundsViolation[] to Flag[] for use in run-scenario.ts.
+ * FIX-004.
  */
-export function boundsViolationsToFlags(
-  violations: BoundsViolation[],
-  subsystem: string
-): Flag[] {
-  return violations.map((v, i) =>
-    makeFlagError(
-      `bounds_violation_${subsystem}_${i}`,
-      v.message,
-      subsystem,
-      v.field,
-      v.value,
-      v.bound
-    )
+export function boundsViolationsToFlags(violations: BoundsViolation[], subsystem: string): Flag[] {
+  return violations.map(v =>
+    v.severity === 'error'
+      ? makeFlagError(FLAG_IDS.BOUNDS_VIOLATION, v.message, subsystem, v.field ?? 'unknown')
+      : makeFlagWarning(FLAG_IDS.BOUNDS_VIOLATION, v.message, subsystem, v.field ?? 'unknown')
   );
 }

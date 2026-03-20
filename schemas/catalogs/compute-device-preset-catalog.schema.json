@@ -1,0 +1,149 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://space-server-heat-dissipation/schemas/catalogs/compute-device-preset-catalog.schema.json",
+  "schema_id": "compute-device-preset-catalog",
+  "schema_version": "v0.1.0",
+  "title": "ComputeDevicePresetCatalog",
+  "type": "object",
+  "required": [
+    "catalog_id",
+    "catalog_version",
+    "entries"
+  ],
+  "properties": {
+    "catalog_id": {
+      "type": "string"
+    },
+    "catalog_version": {
+      "type": "string"
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "preset_id",
+          "label",
+          "vendor",
+          "family",
+          "sku",
+          "device_type",
+          "nominal_tdp_w",
+          "peak_tdp_w",
+          "allowable_junction_temp_k",
+          "allowable_package_temp_k",
+          "allowable_coldplate_temp_min_k",
+          "allowable_coldplate_temp_max_k",
+          "heat_flux_w_per_cm2",
+          "power_idle_w",
+          "power_light_w",
+          "power_medium_w",
+          "power_full_w",
+          "package_mass_kg",
+          "maturity_class",
+          "thermal_grade",
+          "cooling_pickup_class",
+          "pickup_geometry",
+          "performance_basis_note",
+          "thermal_basis_note",
+          "packaging_notes",
+          "research_required"
+        ],
+        "properties": {
+          "preset_id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "vendor": {
+            "type": "string"
+          },
+          "family": {
+            "type": "string"
+          },
+          "sku": {
+            "type": "string"
+          },
+          "device_type": {
+            "type": "string"
+          },
+          "nominal_tdp_w": {
+            "type": "number",
+            "minimum": 0
+          },
+          "peak_tdp_w": {
+            "type": "number",
+            "minimum": 0
+          },
+          "allowable_junction_temp_k": {
+            "type": "number",
+            "minimum": 0
+          },
+          "allowable_package_temp_k": {
+            "type": "number",
+            "minimum": 0
+          },
+          "allowable_coldplate_temp_min_k": {
+            "type": "number",
+            "minimum": 0
+          },
+          "allowable_coldplate_temp_max_k": {
+            "type": "number",
+            "minimum": 0
+          },
+          "heat_flux_w_per_cm2": {
+            "type": "number",
+            "minimum": 0
+          },
+          "power_idle_w": {
+            "type": "number",
+            "minimum": 0
+          },
+          "power_light_w": {
+            "type": "number",
+            "minimum": 0
+          },
+          "power_medium_w": {
+            "type": "number",
+            "minimum": 0
+          },
+          "power_full_w": {
+            "type": "number",
+            "minimum": 0
+          },
+          "package_mass_kg": {
+            "type": "number",
+            "minimum": 0
+          },
+          "maturity_class": {
+            "type": "string"
+          },
+          "thermal_grade": {
+            "type": "string"
+          },
+          "cooling_pickup_class": {
+            "type": "string"
+          },
+          "pickup_geometry": {
+            "type": "string"
+          },
+          "performance_basis_note": {
+            "type": "string"
+          },
+          "thermal_basis_note": {
+            "type": "string"
+          },
+          "packaging_notes": {
+            "type": "string"
+          },
+          "research_required": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

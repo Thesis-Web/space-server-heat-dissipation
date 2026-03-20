@@ -1,93 +1,85 @@
 /**
- * storage.ts
- * Thermal energy storage formulas.
- * Governing equations: §12.5, §21.2.
+ * Thermal storage formula module — orbital-thermal-trade-system v0.1.5
+ * Governing law: engineering-spec-v0.1.0 §26.2
  */
 
+/**
+ * Sensible heat capacity of a solid/liquid storage mass.
+ * Q = m × cp × ΔT
+ */
+export function sensibleCapacity(mass_kg: number, cp_j_per_kg_k: number, delta_t_k: number): number {
+  return mass_kg * cp_j_per_kg_k * delta_t_k;
+}
+
+/**
+ * Latent heat capacity for a PCM storage mass.
+ * Q = m × h_fusion
+ */
+export function latentCapacity(mass_kg: number, h_fusion_j_per_kg: number): number {
+  return mass_kg * h_fusion_j_per_kg;
+}
+
+/**
+ * Discharge duration given stored energy and discharge rate.
+ * t = Q_stored / P_discharge
+ */
+export function dischargeDuration(q_stored_j: number, p_discharge_w: number): number {
+  if (p_discharge_w <= 0) throw new Error("Discharge power must be > 0");
+  return q_stored_j / p_discharge_w;
+}
+
+/**
+ * Charge duration given capacity and charge rate.
+ * t = Q_capacity / P_charge
+ */
+export function chargeDuration(q_capacity_j: number, p_charge_w: number): number {
+  if (p_charge_w <= 0) throw new Error("Charge power must be > 0");
+  return q_capacity_j / p_charge_w;
+}
+
+/**
+ * Required storage mass for a latent storage target.
+ * m = Q_required / h_fusion
+ */
+export function requiredPcmMass(q_required_j: number, h_fusion_j_per_kg: number): number {
+  if (h_fusion_j_per_kg <= 0) throw new Error("h_fusion must be > 0");
+  return q_required_j / h_fusion_j_per_kg;
+}
+
+// ─── FIX-003: computeStorageEnergy composite function ─────────────────────────
+// run-scenario.ts (ANCHOR runner) expects computeStorageEnergy combining
+// sensible and latent capacity per spec §21.2.
+// Formula: E_usable = m*cp*(T_max-T_min) + m*h_fusion*latent_fraction
+// FIX-003: required by run-scenario.ts.
+
 export interface StorageEnergyInput {
-  /** Storage mass (kg). */
   mass_kg: number;
-  /** Specific heat capacity (J/kg·K). */
   cp_j_per_kgk: number;
-  /** Sensible temperature swing lower bound (K). */
   temp_min_k: number;
-  /** Sensible temperature swing upper bound (K). */
   temp_max_k: number;
-  /** Latent heat (J/kg). 0 if no latent component. */
   latent_heat_j_per_kg: number;
-  /** Latent utilization fraction [0, 1]. §12.5 */
   latent_utilization_fraction: number;
 }
 
 export interface StorageEnergyResult {
-  /** E_storage_usable (J). §12.5 / §21.2 */
   e_storage_usable_j: number;
-  /** Sensible component only (J). */
   e_sensible_j: number;
-  /** Latent component only (J). */
   e_latent_j: number;
-  mass_kg: number;
-  delta_t_k: number;
 }
 
 /**
- * E_storage_usable = m * cp * ΔT + m * L * phi_latent  §12.5
+ * Total usable storage energy per spec §21.2.
+ * E_storage_usable = m*cp*(T_max-T_min) + m*h_fusion*latent_utilization_fraction
+ * FIX-003: composite function required by ANCHOR runner.
  */
 export function computeStorageEnergy(input: StorageEnergyInput): StorageEnergyResult {
-  if (input.mass_kg < 0) {
-    throw new RangeError(`mass_kg must be >= 0. Got ${input.mass_kg}`);
-  }
-  if (input.cp_j_per_kgk <= 0) {
-    throw new RangeError(`cp_j_per_kgk must be > 0. Got ${input.cp_j_per_kgk}`);
-  }
-  if (input.temp_min_k >= input.temp_max_k) {
-    throw new RangeError(
-      `temp_min_k (${input.temp_min_k}) must be < temp_max_k (${input.temp_max_k})`
-    );
-  }
-  if (input.latent_heat_j_per_kg < 0) {
-    throw new RangeError(`latent_heat_j_per_kg must be >= 0. Got ${input.latent_heat_j_per_kg}`);
-  }
-  if (input.latent_utilization_fraction < 0 || input.latent_utilization_fraction > 1) {
-    throw new RangeError(
-      `latent_utilization_fraction must be in [0, 1]. Got ${input.latent_utilization_fraction}`
-    );
-  }
-
   const delta_t = input.temp_max_k - input.temp_min_k;
-  const e_sensible = input.mass_kg * input.cp_j_per_kgk * delta_t;
+  if (delta_t < 0) throw new RangeError(`temp_max_k must be >= temp_min_k`);
+  const e_sensible = sensibleCapacity(input.mass_kg, input.cp_j_per_kgk, delta_t);
   const e_latent = input.mass_kg * input.latent_heat_j_per_kg * input.latent_utilization_fraction;
-  const e_storage_usable_j = e_sensible + e_latent;
-
   return {
-    e_storage_usable_j,
+    e_storage_usable_j: e_sensible + e_latent,
     e_sensible_j: e_sensible,
     e_latent_j: e_latent,
-    mass_kg: input.mass_kg,
-    delta_t_k: delta_t,
   };
-}
-
-/**
- * Required mass to store a given energy quantity.
- * Inverse of §12.5 — sensible-only case.
- */
-export function computeRequiredStorageMass(
-  e_required_j: number,
-  cp_j_per_kgk: number,
-  delta_t_k: number,
-  latent_heat_j_per_kg = 0,
-  latent_utilization_fraction = 0
-): number {
-  if (delta_t_k <= 0) {
-    throw new RangeError(`delta_t_k must be > 0. Got ${delta_t_k}`);
-  }
-  if (e_required_j < 0) {
-    throw new RangeError(`e_required_j must be >= 0. Got ${e_required_j}`);
-  }
-  const energy_per_kg = cp_j_per_kgk * delta_t_k + latent_heat_j_per_kg * latent_utilization_fraction;
-  if (energy_per_kg <= 0) {
-    throw new RangeError('energy_per_kg must be > 0 to compute mass');
-  }
-  return e_required_j / energy_per_kg;
 }

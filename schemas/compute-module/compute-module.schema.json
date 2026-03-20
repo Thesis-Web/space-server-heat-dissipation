@@ -3,7 +3,7 @@
   "schema_id": "compute-module",
   "schema_version": "v0.1.0",
   "title": "ComputeModule",
-  "description": "Board-level compute assembly. Runtime derives W_dot_compute_module per §17.2.",
+  "description": "Board-level compute assembly. Runtime derives W_dot_compute_module per §17.2. UI-expansion additive fields per ui-expansion-spec-v0.1.5. SCHEMA-CONTRA-CM-001: BASE uses w_dot_memory_w etc.; ANCHOR uses memory_power_w etc.; ANCHOR wins; runtime must reconcile in Batch 3.",
   "type": "object",
   "required": [
     "module_id",
@@ -47,6 +47,20 @@
       "type": "string",
       "description": "Associates module with a thermal zone group."
     },
+    "label": { "type": "string" },
+    "custom_device_power_w": { "type": "number", "minimum": 0 },
+    "assumptions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "module_preset_id": { "type": "string" },
+    "ui_device_preset_id": { "type": "string" },
+    "overrides_applied": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "packaging_stress_class": { "type": "string" },
+    "compactness_stress_class": { "type": "string" },
     "notes": { "type": "string" }
   }
 }
