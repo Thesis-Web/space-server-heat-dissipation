@@ -1,0 +1,116 @@
+{
+  "catalog_id": "research-evidence-classes",
+  "catalog_version": "v0.1.0",
+  "schema_ref": "model-extension-2-spec-v0.2.1-§12",
+  "description": "Canonical enum definitions for provenance, maturity, confidence, and output effect classification. Governed by model-extension-2-spec-v0.2.1 §12.",
+  "provenance_class": {
+    "_spec_ref": "§12.1",
+    "values": [
+      {
+        "id": "measured",
+        "label": "Measured",
+        "description": "Value derived from direct physical measurement under documented conditions."
+      },
+      {
+        "id": "literature_derived",
+        "label": "Literature Derived",
+        "description": "Value sourced from peer-reviewed or credible published literature with citation."
+      },
+      {
+        "id": "analog_estimated",
+        "label": "Analog Estimated",
+        "description": "Value estimated by analogy to a known related material or geometry with declared basis."
+      },
+      {
+        "id": "placeholder",
+        "label": "Placeholder",
+        "description": "Interim value assigned for structural completeness. research_required must be true. Not for use in final output claims."
+      },
+      {
+        "id": "hypothesis_only",
+        "label": "Hypothesis Only",
+        "description": "Value based on theoretical conjecture only, no experimental or literature basis. research_required must be true."
+      }
+    ]
+  },
+  "maturity_class": {
+    "_spec_ref": "§12.2",
+    "values": [
+      {
+        "id": "concept_only",
+        "label": "Concept Only",
+        "description": "Concept exists on paper or in theory only. No hardware demonstration."
+      },
+      {
+        "id": "bench_evidence",
+        "label": "Bench Evidence",
+        "description": "Laboratory or bench demonstration exists at small scale under controlled conditions."
+      },
+      {
+        "id": "modeled_only",
+        "label": "Modeled Only",
+        "description": "Behavior predicted by simulation or analytical model but not yet demonstrated physically."
+      },
+      {
+        "id": "heritage_analog",
+        "label": "Heritage Analog",
+        "description": "Based on a heritage system or analog that operated in a relevant environment."
+      },
+      {
+        "id": "qualified_estimate",
+        "label": "Qualified Estimate",
+        "description": "Expert-qualified estimate with documented rationale and known uncertainty bounds."
+      },
+      {
+        "id": "custom",
+        "label": "Custom",
+        "description": "Operator-defined maturity classification. Must be documented in notes."
+      }
+    ]
+  },
+  "confidence_class": {
+    "_spec_ref": "§12.3",
+    "values": [
+      {
+        "id": "low",
+        "label": "Low",
+        "description": "High uncertainty. Results should be treated as directional only."
+      },
+      {
+        "id": "medium",
+        "label": "Medium",
+        "description": "Moderate uncertainty. Useful for engineering trade space but not for design commitment."
+      },
+      {
+        "id": "high",
+        "label": "High",
+        "description": "Well-bounded uncertainty. Suitable for engineering trade analysis with appropriate margins."
+      },
+      {
+        "id": "unknown",
+        "label": "Unknown",
+        "description": "Confidence not assessable from available information."
+      }
+    ]
+  },
+  "output_effect_class": {
+    "_spec_ref": "§12.4",
+    "values": [
+      {
+        "id": "output_driving",
+        "label": "Output Driving",
+        "description": "This field affects exploratory numeric outputs through declared Extension 2 runtime equations."
+      },
+      {
+        "id": "metadata_only",
+        "label": "Metadata Only",
+        "description": "This field affects warnings, confidence, or guide text only. Does not alter numeric outputs unless a future law promotes it."
+      },
+      {
+        "id": "warning_only",
+        "label": "Warning Only",
+        "description": "This field triggers operator warnings or cautions but does not directly alter numeric outputs."
+      }
+    ]
+  }
+}

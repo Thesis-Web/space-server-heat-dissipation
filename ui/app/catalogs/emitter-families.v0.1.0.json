@@ -1,0 +1,81 @@
+{
+  "catalog_id": "emitter-families",
+  "catalog_version": "v0.1.0",
+  "schema_ref": "emitter-family.schema.json",
+  "spec_ref": "model-extension-2-spec-v0.2.1-§8-§17.3",
+  "description": "Conservative generic emitter family starter entries for Extension 2 exploratory mode. All entries are generic. Values are conservative estimates for trade space exploration only. Do not treat as measured performance or flight qualification.",
+  "entries": [
+    {
+      "emitter_family_id": "broadband_radiator_generic",
+      "label": "Broadband Radiator (Generic)",
+      "emitter_class": "broadband_radiator",
+      "wavelength_band_min_um": 3.0,
+      "wavelength_band_nominal_um": 10.0,
+      "wavelength_band_max_um": 30.0,
+      "nominal_emissivity": 0.85,
+      "nominal_selectivity_fraction": 0.0,
+      "temperature_min_k": 200,
+      "temperature_nominal_k": 320,
+      "temperature_max_k": 500,
+      "tpv_compatibility_class": "not_applicable",
+      "provenance_class": "literature_derived",
+      "maturity_class": "heritage_analog",
+      "confidence_class": "high",
+      "output_effect_class": "output_driving",
+      "default_enabled_for_exploration": true,
+      "notes": [
+        "Broadband high-emissivity radiator surface representative of well-established spacecraft thermal control coatings (e.g. Z-93, Aeroglaze Z306 class). Nominal emissivity 0.85 is a conservative in-family estimate.",
+        "Selectivity fraction = 0 by definition: this surface emits broadly across the IR spectrum. Appropriate as the non-selective baseline comparator for Extension 2 trade studies."
+      ],
+      "research_required": false
+    },
+    {
+      "emitter_family_id": "selective_emitter_generic",
+      "label": "Selective Emitter (Generic)",
+      "emitter_class": "selective_emitter",
+      "wavelength_band_min_um": 1.5,
+      "wavelength_band_nominal_um": 2.5,
+      "wavelength_band_max_um": 4.0,
+      "nominal_emissivity": 0.75,
+      "nominal_selectivity_fraction": 0.55,
+      "temperature_min_k": 700,
+      "temperature_nominal_k": 1000,
+      "temperature_max_k": 1400,
+      "tpv_compatibility_class": "candidate_tpv_coupled",
+      "provenance_class": "analog_estimated",
+      "maturity_class": "bench_evidence",
+      "confidence_class": "low",
+      "output_effect_class": "output_driving",
+      "default_enabled_for_exploration": false,
+      "notes": [
+        "Represents the concept of a selective thermal emitter concentrating emission in a near-IR or short-wave IR band relevant to TPV cell bandgap. Rare-earth oxides (Er2O3, Yb2O3) and photonic crystal emitters have demonstrated selective emission in bench experiments.",
+        "Selectivity fraction = 0.55 is a conservative generic estimate. Actual performance is highly material, temperature, and fabrication dependent. Do not use for design commitment without spectral measurement of the specific material at operating temperature."
+      ],
+      "research_required": true
+    },
+    {
+      "emitter_family_id": "variable_emissivity_surface_generic",
+      "label": "Variable Emissivity Surface (Generic)",
+      "emitter_class": "variable_emissivity_surface",
+      "wavelength_band_min_um": 3.0,
+      "wavelength_band_nominal_um": 8.0,
+      "wavelength_band_max_um": 14.0,
+      "nominal_emissivity": 0.60,
+      "nominal_selectivity_fraction": 0.0,
+      "temperature_min_k": 220,
+      "temperature_nominal_k": 320,
+      "temperature_max_k": 500,
+      "tpv_compatibility_class": "not_applicable",
+      "provenance_class": "literature_derived",
+      "maturity_class": "heritage_analog",
+      "confidence_class": "medium",
+      "output_effect_class": "output_driving",
+      "default_enabled_for_exploration": false,
+      "notes": [
+        "Represents electrochromic or mechanically variable emissivity surfaces used for spacecraft thermal control. Nominal emissivity 0.60 is a mid-range value for typical variable-emissivity device operating range (0.1–0.85 is common span).",
+        "Selectivity fraction = 0 indicates broadband behavior. Variable emissivity is used for thermal regulation, not spectral selectivity. Include when modeling modulated reject surfaces."
+      ],
+      "research_required": false
+    }
+  ]
+}

@@ -276,6 +276,64 @@
     "thermal_policy_id": {
       "type": "string",
       "description": "UI layer alias for thermal_policy per ui-expansion-spec-v0.1.5 \u00a7133. Optional. Runtime uses thermal_policy enum."
+    },
+    "enable_model_extension_2": {
+      "type": "boolean",
+      "default": false,
+      "description": "Extension 2 enable gate per model-extension-2-spec-v0.2.1 \u00a75.1. If false, all Extension 2 fields must be absent, null, empty, or ignored."
+    },
+    "model_extension_2_mode": {
+      "type": "string",
+      "enum": [
+        "disabled",
+        "baseline_only",
+        "exploratory_compare",
+        "exploratory_only"
+      ],
+      "default": "disabled",
+      "description": "Extension 2 operating mode per spec \u00a75.2."
+    },
+    "source_spectral_profile_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": null,
+      "description": "Reference to a source spectral profile catalog entry per spec \u00a75.1."
+    },
+    "spectral_stage_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Array of spectral stage IDs active in this scenario per spec \u00a75.1."
+    },
+    "exploratory_result_policy": {
+      "type": "string",
+      "enum": [
+        "do_not_mix",
+        "emit_delta_only",
+        "emit_parallel_result"
+      ],
+      "default": "do_not_mix",
+      "description": "Controls how exploratory results are emitted per spec \u00a75.2."
+    },
+    "research_packet_intent": {
+      "type": "string",
+      "enum": [
+        "engineering_trade",
+        "research_screen",
+        "bench_candidate",
+        "custom"
+      ],
+      "default": "engineering_trade",
+      "description": "Declares downstream intent of packet per spec \u00a75.2."
+    },
+    "strict_research_enforcement": {
+      "type": "boolean",
+      "default": true,
+      "description": "When true, placeholder or hypothesis_only provenance on output-driving fields raises blocking caution per spec \u00a712.5."
     }
   }
 }

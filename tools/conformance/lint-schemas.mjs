@@ -92,6 +92,13 @@ const CATALOG_SCHEMA_MAP = {
   "material-families": "material-family-catalog",
   "branch-presets": "branch-preset-catalog",
   "branding": "branding-catalog",
+  // ADDITIVE-001: ext2 catalog wrapper schemas v0.2.1
+  "absorber-families": "absorber-family-catalog",
+  "emitter-families": "emitter-family-catalog",
+  "mediator-families": "mediator-family-catalog",
+  "cavity-geometries": "cavity-geometry-catalog",
+  "source-spectral-profiles": "source-spectral-profile-catalog",
+  "research-evidence-classes": "research-evidence-class-catalog",
 };
 
 const catalogFiles = walkDir(CATALOGS_DIR, ".json");

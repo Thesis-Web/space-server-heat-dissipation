@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "schema_id": "source-spectral-profile",
+  "schema_version": "v0.2.1",
+  "title": "SourceSpectralProfile",
+  "description": "Describes the thermal-emission band of a source zone or branch inlet. Governed by model-extension-2-spec-v0.2.1 §6.",
+  "type": "object",
+  "required": [
+    "profile_id",
+    "label",
+    "profile_class",
+    "source_type",
+    "temperature_basis_min_k",
+    "temperature_basis_nominal_k",
+    "temperature_basis_max_k",
+    "wavelength_band_min_um",
+    "wavelength_band_peak_um",
+    "wavelength_band_max_um",
+    "emissivity_basis",
+    "provenance_class",
+    "maturity_class",
+    "confidence_class",
+    "source_note",
+    "research_required"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "profile_id": { "type": "string" },
+    "label": { "type": "string" },
+    "profile_class": {
+      "type": "string",
+      "enum": [
+        "compute_die_band",
+        "package_hotspot_band",
+        "warm_transport_band",
+        "hot_island_band",
+        "solar_polished_hot_island_band",
+        "custom"
+      ]
+    },
+    "source_type": { "type": "string" },
+    "temperature_basis_min_k": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Must be > 0 and <= nominal per spec §6.3"
+    },
+    "temperature_basis_nominal_k": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "temperature_basis_max_k": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "wavelength_band_min_um": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "wavelength_band_peak_um": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "wavelength_band_max_um": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "emissivity_basis": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "provenance_class": {
+      "type": "string",
+      "enum": ["measured", "literature_derived", "analog_estimated", "placeholder", "hypothesis_only"]
+    },
+    "maturity_class": {
+      "type": "string",
+      "enum": ["concept_only", "bench_evidence", "modeled_only", "heritage_analog", "qualified_estimate", "custom"]
+    },
+    "confidence_class": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "unknown"]
+    },
+    "source_note": { "type": "string" },
+    "research_required": { "type": "boolean" }
+  }
+}

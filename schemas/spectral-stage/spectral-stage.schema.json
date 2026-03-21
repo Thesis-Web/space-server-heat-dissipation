@@ -1,0 +1,171 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "schema_id": "spectral-stage",
+  "schema_version": "v0.2.1",
+  "title": "SpectralStage",
+  "description": "Bounded exploratory stage routing source heat through declared absorber, cavity, mediator, and emitter concepts using explicit coefficients and losses. Governed by model-extension-2-spec-v0.2.1 §11. Output-driving fields: capture_efficiency_fraction, band_match_score, geometry_coupling_score, mediator_transfer_score, regeneration_effectiveness, thermal_loss_fraction, work_input_w, external_heat_input_w, storage_drawdown_w, source_capture_fraction_override. Metadata-only (for numeric): notes[], maturity_class, confidence_class.",
+  "type": "object",
+  "required": [
+    "spectral_stage_id",
+    "label",
+    "enabled",
+    "source_zone_ref",
+    "target_zone_ref",
+    "source_spectral_profile_ref",
+    "absorber_family_ref",
+    "emitter_family_ref",
+    "cavity_geometry_ref",
+    "mediator_family_ref",
+    "stage_mode",
+    "capture_efficiency_fraction",
+    "band_match_score",
+    "geometry_coupling_score",
+    "mediator_transfer_score",
+    "regeneration_effectiveness",
+    "thermal_loss_fraction",
+    "work_input_w",
+    "external_heat_input_w",
+    "storage_drawdown_w",
+    "source_capture_fraction_override",
+    "notes",
+    "provenance_class",
+    "maturity_class",
+    "confidence_class",
+    "research_required"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "spectral_stage_id": {
+      "type": "string",
+      "description": "Deterministic stage identifier. Must be stable for given ordered inputs per spec §16.3."
+    },
+    "label": {
+      "type": "string",
+      "description": "Human-readable stage label."
+    },
+    "enabled": {
+      "type": "boolean",
+      "description": "Whether this stage participates in runtime computation. Disabled stages are serialized but skipped."
+    },
+    "source_zone_ref": {
+      "type": "string",
+      "description": "Reference ID of the thermal zone providing source heat. Required for valid stage per §15.1."
+    },
+    "target_zone_ref": {
+      "type": "string",
+      "description": "Reference ID of the thermal zone receiving transferred heat. Required for valid stage per §15.1."
+    },
+    "source_spectral_profile_ref": {
+      "type": ["string", "null"],
+      "description": "Reference to catalog source spectral profile ID or null if derived profile is used. Required for valid stage per §15.1."
+    },
+    "absorber_family_ref": {
+      "type": "string",
+      "description": "Reference to catalog absorber family ID. Required for valid stage per §15.1."
+    },
+    "emitter_family_ref": {
+      "type": "string",
+      "description": "Reference to catalog emitter family ID. Required for valid stage per §15.1."
+    },
+    "cavity_geometry_ref": {
+      "type": "string",
+      "description": "Reference to catalog cavity geometry ID. Required for valid stage per §15.1."
+    },
+    "mediator_family_ref": {
+      "type": "string",
+      "description": "Reference to catalog mediator family ID. Required for valid stage per §15.1."
+    },
+    "stage_mode": {
+      "type": "string",
+      "enum": [
+        "passive_capture",
+        "capture_to_regen_store",
+        "capture_to_active_hot_island",
+        "capture_plus_solar_polish",
+        "custom"
+      ],
+      "description": "Stage operating mode per spec §11.3."
+    },
+    "capture_efficiency_fraction": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Overall stage capture efficiency [dimensionless, 0–1]. Output-driving per §11.6. Constraint: 0 <= value <= 1 per §11.4."
+    },
+    "band_match_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Normalized source-to-absorber band overlap score [dimensionless, 0–1]. Output-driving per §11.6. Computed helper per §13.4. Constraint: 0 <= value <= 1 per §11.4. Must be serialized explicitly per §11.5."
+    },
+    "geometry_coupling_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Normalized geometry coupling effectiveness score [dimensionless, 0–1]. Output-driving per §11.6. Computed helper per §13.5. Constraint: 0 <= value <= 1 per §11.4. Must be serialized explicitly per §11.5."
+    },
+    "mediator_transfer_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Normalized mediator transfer effectiveness score [dimensionless, 0–1]. Output-driving per §11.6. Computed helper per §13.6. Constraint: 0 <= value <= 1 per §11.4. Must be serialized explicitly per §11.5."
+    },
+    "regeneration_effectiveness": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Regenerative cycle effectiveness [dimensionless, 0–1]. Output-driving per §11.6. Constraint: 0 <= value <= 1 per §11.4."
+    },
+    "thermal_loss_fraction": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 0.9999,
+      "description": "Fractional thermal loss through stage [dimensionless, 0 <= value < 1]. Output-driving per §11.6. Constraint: 0 <= value < 1 per §11.4."
+    },
+    "work_input_w": {
+      "type": "number",
+      "minimum": 0,
+      "description": "External work input to stage [W]. Output-driving per §11.6. Constraint: >= 0 per §11.4. No free-lunch rule: must be declared explicitly per §3.4."
+    },
+    "external_heat_input_w": {
+      "type": "number",
+      "minimum": 0,
+      "description": "External thermal input to stage from non-source path [W]. Output-driving per §11.6. Constraint: >= 0 per §11.4. No free-lunch rule: must be declared explicitly per §3.4."
+    },
+    "storage_drawdown_w": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Storage discharge contributing to stage [W]. Output-driving per §11.6. Constraint: >= 0 per §11.4. No free-lunch rule: must be declared explicitly per §3.4."
+    },
+    "source_capture_fraction_override": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Override for source capture fraction [dimensionless, 0–1] or null to use capture_efficiency_fraction. Output-driving per §11.6 and §13.2. Constraint: 0 <= value <= 1 per §11.4."
+    },
+    "notes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Operator-visible notes. Metadata-only (for numeric outputs) per §11.6. Still affect warnings."
+    },
+    "provenance_class": {
+      "type": "string",
+      "enum": ["measured", "literature_derived", "analog_estimated", "placeholder", "hypothesis_only"],
+      "description": "Evidence provenance class per spec §12.1."
+    },
+    "maturity_class": {
+      "type": "string",
+      "enum": ["concept_only", "bench_evidence", "modeled_only", "heritage_analog", "qualified_estimate", "custom"],
+      "description": "Technology maturity class per spec §12.2. Metadata-only for numeric effect per §11.6; still affects warnings."
+    },
+    "confidence_class": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "unknown"],
+      "description": "Confidence class per spec §12.3. Metadata-only for numeric effect per §11.6; still affects warnings."
+    },
+    "research_required": {
+      "type": "boolean",
+      "description": "True if provenance_class is placeholder or hypothesis_only per spec §12.5."
+    }
+  }
+}

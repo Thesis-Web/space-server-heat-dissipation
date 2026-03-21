@@ -92,6 +92,38 @@
 
   /* ── Footer ── */
   #footer { background: var(--surface); border-top: 1px solid var(--border); padding: 6px 20px; font-size: 11px; color: var(--text-dim); display: flex; gap: 16px; }
+
+  /* ── Tab 7 output cards ── */
+  .out-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+  .out-kv { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; }
+  .out-kv-highlight { background: #0e1825; border-color: var(--accent-dim); }
+  .out-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--text-dim); }
+  .out-value { font-size: 13px; color: var(--text); font-weight: 500; }
+  .out-value.mono { font-family: "Fira Mono", "Consolas", monospace; font-size: 11px; word-break: break-all; }
+  .note-inline { font-size: 10px; font-weight: 400; color: var(--text-dim); text-transform: none; letter-spacing: 0; margin-left: 8px; }
+  .out-concern { margin-top: 10px; padding: 8px 12px; background: #1a0a00; border-left: 3px solid var(--warn); border-radius: 0 4px 4px 0; font-size: 12px; color: var(--warn); }
+  .out-concern.concern-block { background: #1a0a0a; border-left-color: var(--error); color: var(--error); }
+</style>
+  .ext2-badge { display: inline-block; font-size: 10px; padding: 2px 6px; border-radius: 3px; font-weight: 600; background: #1a1040; color: #a070ff; border: 1px solid #4a20a0; text-transform: uppercase; letter-spacing: .04em; }
+  .note.ext2-exploratory { border-left-color: #7a20c0; background: #130a20; }
+  .stage-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; }
+  .stage-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 12px; font-weight: 600; color: var(--text-dim); }
+  .stage-header span { flex: 1; }
+  .stage-validity { padding: 4px 8px; font-size: 11px; border-radius: 3px; margin-top: 8px; }
+  .stage-validity-ok { border-left: 3px solid var(--ok); color: var(--ok); background: #0a1a0a; }
+  .stage-validity-warn { border-left: 3px solid var(--warn); color: var(--warn); background: #1a1000; }
+  .stage-validity-block { border-left: 3px solid var(--error); color: var(--error); background: #1a0a0a; }
+  .delta-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .delta-table td, .delta-table th { padding: 5px 8px; border-bottom: 1px solid var(--border); text-align: left; }
+  .delta-table th { color: var(--text-dim); font-weight: 600; background: var(--surface); }
+  .delta-positive { color: var(--error); }
+  .delta-negative { color: var(--ok); }
+  .delta-zero { color: var(--text-dim); }
+  .confidence-bar { display: inline-block; height: 8px; border-radius: 4px; margin-right: 6px; vertical-align: middle; }
+  .conf-high { background: var(--ok); }
+  .conf-medium { background: var(--warn); }
+  .conf-low { background: var(--error); }
+  .conf-unknown { background: var(--text-dim); }
 </style>
 </head>
 <body>
@@ -176,6 +208,50 @@
   <div class="section">
     <div class="section-title">Assumptions</div>
     <div class="field-row"><label>Assumptions (one per line)</label><textarea id="assumptions" rows="4" placeholder="Enter assumptions here…"></textarea></div>
+  </div>
+
+  <!-- ── Extension 2 — Scenario Flags  spec §5.1, §14.1 ── -->
+  <div class="section">
+    <div class="section-title">Model Extension 2 <span class="ext2-badge">Exploratory</span></div>
+    <div class="note">Enables exploratory spectral capture and thermal concentration stages. All Extension 2 outputs are non-authoritative and must not be treated as flight claims. Per spec §3.4, §5.</div>
+    <div class="field-row"><label>Enable Extension 2</label>
+      <select id="enable_model_extension_2">
+        <option value="false">Disabled</option>
+        <option value="true">Enabled</option>
+      </select>
+    </div>
+    <div id="ext2-scenario-fields" style="display:none;">
+      <div class="field-row"><label>Extension 2 Mode</label>
+        <select id="model_extension_2_mode">
+          <option value="disabled">disabled — fields serialised, no exploratory computation</option>
+          <option value="baseline_only">baseline_only — exploratory fields present, baseline unchanged</option>
+          <option value="exploratory_compare">exploratory_compare — baseline + exploratory + delta emitted</option>
+          <option value="exploratory_only">exploratory_only — exploratory result only</option>
+        </select>
+      </div>
+      <div class="field-row"><label>Exploratory Result Policy</label>
+        <select id="exploratory_result_policy">
+          <option value="do_not_mix">do_not_mix</option>
+          <option value="emit_delta_only">emit_delta_only</option>
+          <option value="emit_parallel_result">emit_parallel_result</option>
+        </select>
+      </div>
+      <div class="field-row"><label>Research Packet Intent</label>
+        <select id="research_packet_intent">
+          <option value="engineering_trade">engineering_trade</option>
+          <option value="research_screen">research_screen</option>
+          <option value="bench_candidate">bench_candidate</option>
+          <option value="custom">custom</option>
+        </select>
+      </div>
+      <div class="field-row"><label>Strict Research Enforcement</label>
+        <select id="strict_research_enforcement">
+          <option value="true">Yes — enforce research flags (recommended)</option>
+          <option value="false">No</option>
+        </select>
+      </div>
+      <div class="note warn-note">⚠ Extension 2 exploratory outputs carry no engineering authority. Research-required flags must be resolved before any commitment to exploratory values.</div>
+    </div>
   </div>
 </div>
 
@@ -266,6 +342,22 @@
     <div class="field-row"><label>Control</label><input id="w_dot_control_w" type="number" min="0" value="0" /></div>
   </div>
   <div id="compute-preview" class="note" style="display:none;"></div>
+
+  <!-- ── Extension 2 — Source Spectral Profile  spec §6, §14.2 ── -->
+  <div class="section" id="ext2-compute-section" style="display:none;">
+    <div class="section-title">Source Spectral Profile <span class="ext2-badge">Exploratory</span></div>
+    <div class="note">Select a source spectral profile characterising the thermal emission band of this compute payload. Used as input to Extension 2 spectral stage computation. Per spec §6.</div>
+    <div class="field-row"><label>Source Spectral Profile</label>
+      <select id="source_spectral_profile_ref">
+        <option value="">— none / no profile selected —</option>
+      </select>
+    </div>
+    <div id="ext2-profile-card" class="note" style="display:none;"></div>
+    <div id="ext2-wien-card" class="note ext2-exploratory" style="display:none;"></div>
+    <div id="ext2-derived-badge" class="note warn-note" style="display:none;">
+      ⚠ No catalog profile selected — if a derived profile is used, runtime must serialise: basis temperature, helper wavelength, derived profile id, provenance class, and research-required state per spec §6.5.
+    </div>
+  </div>
 </div>
 
 <!-- ════════════════════════════════════════════════════════════
@@ -380,6 +472,16 @@
       ⚠ Solar-polish architecture selected. Source characterisation is required; this will surface as a warning in validation.
     </div>
   </div>
+
+  <!-- ── Extension 2 — Spectral Stage Blocks  spec §11, §14.3 ── -->
+  <div class="section" id="ext2-thermal-section" style="display:none;">
+    <div class="section-title">Spectral Stage Blocks <span class="ext2-badge">Exploratory</span></div>
+    <div class="note warn-note">EXPLORATORY_ONLY — Not proven hardware performance. Each stage defines a spectral capture / thermal transfer pathway. All coefficient inputs drive exploratory result computation per spec §11, §13.</div>
+    <div id="stage-block-list" class="block-list"></div>
+    <div class="btn-row">
+      <button class="btn btn-secondary btn-sm" id="add-stage-block">+ Add Stage Block</button>
+    </div>
+  </div>
 </div>
 
 <!-- ════════════════════════════════════════════════════════════
@@ -450,6 +552,33 @@
       </select>
     </div>
   </div>
+
+  <!-- ── Extension 2 — Radiator & Storage  spec §14.4 ── -->
+  <div class="section" id="ext2-radiator-section" style="display:none;">
+    <div class="section-title">Extension 2 — Radiator &amp; Storage <span class="ext2-badge">Exploratory</span></div>
+    <div class="note warn-note">EXPLORATORY_ONLY — All values in this section are non-authoritative projections for exploratory comparison. Per spec §14.4.</div>
+    <div class="field-row"><label>Emitter Family (Exploratory)</label>
+      <select id="ext2_emitter_family_ref">
+        <option value="">— none —</option>
+      </select>
+    </div>
+    <div id="ext2-emitter-card" class="note ext2-exploratory" style="display:none;"></div>
+    <div class="field-row"><label>Hot-Island Storage Class</label>
+      <select id="ext2_hot_island_storage_class">
+        <option value="eutectic_metal">eutectic_metal</option>
+        <option value="pcm_latent">pcm_latent</option>
+        <option value="sensible_solid">sensible_solid</option>
+        <option value="custom">custom</option>
+      </select>
+    </div>
+    <div class="field-row"><label>Mediator Temp Band Low (K)</label>
+      <input id="ext2_mediator_temp_band_low_k" type="number" min="0" value="800" />
+    </div>
+    <div class="field-row"><label>Mediator Temp Band High (K)</label>
+      <input id="ext2_mediator_temp_band_high_k" type="number" min="0" value="1200" />
+    </div>
+    <div id="ext2-radiator-comparison" class="note ext2-exploratory" style="display:none;"></div>
+  </div>
 </div>
 
 <!-- ════════════════════════════════════════════════════════════
@@ -467,65 +596,178 @@
 </div>
 
 <!-- ════════════════════════════════════════════════════════════
-     TAB 7 — OUTPUT & PACKET  (spec §7.7, §17.7)
+     TAB 7 — OUTPUT & PACKET  (spec §7.7, §17.7, §24)
 ═══════════════════════════════════════════════════════════════ -->
 <div id="pane-output" class="pane">
+
+  <!-- ── Branding / Confidentiality (top — feeds the packet header) ── -->
   <div class="section">
-    <div class="section-title">Validation Summary</div>
-    <div id="validation-panel"></div>
-  </div>
-  <div class="section">
-    <div class="section-title">Derived Summary (display only — not authoritative)</div>
-    <div class="note warn-note">All values below are display previews. Authoritative outputs require runtime execution.</div>
-    <table class="summary-table" id="derived-summary-table">
-      <tr><th>Item</th><th>Value</th></tr>
-      <tr><td>Scenario ID</td><td id="sum-scenario-id">—</td></tr>
-      <tr><td>Node Class</td><td id="sum-node-class">—</td></tr>
-      <tr><td>Architecture Class</td><td id="sum-arch-class">—</td></tr>
-      <tr><td>Device Count × Load Power</td><td id="sum-device-total">—</td></tr>
-      <tr><td>Compute Module Total (preview)</td><td id="sum-compute-total">—</td></tr>
-      <tr><td>Non-Compute Total (preview)</td><td id="sum-noncompute-total">—</td></tr>
-      <tr><td>Radiator Target Temp</td><td id="sum-radiator-temp">—</td></tr>
-      <tr><td>Radiator Effective Area (preview)</td><td id="sum-radiator-area">—</td></tr>
-      <tr><td>Area with Margin (preview)</td><td id="sum-radiator-margin">—</td></tr>
-    </table>
-  </div>
-  <div class="section">
-    <div class="section-title">Bundle File Manifest Preview</div>
-    <div id="manifest-preview" class="note"></div>
-  </div>
-  <div class="section">
-    <div class="section-title">Transform Trace</div>
-    <div id="transform-trace-preview" class="note" style="font-family:monospace;font-size:11px;"></div>
-  </div>
-  <div class="section">
-    <div class="section-title">Research Required Items</div>
-    <div id="research-required-preview" class="note"></div>
-  </div>
-  <div class="section">
-    <div class="section-title">Branding / Confidentiality</div>
-    <div class="note">Branding fields are report-only and do not alter runtime results or validation logic per spec §23.</div>
+    <div class="section-title">Report Identity</div>
+    <div class="note">These fields appear in the packet header and downloadable report. They do not alter runtime results per spec §23.</div>
     <div class="field-row"><label>Organisation Name</label><input id="org_name" type="text" placeholder="Organisation name" /></div>
     <div class="field-row"><label>Contact Name</label><input id="contact_name" type="text" /></div>
     <div class="field-row"><label>Contact Email</label><input id="contact_email" type="email" /></div>
     <div class="field-row"><label>Confidentiality Notice</label><input id="confidentiality_notice" type="text" value="Pre-decisional engineering trade study. Distribution controlled." /></div>
   </div>
-  <div class="section">
-    <div class="section-title">Runtime Authority Declaration</div>
-    <div class="note">
-      <strong>runtime</strong> — All authoritative engineering outputs are derived by the server-side runtime formula engine.
-      Browser previews shown in this tool are display-only and subordinate to runtime results per spec §4.1 and §14.
+
+  <!-- ── Action bar — primary call to action ── -->
+  <div class="section" style="background:var(--surface2);border-color:var(--accent-dim);">
+    <div class="section-title" style="color:var(--accent);">Generate Output</div>
+    <div class="note" style="margin-bottom:12px;">Press <strong>Build Report</strong> to compile all scenario inputs into a validated output packet. Download JSON artifacts for engineering use or open the formatted report.</div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="build-packet-btn" style="padding:8px 22px;font-size:14px;">&#9654; Build Report</button>
+      <button class="btn btn-secondary" id="download-packet-btn" style="display:none;">⬇ Download JSON Bundle</button>
+      <button class="btn btn-secondary" id="run-packet-btn" style="display:none;">&#9654; Open Formatted Report</button>
+    </div>
+    <div id="build-status" class="note" style="display:none;margin-top:10px;"></div>
+  </div>
+
+  <!-- ── Validation gate — always visible, updates live ── -->
+  <div class="section" id="validation-section">
+    <div class="section-title">Readiness Check</div>
+    <div id="validation-panel"><div class="note">Complete scenario inputs in Tabs 1–6, then return here.</div></div>
+  </div>
+
+  <!-- ── Scenario snapshot card — populated on build ── -->
+  <div class="section" id="output-scenario-card" style="display:none;">
+    <div class="section-title">Scenario Snapshot <span style="float:right;font-size:11px;font-weight:400;color:var(--text-dim);" id="out-generated-at"></span></div>
+    <div class="out-grid">
+      <div class="out-kv"><span class="out-label">Scenario ID</span><span class="out-value mono" id="out-scenario-id">—</span></div>
+      <div class="out-kv"><span class="out-label">Label</span><span class="out-value" id="out-label">—</span></div>
+      <div class="out-kv"><span class="out-label">Node Class</span><span class="out-value" id="out-node-class">—</span></div>
+      <div class="out-kv"><span class="out-label">Architecture</span><span class="out-value" id="out-arch-class">—</span></div>
+      <div class="out-kv"><span class="out-label">Orbit</span><span class="out-value" id="out-orbit">—</span></div>
+      <div class="out-kv"><span class="out-label">Mission Mode</span><span class="out-value" id="out-mission-mode">—</span></div>
     </div>
   </div>
+
+  <!-- ── Thermal load summary card ── -->
+  <div class="section" id="output-thermal-card" style="display:none;">
+    <div class="section-title">Thermal Load Summary <span class="note-inline">preview — not authoritative</span></div>
+    <div class="out-grid">
+      <div class="out-kv"><span class="out-label">Device Count</span><span class="out-value" id="out-device-count">—</span></div>
+      <div class="out-kv"><span class="out-label">Load State</span><span class="out-value" id="out-load-state">—</span></div>
+      <div class="out-kv"><span class="out-label">Per-Device Power</span><span class="out-value" id="out-device-power">—</span></div>
+      <div class="out-kv"><span class="out-label">Compute Device Total</span><span class="out-value" id="out-compute-device-total">—</span></div>
+      <div class="out-kv"><span class="out-label">Module Overheads</span><span class="out-value" id="out-overhead">—</span></div>
+      <div class="out-kv out-kv-highlight"><span class="out-label">Compute Module Total</span><span class="out-value" id="sum-compute-total">—</span></div>
+      <div class="out-kv"><span class="out-label">Non-Compute Total</span><span class="out-value" id="sum-noncompute-total">—</span></div>
+      <div class="out-kv out-kv-highlight"><span class="out-label">Total Reject Load</span><span class="out-value" id="out-total-reject">—</span></div>
+    </div>
+  </div>
+
+  <!-- ── Radiator sizing card ── -->
+  <div class="section" id="output-radiator-card" style="display:none;">
+    <div class="section-title">Radiator Sizing <span class="note-inline">preview — not authoritative</span></div>
+    <div class="out-grid">
+      <div class="out-kv"><span class="out-label">Target Surface Temp</span><span class="out-value" id="out-rad-temp">—</span></div>
+      <div class="out-kv"><span class="out-label">Sink Temp</span><span class="out-value" id="out-sink-temp">—</span></div>
+      <div class="out-kv"><span class="out-label">Emissivity (ε)</span><span class="out-value" id="out-emissivity">—</span></div>
+      <div class="out-kv"><span class="out-label">View Factor (F)</span><span class="out-value" id="out-view-factor">—</span></div>
+      <div class="out-kv out-kv-highlight"><span class="out-label">Effective Area (A_eff)</span><span class="out-value" id="sum-radiator-area">—</span></div>
+      <div class="out-kv out-kv-highlight"><span class="out-label">Area + Reserve Margin</span><span class="out-value" id="sum-radiator-margin">—</span></div>
+      <div class="out-kv"><span class="out-label">Reserve Margin</span><span class="out-value" id="out-reserve-margin">—</span></div>
+      <div class="out-kv"><span class="out-label">Material Family</span><span class="out-value" id="out-material-family">—</span></div>
+    </div>
+    <div id="out-radiator-concern" class="out-concern" style="display:none;"></div>
+  </div>
+
+  <!-- ── Optional branches card ── -->
+  <div class="section" id="output-branches-card" style="display:none;">
+    <div class="section-title">Optional Branches</div>
+    <div id="out-branches-list" class="note"></div>
+  </div>
+
+  <!-- ── Extension 2 exploratory output — spec §14.5 ── -->
+  <div class="section" id="ext2-output-section" style="display:none;">
+    <div class="section-title">Extension 2 — Exploratory Thermal Concentration <span class="ext2-badge">Exploratory</span></div>
+    <div class="note warn-note" style="margin-bottom:12px;">⚠ EXPLORATORY_ONLY — Not proven hardware performance. All Extension 2 values are non-authoritative projections for engineering trade screening only.</div>
+
+    <!-- Baseline vs Exploratory side-by-side -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;">
+        <div class="section-title" style="font-size:11px;color:var(--text-dim);margin-bottom:8px;">Baseline</div>
+        <div id="ext2-baseline-summary"></div>
+      </div>
+      <div style="background:#130a20;border:1px solid #4a20a0;border-radius:var(--radius);padding:12px;">
+        <div class="section-title" style="font-size:11px;color:#a070ff;margin-bottom:8px;">Exploratory</div>
+        <div id="ext2-exploratory-summary"></div>
+      </div>
+    </div>
+
+    <!-- Delta table -->
+    <div style="margin-bottom:12px;">
+      <div class="section-title" style="font-size:11px;margin-bottom:6px;">Delta — Exploratory vs Baseline</div>
+      <div id="ext2-delta-table"></div>
+    </div>
+
+    <!-- Stage manifest -->
+    <div style="margin-bottom:12px;">
+      <div class="section-title" style="font-size:11px;margin-bottom:6px;">Stage Manifest</div>
+      <div id="ext2-stage-manifest" class="note"></div>
+    </div>
+
+    <!-- Research confidence + blocking in a 2-col layout -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div>
+        <div class="section-title" style="font-size:11px;margin-bottom:6px;">Research Confidence</div>
+        <div id="ext2-confidence-summary" class="note"></div>
+      </div>
+      <div>
+        <div class="section-title" style="font-size:11px;margin-bottom:6px;">Extension 2 Validation</div>
+        <div id="ext2-blocking-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Research required ── -->
+  <div class="section" id="output-research-card" style="display:none;">
+    <div class="section-title">Research Required Items</div>
+    <div id="research-required-preview" class="note"></div>
+  </div>
+
+  <!-- ── Bundle manifest ── -->
+  <div class="section" id="output-manifest-card" style="display:none;">
+    <div class="section-title">Bundle Manifest</div>
+    <div id="manifest-preview" class="note" style="font-family:monospace;font-size:11px;"></div>
+  </div>
+
+  <!-- ── Transform trace (collapsed by default) ── -->
+  <div class="section" id="output-trace-card" style="display:none;">
+    <div class="section-title" style="cursor:pointer;" onclick="toggleTracePanel()">
+      Transform Trace <span id="trace-toggle-label" style="font-size:11px;font-weight:400;color:var(--accent);">▶ show</span>
+    </div>
+    <div id="transform-trace-wrap" style="display:none;">
+      <div id="transform-trace-preview" class="note" style="font-family:monospace;font-size:11px;"></div>
+    </div>
+  </div>
+
+  <!-- ── Runtime authority ── -->
   <div class="section">
-    <div class="section-title">Packet Preview</div>
-    <pre id="output-preview">Build the packet to preview…</pre>
+    <div class="section-title">Runtime Authority</div>
+    <div class="note">
+      All authoritative engineering outputs require server-side runtime execution. Browser previews are display-only per spec §4.1 and §14.
+      Packet schema versions: blueprint v0.1.1 · spec v0.1.0 · extension-2 spec v0.2.1.
+    </div>
   </div>
-  <div class="btn-row">
-    <button class="btn btn-primary" id="build-packet-btn">Build Packet</button>
-    <button class="btn btn-secondary" id="download-packet-btn" style="display:none;">⬇ Download Bundle</button>
-    <button class="btn btn-secondary" id="run-packet-btn" style="display:none;">&#9654; Run Packet</button>
+
+  <!-- ── JSON packet preview (collapsed) ── -->
+  <div class="section" id="output-json-card" style="display:none;">
+    <div class="section-title" style="cursor:pointer;" onclick="toggleJsonPanel()">
+      JSON Packet <span id="json-toggle-label" style="font-size:11px;font-weight:400;color:var(--accent);">▶ show</span>
+    </div>
+    <div id="json-preview-wrap" style="display:none;">
+      <pre id="output-preview" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;font:12px/1.6 'Fira Mono','Consolas',monospace;white-space:pre-wrap;word-break:break-all;color:var(--text);max-height:320px;overflow:auto;"></pre>
+    </div>
   </div>
+
+  <!-- Hidden compatibility elements for summary table IDs used by updateOutputTab -->
+  <span id="sum-scenario-id" style="display:none;"></span>
+  <span id="sum-node-class" style="display:none;"></span>
+  <span id="sum-arch-class" style="display:none;"></span>
+  <span id="sum-device-total" style="display:none;"></span>
+  <span id="sum-radiator-temp" style="display:none;"></span>
+
 </div>
 
 </div><!-- /content -->

@@ -185,7 +185,116 @@
       "type": "array",
       "items": {
         "type": "string"
-      }
+      },
+      "description": "List of items flagged research-required per spec \u00a716.1."
+    },
+    "enable_model_extension_2": {
+      "type": "boolean",
+      "default": false,
+      "description": "Extension 2 enable state serialized into packet per spec \u00a716.1."
+    },
+    "model_extension_2_mode": {
+      "type": "string",
+      "enum": [
+        "disabled",
+        "baseline_only",
+        "exploratory_compare",
+        "exploratory_only"
+      ],
+      "default": "disabled",
+      "description": "Extension 2 mode serialized into packet per spec \u00a716.1."
+    },
+    "source_spectral_profile_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "All source spectral profile catalog IDs used per spec \u00a716.1."
+    },
+    "derived_source_profiles": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Derived source profiles with derivation basis per spec \u00a716.1 and \u00a76.5."
+    },
+    "spectral_stage_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "All spectral stage IDs in packet per spec \u00a716.1."
+    },
+    "extension_2_catalog_ids_used": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "All Extension 2 catalog entry IDs used per spec \u00a716.1."
+    },
+    "extension_2_catalog_versions_used": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Map of catalog name to version string per spec \u00a716.1."
+    },
+    "extension_2_catalog_checksums_sha256": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Map of catalog name to SHA-256 checksum per spec \u00a716.1."
+    },
+    "exploratory_result_policy": {
+      "type": "string",
+      "enum": [
+        "do_not_mix",
+        "emit_delta_only",
+        "emit_parallel_result"
+      ],
+      "description": "Serialized exploratory result policy per spec \u00a716.1."
+    },
+    "research_packet_intent": {
+      "type": "string",
+      "enum": [
+        "engineering_trade",
+        "research_screen",
+        "bench_candidate",
+        "custom"
+      ],
+      "description": "Serialized research packet intent per spec \u00a716.1."
+    },
+    "strict_research_enforcement": {
+      "type": "boolean",
+      "description": "Serialized strict research enforcement flag per spec \u00a716.1."
+    },
+    "exploratory_coefficients_summary": {
+      "type": "object",
+      "description": "Summary object of all exploratory coefficients used per spec \u00a716.1."
+    },
+    "baseline_result": {
+      "type": "object",
+      "description": "Baseline result section per spec \u00a716.2. Required when extension 2 is active."
+    },
+    "exploratory_result": {
+      "type": "object",
+      "description": "Exploratory result section per spec \u00a716.2. Emitted when mode = exploratory_compare or exploratory_only."
+    },
+    "delta_result": {
+      "type": "object",
+      "description": "Delta result section per spec \u00a716.2. Emitted when mode = exploratory_compare."
+    },
+    "extension_2_summary": {
+      "type": "object",
+      "description": "Extension 2 overall summary object per spec \u00a716.2."
+    },
+    "extension_2_stage_results": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Per-stage exploratory result objects per spec \u00a716.2."
     }
   }
 }

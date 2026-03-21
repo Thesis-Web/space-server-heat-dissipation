@@ -1,0 +1,144 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "schema_id": "mediator-family",
+  "schema_version": "v0.2.1",
+  "title": "MediatorFamily",
+  "description": "Catalog entry describing thermal-storage or transfer medium between source capture and target use. Governed by model-extension-2-spec-v0.2.1 §10. Output-driving fields: temperature_*, nominal_specific_energy_j_per_kg, nominal_density_kg_per_m3, nominal_thermal_buffer_fraction. Metadata-only fields: contamination_sensitivity, corrosion_sensitivity, cycling_risk, notes[].",
+  "type": "object",
+  "required": [
+    "mediator_family_id",
+    "label",
+    "mediator_class",
+    "phase_behavior_class",
+    "temperature_min_k",
+    "temperature_nominal_k",
+    "temperature_max_k",
+    "nominal_specific_energy_j_per_kg",
+    "nominal_density_kg_per_m3",
+    "nominal_thermal_buffer_fraction",
+    "compatible_absorber_classes",
+    "compatible_emitter_classes",
+    "contamination_sensitivity",
+    "corrosion_sensitivity",
+    "cycling_risk",
+    "provenance_class",
+    "maturity_class",
+    "confidence_class",
+    "output_effect_class",
+    "default_enabled_for_exploration",
+    "notes",
+    "research_required"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "mediator_family_id": {
+      "type": "string",
+      "description": "Stable catalog identifier."
+    },
+    "label": {
+      "type": "string",
+      "description": "Human-readable display name."
+    },
+    "mediator_class": {
+      "type": "string",
+      "enum": [
+        "pcm_eutectic_store",
+        "sensible_refractory_store",
+        "liquid_metal_exchange_candidate",
+        "hybrid_pcm_refractory_store",
+        "custom"
+      ],
+      "description": "Mediator class per spec §10.2."
+    },
+    "phase_behavior_class": {
+      "type": "string",
+      "description": "Phase behavior descriptor (e.g. solid-liquid PCM, sensible-only, hybrid)."
+    },
+    "temperature_min_k": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Minimum operating temperature in Kelvin. Output-driving per §10.4. Constraint: min < nominal < max per §10.3."
+    },
+    "temperature_nominal_k": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Nominal operating temperature in Kelvin. Output-driving per §10.4."
+    },
+    "temperature_max_k": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Maximum operating temperature in Kelvin. Output-driving per §10.4."
+    },
+    "nominal_specific_energy_j_per_kg": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Nominal specific thermal energy capacity [J/kg]. Output-driving per §10.4. Constraint: > 0 per §10.3."
+    },
+    "nominal_density_kg_per_m3": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Nominal bulk density [kg/m³]. Output-driving per §10.4. Constraint: > 0 per §10.3."
+    },
+    "nominal_thermal_buffer_fraction": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Fraction of total stored energy available for buffering transfer [dimensionless, 0–1]. Output-driving per §10.4. Constraint: 0 <= value <= 1 per §10.3."
+    },
+    "compatible_absorber_classes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Absorber class IDs this mediator is compatible with per spec §10.1."
+    },
+    "compatible_emitter_classes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Emitter class IDs this mediator is compatible with per spec §10.1."
+    },
+    "contamination_sensitivity": {
+      "type": "string",
+      "description": "Qualitative contamination sensitivity. Metadata-only per §10.4."
+    },
+    "corrosion_sensitivity": {
+      "type": "string",
+      "description": "Qualitative corrosion sensitivity. Metadata-only per §10.4."
+    },
+    "cycling_risk": {
+      "type": "string",
+      "description": "Qualitative thermal cycling risk. Metadata-only per §10.4."
+    },
+    "provenance_class": {
+      "type": "string",
+      "enum": ["measured", "literature_derived", "analog_estimated", "placeholder", "hypothesis_only"],
+      "description": "Evidence provenance class per spec §12.1."
+    },
+    "maturity_class": {
+      "type": "string",
+      "enum": ["concept_only", "bench_evidence", "modeled_only", "heritage_analog", "qualified_estimate", "custom"],
+      "description": "Technology maturity class per spec §12.2."
+    },
+    "confidence_class": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "unknown"],
+      "description": "Confidence class per spec §12.3."
+    },
+    "output_effect_class": {
+      "type": "string",
+      "enum": ["output_driving", "metadata_only", "warning_only"],
+      "description": "Declared output effect of this catalog entry per spec §12.4."
+    },
+    "default_enabled_for_exploration": {
+      "type": "boolean",
+      "description": "Whether this entry is pre-selected for exploratory comparison by default."
+    },
+    "notes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Operator-visible notes. Metadata-only per §10.4."
+    },
+    "research_required": {
+      "type": "boolean",
+      "description": "True if provenance_class is placeholder or hypothesis_only per spec §12.5."
+    }
+  }
+}

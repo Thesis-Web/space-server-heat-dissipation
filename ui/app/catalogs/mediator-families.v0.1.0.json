@@ -1,0 +1,110 @@
+{
+  "catalog_id": "mediator-families",
+  "catalog_version": "v0.1.0",
+  "schema_ref": "mediator-family.schema.json",
+  "spec_ref": "model-extension-2-spec-v0.2.1-§10-§17.5",
+  "description": "Conservative generic mediator family starter entries for Extension 2 exploratory mode. All specific energy and density values are conservative generic estimates for trade space exploration only. Do not treat as measured or flight-qualified material properties.",
+  "entries": [
+    {
+      "mediator_family_id": "pcm_eutectic_generic",
+      "label": "PCM Eutectic Store (Generic)",
+      "mediator_class": "pcm_eutectic_store",
+      "phase_behavior_class": "solid_liquid_pcm",
+      "temperature_min_k": 600,
+      "temperature_nominal_k": 800,
+      "temperature_max_k": 1050,
+      "nominal_specific_energy_j_per_kg": 200000,
+      "nominal_density_kg_per_m3": 2800,
+      "nominal_thermal_buffer_fraction": 0.70,
+      "compatible_absorber_classes": [
+        "broadband_mid_ir_absorber",
+        "ceramic_selective_absorber",
+        "refractory_receiver_surface"
+      ],
+      "compatible_emitter_classes": [
+        "broadband_radiator",
+        "selective_emitter"
+      ],
+      "contamination_sensitivity": "high",
+      "corrosion_sensitivity": "high",
+      "cycling_risk": "moderate",
+      "provenance_class": "literature_derived",
+      "maturity_class": "bench_evidence",
+      "confidence_class": "low",
+      "output_effect_class": "output_driving",
+      "default_enabled_for_exploration": true,
+      "notes": [
+        "Represents a high-temperature eutectic PCM class (e.g. fluoride salt eutectics or metal alloy eutectics). Specific energy 200 kJ/kg is conservative for this temperature range; some fluoride eutectics exceed 500 kJ/kg latent heat.",
+        "Contamination and corrosion sensitivity is high because eutectic salts are corrosive to most structural metals at temperature. Compatible container materials (refractory metals, coated graphite) add mass and complexity.",
+        "Cycling risk is moderate: thermal cycling can cause volume change, phase segregation, or container fatigue. These risks must be addressed in detailed design. Not suitable for uncontrolled use without materials engineering review."
+      ],
+      "research_required": true
+    },
+    {
+      "mediator_family_id": "sensible_refractory_store_generic",
+      "label": "Sensible Refractory Store (Generic)",
+      "mediator_class": "sensible_refractory_store",
+      "phase_behavior_class": "sensible_solid",
+      "temperature_min_k": 400,
+      "temperature_nominal_k": 900,
+      "temperature_max_k": 1400,
+      "nominal_specific_energy_j_per_kg": 900,
+      "nominal_density_kg_per_m3": 3200,
+      "nominal_thermal_buffer_fraction": 0.55,
+      "compatible_absorber_classes": [
+        "ceramic_selective_absorber",
+        "refractory_receiver_surface"
+      ],
+      "compatible_emitter_classes": [
+        "broadband_radiator",
+        "selective_emitter"
+      ],
+      "contamination_sensitivity": "low",
+      "corrosion_sensitivity": "low",
+      "cycling_risk": "low",
+      "provenance_class": "literature_derived",
+      "maturity_class": "heritage_analog",
+      "confidence_class": "medium",
+      "output_effect_class": "output_driving",
+      "default_enabled_for_exploration": false,
+      "notes": [
+        "Represents dense refractory ceramics (alumina, magnesia, silicon carbide composites) used as sensible heat stores. Specific energy 900 J/(kg·K) is representative of SiC class ceramics for sensible storage; actual value is temperature-averaged Cp over the operating range.",
+        "Sensible storage is lower energy density than PCM at similar mass but offers better thermal and mechanical stability, simpler containment, and lower cycling risk. Heritage in high-temperature industrial regenerators."
+      ],
+      "research_required": false
+    },
+    {
+      "mediator_family_id": "liquid_metal_exchange_candidate_generic",
+      "label": "Liquid Metal Exchange Candidate (Generic)",
+      "mediator_class": "liquid_metal_exchange_candidate",
+      "phase_behavior_class": "liquid_metal_loop",
+      "temperature_min_k": 500,
+      "temperature_nominal_k": 850,
+      "temperature_max_k": 1300,
+      "nominal_specific_energy_j_per_kg": 180,
+      "nominal_density_kg_per_m3": 7500,
+      "nominal_thermal_buffer_fraction": 0.40,
+      "compatible_absorber_classes": [
+        "ceramic_selective_absorber",
+        "refractory_receiver_surface"
+      ],
+      "compatible_emitter_classes": [
+        "broadband_radiator",
+        "selective_emitter"
+      ],
+      "contamination_sensitivity": "moderate",
+      "corrosion_sensitivity": "high",
+      "cycling_risk": "low",
+      "provenance_class": "literature_derived",
+      "maturity_class": "heritage_analog",
+      "confidence_class": "medium",
+      "output_effect_class": "output_driving",
+      "default_enabled_for_exploration": false,
+      "notes": [
+        "Represents liquid metal heat transfer candidates (e.g. NaK, lead-bismuth eutectic, or alkali metals). Specific heat capacity 180 J/(kg·K) is representative of NaK-78 class. High density (7500 kg/m³) means mass-efficiency for storage is lower than ceramics or PCMs per volume, but thermal conductivity is very high.",
+        "Corrosion sensitivity is high: alkali metals and lead-bismuth attack most standard structural alloys. Specialized refractory metal or coated container required. Heritage exists in nuclear and concentrated solar applications but not in space thermal management at these scales."
+      ],
+      "research_required": true
+    }
+  ]
+}

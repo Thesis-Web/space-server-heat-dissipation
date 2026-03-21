@@ -1,0 +1,131 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://space-server-heat-dissipation/schemas/catalogs/emitter-family-catalog.schema.json",
+  "schema_id": "emitter-family-catalog",
+  "schema_version": "v0.1.0",
+  "title": "EmitterFamilyCatalog",
+  "type": "object",
+  "required": [
+    "catalog_id",
+    "catalog_version",
+    "entries"
+  ],
+  "properties": {
+    "catalog_id": {
+      "type": "string"
+    },
+    "catalog_version": {
+      "type": "string"
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "emitter_family_id",
+          "label",
+          "emitter_class",
+          "wavelength_band_min_um",
+          "wavelength_band_nominal_um",
+          "wavelength_band_max_um",
+          "nominal_emissivity",
+          "nominal_selectivity_fraction",
+          "temperature_min_k",
+          "temperature_nominal_k",
+          "temperature_max_k",
+          "tpv_compatibility_class",
+          "provenance_class",
+          "maturity_class",
+          "confidence_class",
+          "output_effect_class",
+          "default_enabled_for_exploration",
+          "notes",
+          "research_required"
+        ],
+        "properties": {
+          "emitter_family_id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "emitter_class": {
+            "type": "string"
+          },
+          "wavelength_band_min_um": {
+            "type": "number",
+            "minimum": 0
+          },
+          "wavelength_band_nominal_um": {
+            "type": "number",
+            "minimum": 0
+          },
+          "wavelength_band_max_um": {
+            "type": "number",
+            "minimum": 0
+          },
+          "nominal_emissivity": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "nominal_selectivity_fraction": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "temperature_min_k": {
+            "type": "number",
+            "minimum": 0
+          },
+          "temperature_nominal_k": {
+            "type": "number",
+            "minimum": 0
+          },
+          "temperature_max_k": {
+            "type": "number",
+            "minimum": 0
+          },
+          "tpv_compatibility_class": {
+            "type": "string"
+          },
+          "provenance_class": {
+            "type": "string"
+          },
+          "maturity_class": {
+            "type": "string"
+          },
+          "confidence_class": {
+            "type": "string"
+          },
+          "output_effect_class": {
+            "type": "string"
+          },
+          "default_enabled_for_exploration": {
+            "type": "boolean"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "research_required": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "schema_ref": {
+      "type": "string"
+    },
+    "spec_ref": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

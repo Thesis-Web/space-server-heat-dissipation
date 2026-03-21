@@ -1,0 +1,99 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://space-server-heat-dissipation/schemas/catalogs/cavity-geometry-catalog.schema.json",
+  "schema_id": "cavity-geometry-catalog",
+  "schema_version": "v0.1.0",
+  "title": "CavityGeometryCatalog",
+  "type": "object",
+  "required": [
+    "catalog_id",
+    "catalog_version",
+    "entries"
+  ],
+  "properties": {
+    "catalog_id": {
+      "type": "string"
+    },
+    "catalog_version": {
+      "type": "string"
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "cavity_geometry_id",
+          "label",
+          "geometry_class",
+          "optical_access_factor",
+          "surface_area_multiplier",
+          "coupling_uniformity_class",
+          "nominal_view_factor",
+          "nominal_path_length_factor",
+          "manufacturability_class",
+          "output_effect_class",
+          "notes",
+          "research_required"
+        ],
+        "properties": {
+          "cavity_geometry_id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "geometry_class": {
+            "type": "string"
+          },
+          "optical_access_factor": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "surface_area_multiplier": {
+            "type": "number",
+            "minimum": 0
+          },
+          "coupling_uniformity_class": {
+            "type": "string"
+          },
+          "nominal_view_factor": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "nominal_path_length_factor": {
+            "type": "number",
+            "minimum": 0
+          },
+          "manufacturability_class": {
+            "type": "string"
+          },
+          "output_effect_class": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "research_required": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "schema_ref": {
+      "type": "string"
+    },
+    "spec_ref": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,130 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "schema_id": "emitter-family",
+  "schema_version": "v0.2.1",
+  "title": "EmitterFamily",
+  "description": "Catalog entry describing wavelength band, emissivity, selectivity, temperature range, and evidence state of a reject or conversion-coupled emitter concept. Governed by model-extension-2-spec-v0.2.1 §8. Output-driving fields: wavelength_band_*, nominal_emissivity, nominal_selectivity_fraction, temperature_*. Metadata-only fields: tpv_compatibility_class, notes[].",
+  "type": "object",
+  "required": [
+    "emitter_family_id",
+    "label",
+    "emitter_class",
+    "wavelength_band_min_um",
+    "wavelength_band_nominal_um",
+    "wavelength_band_max_um",
+    "nominal_emissivity",
+    "nominal_selectivity_fraction",
+    "temperature_min_k",
+    "temperature_nominal_k",
+    "temperature_max_k",
+    "tpv_compatibility_class",
+    "provenance_class",
+    "maturity_class",
+    "confidence_class",
+    "output_effect_class",
+    "default_enabled_for_exploration",
+    "notes",
+    "research_required"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "emitter_family_id": {
+      "type": "string",
+      "description": "Stable catalog identifier."
+    },
+    "label": {
+      "type": "string",
+      "description": "Human-readable display name."
+    },
+    "emitter_class": {
+      "type": "string",
+      "enum": [
+        "broadband_radiator",
+        "selective_emitter",
+        "variable_emissivity_surface",
+        "tpv_coupled_emitter_candidate",
+        "custom"
+      ],
+      "description": "Emitter class per spec §8.2."
+    },
+    "wavelength_band_min_um": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Lower bound of emitter active wavelength band in micrometers. Output-driving per §8.4."
+    },
+    "wavelength_band_nominal_um": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Nominal center wavelength in micrometers. Output-driving per §8.4."
+    },
+    "wavelength_band_max_um": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Upper bound of emitter active wavelength band in micrometers. Output-driving per §8.4."
+    },
+    "nominal_emissivity": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Nominal emissivity [dimensionless, 0–1]. Output-driving per §8.4. Constraint: 0 <= value <= 1 per §8.3."
+    },
+    "nominal_selectivity_fraction": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Nominal fraction of emission concentrated in target band [dimensionless, 0–1]. Output-driving per §8.4. Constraint: 0 <= value <= 1 per §8.3."
+    },
+    "temperature_min_k": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Minimum operating temperature in Kelvin. Output-driving per §8.4. Constraint: min < nominal < max per §8.3."
+    },
+    "temperature_nominal_k": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Nominal operating temperature in Kelvin. Output-driving per §8.4."
+    },
+    "temperature_max_k": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Maximum operating temperature in Kelvin. Output-driving per §8.4."
+    },
+    "tpv_compatibility_class": {
+      "type": "string",
+      "description": "TPV cell compatibility class descriptor. Metadata-only per §8.4."
+    },
+    "provenance_class": {
+      "type": "string",
+      "enum": ["measured", "literature_derived", "analog_estimated", "placeholder", "hypothesis_only"],
+      "description": "Evidence provenance class per spec §12.1."
+    },
+    "maturity_class": {
+      "type": "string",
+      "enum": ["concept_only", "bench_evidence", "modeled_only", "heritage_analog", "qualified_estimate", "custom"],
+      "description": "Technology maturity class per spec §12.2."
+    },
+    "confidence_class": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "unknown"],
+      "description": "Confidence class per spec §12.3."
+    },
+    "output_effect_class": {
+      "type": "string",
+      "enum": ["output_driving", "metadata_only", "warning_only"],
+      "description": "Declared output effect of this catalog entry per spec §12.4."
+    },
+    "default_enabled_for_exploration": {
+      "type": "boolean",
+      "description": "Whether this entry is pre-selected for exploratory comparison by default."
+    },
+    "notes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Operator-visible notes. Metadata-only per §8.4."
+    },
+    "research_required": {
+      "type": "boolean",
+      "description": "True if provenance_class is placeholder or hypothesis_only per spec §12.5."
+    }
+  }
+}

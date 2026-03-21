@@ -1,0 +1,146 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "schema_id": "absorber-family",
+  "schema_version": "v0.2.1",
+  "title": "AbsorberFamily",
+  "description": "Catalog entry describing wavelength band, absorptivity, temperature range, and evidence state of an absorber surface or receiver concept. Governed by model-extension-2-spec-v0.2.1 §7. Output-driving fields: wavelength_band_*, nominal_absorptivity, temperature_*. Metadata-only fields: contamination_sensitivity, corrosion_sensitivity, radiation_sensitivity, surface_state_class, notes[].",
+  "type": "object",
+  "required": [
+    "absorber_family_id",
+    "label",
+    "absorber_class",
+    "wavelength_band_min_um",
+    "wavelength_band_nominal_um",
+    "wavelength_band_max_um",
+    "nominal_absorptivity",
+    "nominal_emissivity",
+    "temperature_min_k",
+    "temperature_nominal_k",
+    "temperature_max_k",
+    "contamination_sensitivity",
+    "corrosion_sensitivity",
+    "radiation_sensitivity",
+    "surface_state_class",
+    "provenance_class",
+    "maturity_class",
+    "confidence_class",
+    "output_effect_class",
+    "default_enabled_for_exploration",
+    "notes",
+    "research_required"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "absorber_family_id": {
+      "type": "string",
+      "description": "Stable catalog identifier."
+    },
+    "label": {
+      "type": "string",
+      "description": "Human-readable display name."
+    },
+    "absorber_class": {
+      "type": "string",
+      "enum": [
+        "broadband_mid_ir_absorber",
+        "narrowband_mid_ir_absorber",
+        "metamaterial_candidate",
+        "ceramic_selective_absorber",
+        "refractory_receiver_surface",
+        "custom"
+      ],
+      "description": "Absorber class per spec §7.2."
+    },
+    "wavelength_band_min_um": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Lower bound of absorber active wavelength band in micrometers. Output-driving per §7.4. Constraint: 0 < min <= nominal per §7.3."
+    },
+    "wavelength_band_nominal_um": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Nominal center wavelength in micrometers. Output-driving per §7.4."
+    },
+    "wavelength_band_max_um": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Upper bound of absorber active wavelength band in micrometers. Output-driving per §7.4. Constraint: nominal <= max per §7.3."
+    },
+    "nominal_absorptivity": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Nominal in-band absorptivity [dimensionless, 0–1]. Output-driving per §7.4."
+    },
+    "nominal_emissivity": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Nominal out-of-band emissivity [dimensionless, 0–1]. Per §7.1."
+    },
+    "temperature_min_k": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Minimum operating temperature in Kelvin. Output-driving per §7.4. Constraint: min < nominal < max per §7.3."
+    },
+    "temperature_nominal_k": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Nominal operating temperature in Kelvin. Output-driving per §7.4."
+    },
+    "temperature_max_k": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Maximum operating temperature in Kelvin. Output-driving per §7.4."
+    },
+    "contamination_sensitivity": {
+      "type": "string",
+      "description": "Qualitative contamination sensitivity class. Metadata-only per §7.4."
+    },
+    "corrosion_sensitivity": {
+      "type": "string",
+      "description": "Qualitative corrosion sensitivity class. Metadata-only per §7.4."
+    },
+    "radiation_sensitivity": {
+      "type": "string",
+      "description": "Qualitative radiation sensitivity class. Metadata-only per §7.4."
+    },
+    "surface_state_class": {
+      "type": "string",
+      "description": "Qualitative surface state descriptor. Metadata-only per §7.4."
+    },
+    "provenance_class": {
+      "type": "string",
+      "enum": ["measured", "literature_derived", "analog_estimated", "placeholder", "hypothesis_only"],
+      "description": "Evidence provenance class per spec §12.1."
+    },
+    "maturity_class": {
+      "type": "string",
+      "enum": ["concept_only", "bench_evidence", "modeled_only", "heritage_analog", "qualified_estimate", "custom"],
+      "description": "Technology maturity class per spec §12.2."
+    },
+    "confidence_class": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "unknown"],
+      "description": "Confidence class per spec §12.3."
+    },
+    "output_effect_class": {
+      "type": "string",
+      "enum": ["output_driving", "metadata_only", "warning_only"],
+      "description": "Declared output effect of this catalog entry per spec §12.4."
+    },
+    "default_enabled_for_exploration": {
+      "type": "boolean",
+      "description": "Whether this entry is pre-selected for exploratory comparison by default."
+    },
+    "notes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Operator-visible notes. Metadata-only per §7.4."
+    },
+    "research_required": {
+      "type": "boolean",
+      "description": "True if provenance_class is placeholder or hypothesis_only per spec §12.5."
+    }
+  }
+}

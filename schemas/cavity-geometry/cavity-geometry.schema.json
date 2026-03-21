@@ -1,0 +1,89 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "schema_id": "cavity-geometry",
+  "schema_version": "v0.2.1",
+  "title": "CavityGeometry",
+  "description": "Catalog entry describing optical access, view factor, area multiplier, and coupling class of a receiver or hot-island cavity topology. Governed by model-extension-2-spec-v0.2.1 §9. Output-driving fields: optical_access_factor, surface_area_multiplier, nominal_view_factor, nominal_path_length_factor. Metadata-only fields: coupling_uniformity_class, manufacturability_class, notes[].",
+  "type": "object",
+  "required": [
+    "cavity_geometry_id",
+    "label",
+    "geometry_class",
+    "optical_access_factor",
+    "surface_area_multiplier",
+    "coupling_uniformity_class",
+    "nominal_view_factor",
+    "nominal_path_length_factor",
+    "manufacturability_class",
+    "output_effect_class",
+    "notes",
+    "research_required"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "cavity_geometry_id": {
+      "type": "string",
+      "description": "Stable catalog identifier."
+    },
+    "label": {
+      "type": "string",
+      "description": "Human-readable display name."
+    },
+    "geometry_class": {
+      "type": "string",
+      "enum": [
+        "planar_receiver",
+        "folded_cavity",
+        "microchannel_receiver",
+        "porous_exchange_matrix",
+        "annular_hot_island_receiver",
+        "custom"
+      ],
+      "description": "Cavity geometry class per spec §9.2."
+    },
+    "optical_access_factor": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Fraction of source flux geometrically accessible to receiver [dimensionless, 0–1]. Output-driving per §9.4. Constraint: 0 <= value <= 1 per §9.3."
+    },
+    "surface_area_multiplier": {
+      "type": "number",
+      "minimum": 1,
+      "description": "Effective surface area relative to projected aperture [dimensionless, >= 1]. Output-driving per §9.4. Constraint: >= 1 per §9.3."
+    },
+    "coupling_uniformity_class": {
+      "type": "string",
+      "description": "Qualitative descriptor of coupling uniformity across receiver surface. Metadata-only per §9.4."
+    },
+    "nominal_view_factor": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 1,
+      "description": "Nominal radiative view factor from source to absorber [dimensionless, 0 < value <= 1]. Output-driving per §9.4. Constraint: 0 < value <= 1 per §9.3."
+    },
+    "nominal_path_length_factor": {
+      "type": "number",
+      "minimum": 1,
+      "description": "Normalized optical path length relative to direct path [dimensionless, >= 1]. Output-driving per §9.4. Constraint: >= 1 per §9.3."
+    },
+    "manufacturability_class": {
+      "type": "string",
+      "description": "Qualitative manufacturability class descriptor. Metadata-only per §9.4."
+    },
+    "output_effect_class": {
+      "type": "string",
+      "enum": ["output_driving", "metadata_only", "warning_only"],
+      "description": "Declared output effect of this catalog entry per spec §12.4."
+    },
+    "notes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Operator-visible notes. Metadata-only per §9.4."
+    },
+    "research_required": {
+      "type": "boolean",
+      "description": "True if any output-driving coefficient is placeholder or hypothesis_only per spec §12.5."
+    }
+  }
+}

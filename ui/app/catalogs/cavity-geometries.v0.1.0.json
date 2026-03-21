@@ -1,0 +1,60 @@
+{
+  "catalog_id": "cavity-geometries",
+  "catalog_version": "v0.1.0",
+  "schema_ref": "cavity-geometry.schema.json",
+  "spec_ref": "model-extension-2-spec-v0.2.1-§9-§17.4",
+  "description": "Conservative generic cavity geometry starter entries for Extension 2 exploratory mode. All entries are generic. Coupling scores are conservative estimates for trade exploration only.",
+  "entries": [
+    {
+      "cavity_geometry_id": "planar_receiver_generic",
+      "label": "Planar Receiver (Generic)",
+      "geometry_class": "planar_receiver",
+      "optical_access_factor": 0.70,
+      "surface_area_multiplier": 1.0,
+      "coupling_uniformity_class": "uniform",
+      "nominal_view_factor": 0.60,
+      "nominal_path_length_factor": 1.0,
+      "manufacturability_class": "high",
+      "output_effect_class": "output_driving",
+      "notes": [
+        "A flat planar receiver with direct line-of-sight to source. Simplest geometry. Optical access factor 0.70 accounts for edge effects and mounting losses. View factor 0.60 is conservative for a planar receiver without concentration optics.",
+        "Path length factor = 1.0 for direct path geometry. Use this as baseline geometry comparator."
+      ],
+      "research_required": false
+    },
+    {
+      "cavity_geometry_id": "folded_cavity_generic",
+      "label": "Folded Cavity (Generic)",
+      "geometry_class": "folded_cavity",
+      "optical_access_factor": 0.55,
+      "surface_area_multiplier": 2.5,
+      "coupling_uniformity_class": "moderate",
+      "nominal_view_factor": 0.80,
+      "nominal_path_length_factor": 2.2,
+      "manufacturability_class": "moderate",
+      "output_effect_class": "output_driving",
+      "notes": [
+        "A folded or reentrant cavity geometry providing enhanced multiple-reflection absorption. Surface area multiplier 2.5 represents internal wall area relative to aperture. View factor improvement over planar reflects cavity trapping effect.",
+        "Path length factor 2.2 accounts for multiple internal reflections. Coupling uniformity is moderate due to reflection path variability. Manufacturing complexity increases relative to planar."
+      ],
+      "research_required": false
+    },
+    {
+      "cavity_geometry_id": "annular_hot_island_receiver_generic",
+      "label": "Annular Hot Island Receiver (Generic)",
+      "geometry_class": "annular_hot_island_receiver",
+      "optical_access_factor": 0.45,
+      "surface_area_multiplier": 4.0,
+      "coupling_uniformity_class": "moderate",
+      "nominal_view_factor": 0.85,
+      "nominal_path_length_factor": 3.5,
+      "manufacturability_class": "low",
+      "output_effect_class": "output_driving",
+      "notes": [
+        "Annular cavity topology where emitter surrounds a central absorber or mediator zone. High surface area multiplier and path length factor reflect enhanced trapping. Represents a hot-island geometry concept for concentrating routed waste heat.",
+        "This geometry is speculative for the waste-heat routing application. Optical access factor 0.45 reflects geometric constraints of annular configuration. Manufacturability rated low due to complexity at relevant temperature ranges. Research required for material compatibility at target temperatures."
+      ],
+      "research_required": true
+    }
+  ]
+}

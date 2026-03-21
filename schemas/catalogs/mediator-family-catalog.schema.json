@@ -1,0 +1,146 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://space-server-heat-dissipation/schemas/catalogs/mediator-family-catalog.schema.json",
+  "schema_id": "mediator-family-catalog",
+  "schema_version": "v0.1.0",
+  "title": "MediatorFamilyCatalog",
+  "type": "object",
+  "required": [
+    "catalog_id",
+    "catalog_version",
+    "entries"
+  ],
+  "properties": {
+    "catalog_id": {
+      "type": "string"
+    },
+    "catalog_version": {
+      "type": "string"
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "mediator_family_id",
+          "label",
+          "mediator_class",
+          "phase_behavior_class",
+          "temperature_min_k",
+          "temperature_nominal_k",
+          "temperature_max_k",
+          "nominal_specific_energy_j_per_kg",
+          "nominal_density_kg_per_m3",
+          "nominal_thermal_buffer_fraction",
+          "compatible_absorber_classes",
+          "compatible_emitter_classes",
+          "contamination_sensitivity",
+          "corrosion_sensitivity",
+          "cycling_risk",
+          "provenance_class",
+          "maturity_class",
+          "confidence_class",
+          "output_effect_class",
+          "default_enabled_for_exploration",
+          "notes",
+          "research_required"
+        ],
+        "properties": {
+          "mediator_family_id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "mediator_class": {
+            "type": "string"
+          },
+          "phase_behavior_class": {
+            "type": "string"
+          },
+          "temperature_min_k": {
+            "type": "number",
+            "minimum": 0
+          },
+          "temperature_nominal_k": {
+            "type": "number",
+            "minimum": 0
+          },
+          "temperature_max_k": {
+            "type": "number",
+            "minimum": 0
+          },
+          "nominal_specific_energy_j_per_kg": {
+            "type": "number",
+            "minimum": 0
+          },
+          "nominal_density_kg_per_m3": {
+            "type": "number",
+            "minimum": 0
+          },
+          "nominal_thermal_buffer_fraction": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "compatible_absorber_classes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "compatible_emitter_classes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "contamination_sensitivity": {
+            "type": "string"
+          },
+          "corrosion_sensitivity": {
+            "type": "string"
+          },
+          "cycling_risk": {
+            "type": "string"
+          },
+          "provenance_class": {
+            "type": "string"
+          },
+          "maturity_class": {
+            "type": "string"
+          },
+          "confidence_class": {
+            "type": "string"
+          },
+          "output_effect_class": {
+            "type": "string"
+          },
+          "default_enabled_for_exploration": {
+            "type": "boolean"
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "research_required": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "schema_ref": {
+      "type": "string"
+    },
+    "spec_ref": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

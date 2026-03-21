@@ -1,0 +1,114 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://space-server-heat-dissipation/schemas/catalogs/source-spectral-profile-catalog.schema.json",
+  "schema_id": "source-spectral-profile-catalog",
+  "schema_version": "v0.1.0",
+  "title": "SourceSpectralProfileCatalog",
+  "type": "object",
+  "required": [
+    "catalog_id",
+    "catalog_version",
+    "entries"
+  ],
+  "properties": {
+    "catalog_id": {
+      "type": "string"
+    },
+    "catalog_version": {
+      "type": "string"
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "profile_id",
+          "label",
+          "profile_class",
+          "source_type",
+          "temperature_basis_min_k",
+          "temperature_basis_nominal_k",
+          "temperature_basis_max_k",
+          "wavelength_band_min_um",
+          "wavelength_band_peak_um",
+          "wavelength_band_max_um",
+          "emissivity_basis",
+          "provenance_class",
+          "maturity_class",
+          "confidence_class",
+          "source_note",
+          "research_required"
+        ],
+        "properties": {
+          "profile_id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "profile_class": {
+            "type": "string"
+          },
+          "source_type": {
+            "type": "string"
+          },
+          "temperature_basis_min_k": {
+            "type": "number",
+            "minimum": 0
+          },
+          "temperature_basis_nominal_k": {
+            "type": "number",
+            "minimum": 0
+          },
+          "temperature_basis_max_k": {
+            "type": "number",
+            "minimum": 0
+          },
+          "wavelength_band_min_um": {
+            "type": "number",
+            "minimum": 0
+          },
+          "wavelength_band_peak_um": {
+            "type": "number",
+            "minimum": 0
+          },
+          "wavelength_band_max_um": {
+            "type": "number",
+            "minimum": 0
+          },
+          "emissivity_basis": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "provenance_class": {
+            "type": "string"
+          },
+          "maturity_class": {
+            "type": "string"
+          },
+          "confidence_class": {
+            "type": "string"
+          },
+          "source_note": {
+            "type": "string"
+          },
+          "research_required": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "schema_ref": {
+      "type": "string"
+    },
+    "spec_ref": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

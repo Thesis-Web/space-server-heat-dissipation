@@ -1,0 +1,171 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://space-server-heat-dissipation/schemas/catalogs/research-evidence-class-catalog.schema.json",
+  "schema_id": "research-evidence-class-catalog",
+  "schema_version": "v0.1.0",
+  "title": "ResearchEvidenceClassCatalog",
+  "type": "object",
+  "required": [
+    "catalog_id",
+    "catalog_version",
+    "provenance_class",
+    "maturity_class",
+    "confidence_class",
+    "output_effect_class"
+  ],
+  "properties": {
+    "catalog_id": {
+      "type": "string"
+    },
+    "catalog_version": {
+      "type": "string"
+    },
+    "schema_ref": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "provenance_class": {
+      "type": "object",
+      "required": [
+        "values"
+      ],
+      "properties": {
+        "_spec_ref": {
+          "type": "string"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "label",
+              "description"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "maturity_class": {
+      "type": "object",
+      "required": [
+        "values"
+      ],
+      "properties": {
+        "_spec_ref": {
+          "type": "string"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "label",
+              "description"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "confidence_class": {
+      "type": "object",
+      "required": [
+        "values"
+      ],
+      "properties": {
+        "_spec_ref": {
+          "type": "string"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "label",
+              "description"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "output_effect_class": {
+      "type": "object",
+      "required": [
+        "values"
+      ],
+      "properties": {
+        "_spec_ref": {
+          "type": "string"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "label",
+              "description"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
