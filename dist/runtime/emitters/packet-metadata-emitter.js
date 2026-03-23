@@ -12,6 +12,7 @@ exports.utf8ByteLength = utf8ByteLength;
 exports.makeManifestEntry = makeManifestEntry;
 exports.emitPacketMetadata = emitPacketMetadata;
 exports.emitScenarioSummaryMarkdown = emitScenarioSummaryMarkdown;
+exports.buildExtension3APacketMetadata = buildExtension3APacketMetadata;
 /**
  * Compute UTF-8 byte length of a string.
  * Spec §6.4: byte_length is the UTF-8 encoded byte length of the exact serialised file content.
@@ -93,5 +94,48 @@ function emitScenarioSummaryMarkdown(params) {
         `*Runtime authority: ${p.runtime_authority_declaration}. All engineering outputs are derived by the authoritative runtime engine.*`,
     ];
     return lines.join("\n");
+}
+/**
+ * Build 3A addition to packet metadata.
+ * §10.1: topology_report_policy, defaults_audit_version, catalog_versions, generated_artifacts[].
+ * §10.2: any generated report must appear in packet metadata and file manifest.
+ */
+function buildExtension3APacketMetadata(params) {
+    const artifacts = [];
+    if (params.topology_report_content) {
+        artifacts.push({
+            artifact_type: 'topology_report',
+            name: 'extension-3a-topology-report.md',
+            byte_length: Buffer.byteLength(params.topology_report_content, 'utf8'),
+            spec_section: '§14.1',
+        });
+    }
+    if (params.defaults_audit_content) {
+        artifacts.push({
+            artifact_type: 'defaults_audit',
+            name: 'extension-3a-defaults-audit.json',
+            byte_length: Buffer.byteLength(params.defaults_audit_content, 'utf8'),
+            spec_section: '§12.2',
+        });
+    }
+    if (params.convergence_trace_content) {
+        artifacts.push({
+            artifact_type: 'convergence_trace',
+            name: 'extension-3a-convergence-trace.json',
+            byte_length: Buffer.byteLength(params.convergence_trace_content, 'utf8'),
+            spec_section: '§11.4',
+        });
+    }
+    return {
+        enable_model_extension_3a: params.enable_model_extension_3a,
+        model_extension_3a_mode: params.model_extension_3a_mode,
+        topology_report_policy: params.topology_report_policy ?? 'always',
+        defaults_audit_version: params.defaults_audit_version ?? null,
+        extension_3a_catalog_versions: {
+            working_fluids: params.working_fluids_catalog_version ?? null,
+            pickup_geometries: params.pickup_geometries_catalog_version ?? null,
+        },
+        generated_artifacts_3a: artifacts,
+    };
 }
 //# sourceMappingURL=packet-metadata-emitter.js.map

@@ -10,6 +10,7 @@ import { aggregateScenario, type ScenarioAggregationInput } from "../transforms/
 import { radiatorEffectiveArea, type RadiatorSizingInput } from "../formulas/radiation";
 import { type ValidationResult } from "../validators/bounds";
 import { RUNTIME_VERSIONS } from "../constants/constants";
+import { type Extension3AInput, type Extension3AResult } from "./run-extension-3a";
 export interface BranchInput {
     branch_id: string;
     mode_label: string;
@@ -33,6 +34,7 @@ export interface RunPacketInput {
     has_speculative_material: boolean;
     has_solar_polish_without_source: boolean;
     has_per_subsystem_duty_simplification: boolean;
+    extension_3a_input?: Extension3AInput;
 }
 export interface RunPacketOutput {
     packet_id: string;
@@ -48,6 +50,7 @@ export interface RunPacketOutput {
     transform_trace: string[];
     runtime_authority_declaration: "runtime";
     versions: typeof RUNTIME_VERSIONS;
+    extension_3a_result?: Extension3AResult;
 }
 /**
  * Execute a run packet through all runtime steps per spec §27.

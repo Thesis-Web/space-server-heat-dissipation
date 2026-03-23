@@ -12,6 +12,8 @@ import { radiatorEffectiveArea, type RadiatorSizingInput } from "../formulas/rad
 import { validatePacketForExport, type ValidationResult } from "../validators/bounds";
 import { validatePowerCycleEfficiency, validateHeatLiftCop, checkNoSilentUplift } from "../formulas/power-cycle";
 import { RUNTIME_VERSIONS } from "../constants/constants";
+// ── Extension 3A dispatch — additive per spec §14.1, DIFF-3A-EXT2-COHABIT-001 ─
+import { runExtension3A, type Extension3AInput, type Extension3AResult } from "./run-extension-3a";
 
 export interface BranchInput {
   branch_id: string;
@@ -37,6 +39,10 @@ export interface RunPacketInput {
   has_speculative_material: boolean;
   has_solar_polish_without_source: boolean;
   has_per_subsystem_duty_simplification: boolean;
+  // ── Extension 3A — additive optional dispatch input, spec §14.1 ──────────
+  // Present only when enable_model_extension_3a=true on the scenario.
+  // If absent the 3A runner is not called and baseline path is unchanged.
+  extension_3a_input?: Extension3AInput;
 }
 
 export interface RunPacketOutput {
@@ -49,6 +55,9 @@ export interface RunPacketOutput {
   transform_trace: string[];
   runtime_authority_declaration: "runtime";
   versions: typeof RUNTIME_VERSIONS;
+  // ── Extension 3A result — additive optional, spec §14.1 ─────────────────
+  // Present only when extension_3a_input was supplied and runExtension3A ran.
+  extension_3a_result?: Extension3AResult;
 }
 
 /**
@@ -134,6 +143,21 @@ export function executeRunPacket(input: RunPacketInput): RunPacketOutput {
 
   transform_trace.push(`validation: blocking=${validation.blocking.length} warnings=${validation.warnings.length}`);
 
+  // ── Extension 3A dispatch — spec §14.1, DIFF-3A-EXT2-COHABIT-001 ─────────
+  // Purely additive. Extension-2 path above is untouched.
+  // Runs only when caller supplies extension_3a_input (i.e. scenario has
+  // enable_model_extension_3a=true). Result attaches as extension_3a_result.
+  let extension_3a_result: Extension3AResult | undefined;
+  if (input.extension_3a_input !== undefined) {
+    extension_3a_result = runExtension3A(input.extension_3a_input);
+    transform_trace.push(
+      `extension-3a: enabled=${extension_3a_result.extension_3a_enabled}` +
+      ` topology_valid=${extension_3a_result.topology_valid}` +
+      ` convergence_status=${extension_3a_result.convergence_status}` +
+      ` blocking_errors=${extension_3a_result.blocking_errors.length}`
+    );
+  }
+
   return {
     packet_id: input.packet_id,
     scenario_id: input.scenario_id,
@@ -144,5 +168,6 @@ export function executeRunPacket(input: RunPacketInput): RunPacketOutput {
     transform_trace,
     runtime_authority_declaration: "runtime",
     versions: RUNTIME_VERSIONS,
+    ...(extension_3a_result !== undefined ? { extension_3a_result } : {}),
   };
 }

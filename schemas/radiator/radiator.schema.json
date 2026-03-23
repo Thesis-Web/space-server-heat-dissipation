@@ -1,9 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "schema_id": "radiator",
-  "schema_version": "v0.1.0",
+  "schema_version": "v0.2.0",
   "title": "Radiator",
-  "description": "Radiator configuration. Area computed or validated per §22.2 and §12.2. Margin per §32.3. UI-expansion additive fields per ui-expansion-spec-v0.1.5.",
+  "description": "Radiator configuration. v0.2.0 adds Extension 3A geometry_mode, BOL/EOL emissivity, cavity emissivity, and background_sink_temp_k_override fields per 3A-spec §9. Baseline fields preserved. Area computed per §22.2, §12.2. Margin per §32.3.",
   "type": "object",
   "required": [
     "radiator_id",
@@ -18,15 +18,20 @@
   ],
   "additionalProperties": false,
   "properties": {
-    "radiator_id": { "type": "string" },
-    "schema_version": { "type": "string", "pattern": "^v\\d+\\.\\d+\\.\\d+$" },
-    "target_surface_temp_k": { "type": "number", "exclusiveMinimum": 0 },
-    "emissivity": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+    "radiator_id":            { "type": "string" },
+    "schema_version":         { "type": "string", "pattern": "^v\\d+\\.\\d+\\.\\d+$" },
+    "target_surface_temp_k":  { "type": "number", "exclusiveMinimum": 0 },
+    "emissivity": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 1,
+      "description": "Baseline emissivity field (pre-3A). Preserved for backward compat. 3A uses surface_emissivity_bol."
+    },
     "view_factor": {
       "type": "number",
       "exclusiveMinimum": 0,
       "maximum": 1,
-      "description": "Radiator view factor F per §12.2. Carried from BASE v0.1.5; not in ANCHOR v0.1.0."
+      "description": "Radiator view factor F per §12.2. Baseline field. 3A uses face_a_view_factor / face_b_view_factor."
     },
     "effective_area_m2": {
       "type": "number",
@@ -37,55 +42,113 @@
       "type": "number",
       "minimum": 0,
       "default": 0,
-      "description": "T_sink_effective. Defaults to 0 K per §40."
+      "description": "T_sink_effective baseline field. Defaults to 0 K per §40. 3A uses background_sink_temp_k_override and §9.4 priority chain."
     },
-    "material_family": {
-      "type": "string",
-      "description": "e.g. carbon_composite, aluminum_alloy, titanium, custom"
-    },
+    "material_family":        { "type": "string" },
     "geometry_class": {
       "type": "string",
-      "enum": ["fixed_body", "fixed_panel", "deployable_panel", "custom"]
+      "enum": ["fixed_body", "fixed_panel", "deployable_panel", "custom"],
+      "description": "Physical deployment geometry class (baseline). Not to be confused with 3A geometry_mode (thermal face configuration)."
     },
     "deployment_class": {
       "type": "string",
       "enum": ["body_mounted", "boom_deployed", "roll_out", "inflatable", "custom"]
     },
-    "packaging_notes": { "type": "string" },
-    "reserve_margin_fraction": {
-      "type": "number",
-      "minimum": 0,
-      "default": 0.15,
-      "description": "Default 0.15 per §40."
-    },
-    "areal_mass_density_kg_per_m2": {
-      "type": "number",
-      "exclusiveMinimum": 0,
-      "description": "For mass estimation."
-    },
-    "material_limit_temp_k": { "type": "number", "exclusiveMinimum": 0 },
-    "label": { "type": "string" },
-    "preset_id": { "type": "string" },
-    "material_family_ref": { "type": "string" },
+    "packaging_notes":             { "type": "string" },
+    "reserve_margin_fraction":     { "type": "number", "minimum": 0, "default": 0.15 },
+    "areal_mass_density_kg_per_m2":{ "type": "number", "exclusiveMinimum": 0 },
+    "material_limit_temp_k":       { "type": "number", "exclusiveMinimum": 0 },
+    "label":                       { "type": "string" },
+    "preset_id":                   { "type": "string" },
+    "material_family_ref":         { "type": "string" },
     "service_domain_type": {
       "type": "string",
-      "enum": [
-        "primary_rejector",
-        "payload_service_domain",
-        "branch_sink_domain",
-        "custom"
-      ]
+      "enum": ["primary_rejector", "payload_service_domain", "branch_sink_domain", "custom"]
     },
     "sourcing_status": {
       "type": "string",
       "enum": ["operator-estimated", "sourced", "inferred", "research-required"]
     },
-    "maturity_class": { "type": "string" },
-    "research_required": { "type": "boolean" },
-    "risk_notes": {
-      "type": "array",
-      "items": { "type": "string" }
+    "maturity_class":              { "type": "string" },
+    "research_required":           { "type": "boolean" },
+    "risk_notes":                  { "type": "array", "items": { "type": "string" } },
+    "notes":                       { "type": "string" },
+
+    "geometry_mode": {
+      "type": "string",
+      "enum": ["single_sided", "double_sided_symmetric", "double_sided_asymmetric"],
+      "default": "single_sided",
+      "description": "3A thermal face geometry mode. §9.1–§9.2. Default: single_sided."
     },
-    "notes": { "type": "string" }
+    "face_a_area_m2": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "3A face A area in m². §9.1. Required when enable_model_extension_3a=true."
+    },
+    "face_b_area_m2": {
+      "type": "number",
+      "minimum": 0,
+      "default": 0,
+      "description": "3A face B area in m². 0 for single_sided. §9.1."
+    },
+    "face_a_view_factor": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 1,
+      "description": "3A face A view factor. §9.1, §9.3."
+    },
+    "face_b_view_factor": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "default": 0,
+      "description": "3A face B view factor. 0 for single_sided. §9.1, §9.3."
+    },
+    "surface_emissivity_bol": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 1,
+      "description": "3A BOL surface emissivity. No silent default. §9.1, §12.2, §13.3."
+    },
+    "surface_emissivity_eol_override": {
+      "type": ["number", "null"],
+      "default": null,
+      "exclusiveMinimum": 0,
+      "maximum": 1,
+      "description": "3A EOL emissivity override. If present, takes priority over degradation calculation. §9.1, §11.7."
+    },
+    "emissivity_degradation_fraction": {
+      "type": ["number", "null"],
+      "default": null,
+      "minimum": 0,
+      "maximum": 1,
+      "description": "3A mission-life emissivity degradation fraction. epsilon_eol = epsilon_bol*(1-f). §9.1, §11.7."
+    },
+    "cavity_emissivity_mode": {
+      "type": "string",
+      "enum": ["disabled", "surface_only", "gray_cavity_approx"],
+      "default": "disabled",
+      "description": "3A cavity emissivity mode. §9.1–§9.2, §11.5–§11.6."
+    },
+    "cavity_view_factor": {
+      "type": ["number", "null"],
+      "default": null,
+      "exclusiveMinimum": 0,
+      "maximum": 1,
+      "description": "3A cavity view factor F_cavity. Required when cavity_emissivity_mode=gray_cavity_approx. §9.1, §9.3."
+    },
+    "cavity_surface_emissivity": {
+      "type": ["number", "null"],
+      "default": null,
+      "exclusiveMinimum": 0,
+      "maximum": 1,
+      "description": "3A cavity surface emissivity. Required when cavity_emissivity_mode=gray_cavity_approx. §9.1, §9.3."
+    },
+    "background_sink_temp_k_override": {
+      "type": ["number", "null"],
+      "default": null,
+      "exclusiveMinimum": 0,
+      "description": "3A per-radiator T_sink override (K). Priority 1 per §9.4 T_sink resolution chain."
+    }
   }
 }

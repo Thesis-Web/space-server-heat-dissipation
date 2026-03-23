@@ -17,11 +17,13 @@
     "sourceMap": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "typeRoots": ["./types", "./node_modules/@types"]
   },
   "include": [
     "runtime/**/*.ts",
-    "tools/**/*.ts"
+    "tools/**/*.ts",
+    "types/**/*.d.ts"
   ],
   "exclude": [
     "node_modules",

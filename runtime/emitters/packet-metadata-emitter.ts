@@ -161,3 +161,83 @@ export function emitScenarioSummaryMarkdown(params: {
   ];
   return lines.join("\n");
 }
+
+// =============================================================================
+// Extension 3A packet metadata additions
+// Governing law: 3A-spec §10.1–§10.2; dist-tree patch §17 (packet-metadata-emitter.ts patch target)
+// =============================================================================
+
+export interface Extension3AGeneratedArtifact {
+  artifact_type: 'topology_report' | 'defaults_audit' | 'convergence_trace';
+  name: string;
+  byte_length: number;
+  spec_section: string;
+}
+
+export interface Extension3APacketMetadataAddition {
+  enable_model_extension_3a: boolean;
+  model_extension_3a_mode: string;
+  topology_report_policy: string;
+  defaults_audit_version: string | null;
+  extension_3a_catalog_versions: {
+    working_fluids: string | null;
+    pickup_geometries: string | null;
+  };
+  generated_artifacts_3a: Extension3AGeneratedArtifact[];
+}
+
+/**
+ * Build 3A addition to packet metadata.
+ * §10.1: topology_report_policy, defaults_audit_version, catalog_versions, generated_artifacts[].
+ * §10.2: any generated report must appear in packet metadata and file manifest.
+ */
+export function buildExtension3APacketMetadata(params: {
+  enable_model_extension_3a: boolean;
+  model_extension_3a_mode: string;
+  topology_report_policy?: string;
+  defaults_audit_version?: string | null;
+  working_fluids_catalog_version?: string | null;
+  pickup_geometries_catalog_version?: string | null;
+  topology_report_content?: string | null;
+  defaults_audit_content?: string | null;
+  convergence_trace_content?: string | null;
+}): Extension3APacketMetadataAddition {
+  const artifacts: Extension3AGeneratedArtifact[] = [];
+
+  if (params.topology_report_content) {
+    artifacts.push({
+      artifact_type: 'topology_report',
+      name: 'extension-3a-topology-report.md',
+      byte_length: Buffer.byteLength(params.topology_report_content, 'utf8'),
+      spec_section: '§14.1',
+    });
+  }
+  if (params.defaults_audit_content) {
+    artifacts.push({
+      artifact_type: 'defaults_audit',
+      name: 'extension-3a-defaults-audit.json',
+      byte_length: Buffer.byteLength(params.defaults_audit_content, 'utf8'),
+      spec_section: '§12.2',
+    });
+  }
+  if (params.convergence_trace_content) {
+    artifacts.push({
+      artifact_type: 'convergence_trace',
+      name: 'extension-3a-convergence-trace.json',
+      byte_length: Buffer.byteLength(params.convergence_trace_content, 'utf8'),
+      spec_section: '§11.4',
+    });
+  }
+
+  return {
+    enable_model_extension_3a: params.enable_model_extension_3a,
+    model_extension_3a_mode: params.model_extension_3a_mode,
+    topology_report_policy: params.topology_report_policy ?? 'always',
+    defaults_audit_version: params.defaults_audit_version ?? null,
+    extension_3a_catalog_versions: {
+      working_fluids: params.working_fluids_catalog_version ?? null,
+      pickup_geometries: params.pickup_geometries_catalog_version ?? null,
+    },
+    generated_artifacts_3a: artifacts,
+  };
+}

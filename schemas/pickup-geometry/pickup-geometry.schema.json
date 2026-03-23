@@ -1,0 +1,85 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "schema_id": "pickup-geometry",
+  "schema_version": "v0.1.0",
+  "title": "PickupGeometry",
+  "description": "Pickup geometry catalog entry. Defines thermal contact configuration between compute package and working fluid loop. Governed by 3A-spec §8. Only nominal_resistance_multiplier is output-driving; all other fields are intrinsic metadata.",
+  "type": "object",
+  "required": [
+    "pickup_geometry_id",
+    "schema_version",
+    "label",
+    "geometry_class",
+    "contact_mode",
+    "nominal_contact_area_fraction",
+    "nominal_spreading_factor",
+    "nominal_resistance_multiplier",
+    "manufacturability_class",
+    "provenance_class",
+    "confidence_class",
+    "research_required",
+    "source_note"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "pickup_geometry_id": {
+      "type": "string",
+      "description": "Canonical pickup geometry ID. Referenced by thermal-zone.pickup_geometry_ref. §8.1."
+    },
+    "schema_version": { "type": "string", "pattern": "^v\\d+\\.\\d+\\.\\d+$" },
+    "label": { "type": "string", "description": "Human-readable label for this geometry entry." },
+
+    "geometry_class": {
+      "type": "string",
+      "enum": [
+        "direct_cold_plate",
+        "dual_sided_package_pickup",
+        "microchannel_plate",
+        "vapor_chamber_interface",
+        "heat_pipe_interface",
+        "immersion_bath_pickup",
+        "custom"
+      ],
+      "description": "Geometry class per 3A-spec §8.2."
+    },
+    "contact_mode": {
+      "type": "string",
+      "description": "Contact interface mode description (e.g. direct_bond, TIM_pad, solder, custom). Informational."
+    },
+    "nominal_contact_area_fraction": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 1,
+      "description": "Nominal fraction of package base area in thermal contact. 0 < value <= 1. §8.3."
+    },
+    "nominal_spreading_factor": {
+      "type": "number",
+      "minimum": 1,
+      "description": "Nominal spreading resistance factor (>= 1). §8.3."
+    },
+    "nominal_resistance_multiplier": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "OUTPUT-DRIVING: multiplied against r_spreader_to_pickup_nominal_k_per_w to obtain r_spreader_to_pickup_effective. §8.3–§8.4."
+    },
+
+    "manufacturability_class": {
+      "type": "string",
+      "enum": ["heritage", "near_term", "developmental", "research_required", "custom"],
+      "description": "Manufacturability assessment. Informational. §8.1."
+    },
+    "provenance_class": {
+      "type": "string",
+      "enum": ["sourced_authoritative", "sourced_secondary", "operator_estimated", "research_required"],
+      "description": "Data provenance class. §8.1."
+    },
+    "confidence_class": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "unknown"],
+      "description": "Confidence class. §8.1."
+    },
+    "research_required": { "type": "boolean" },
+    "source_note":       { "type": "string", "description": "Source citation or provenance note. §8.1." },
+    "notes":             { "type": "string" }
+  }
+}

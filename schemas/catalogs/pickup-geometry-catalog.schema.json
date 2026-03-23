@@ -1,0 +1,107 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://space-server-heat-dissipation/schemas/catalogs/pickup-geometry-catalog.schema.json",
+  "schema_id": "pickup-geometry-catalog",
+  "schema_version": "v0.1.0",
+  "title": "PickupGeometryCatalog",
+  "type": "object",
+  "required": [
+    "catalog_id",
+    "catalog_version",
+    "entries"
+  ],
+  "properties": {
+    "catalog_id": {
+      "type": "string"
+    },
+    "catalog_version": {
+      "type": "string"
+    },
+    "governed_by": {
+      "type": "string"
+    },
+    "authority_note": {
+      "type": "string"
+    },
+    "schema_ref": {
+      "type": "string"
+    },
+    "spec_ref": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "pickup_geometry_id",
+          "schema_version",
+          "label",
+          "geometry_class",
+          "contact_mode",
+          "nominal_contact_area_fraction",
+          "nominal_spreading_factor",
+          "nominal_resistance_multiplier",
+          "manufacturability_class",
+          "provenance_class",
+          "confidence_class",
+          "research_required",
+          "source_note"
+        ],
+        "properties": {
+          "pickup_geometry_id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "geometry_class": {
+            "type": "string"
+          },
+          "contact_mode": {
+            "type": "string"
+          },
+          "nominal_contact_area_fraction": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "nominal_spreading_factor": {
+            "type": "number",
+            "minimum": 0
+          },
+          "nominal_resistance_multiplier": {
+            "type": "number",
+            "minimum": 0
+          },
+          "manufacturability_class": {
+            "type": "string"
+          },
+          "provenance_class": {
+            "type": "string"
+          },
+          "confidence_class": {
+            "type": "string"
+          },
+          "research_required": {
+            "type": "boolean"
+          },
+          "source_note": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

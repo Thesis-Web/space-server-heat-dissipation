@@ -6,12 +6,17 @@
  * Added per HOLE-003: required by §26.3, omitted from §43. §26.3 governs.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.TOPOLOGY_VALIDATION_POLICIES = exports.MODEL_EXTENSION_3A_MODES = void 0;
 exports.validateOrbitClass = validateOrbitClass;
 exports.validateNoModeFusion = validateNoModeFusion;
 exports.validateHeatLiftMode = validateHeatLiftMode;
 exports.validatePowerCycleMode = validatePowerCycleMode;
 exports.checkScavengingSignificance = checkScavengingSignificance;
 exports.modeViolationsToFlags = modeViolationsToFlags;
+exports.validateExtension3AMode = validateExtension3AMode;
+exports.validateTopologyPolicy = validateTopologyPolicy;
+exports.validateExtension3AGate = validateExtension3AGate;
+exports.validateExtension3AOperatingMode = validateExtension3AOperatingMode;
 const flag_emitter_1 = require("../emitters/flag-emitter");
 const constants_1 = require("../constants/constants");
 const heat_pump_1 = require("../formulas/heat-pump");
@@ -129,5 +134,85 @@ function checkScavengingSignificance(branch_id, branch_output_w, q_dot_internal_
  */
 function modeViolationsToFlags(violations) {
     return violations.map((v, i) => (0, flag_emitter_1.makeFlagError)(`operating_mode_violation_${i}`, v.message, 'scenario', v.rule, 0, undefined));
+}
+// =============================================================================
+// Extension 3A — operating mode validation
+// Governing law: 3A-spec §5.1–§5.3; dist-tree patch §5 (operating-mode.ts patch target)
+// =============================================================================
+/**
+ * 3A mode enum values per §5.2.
+ */
+exports.MODEL_EXTENSION_3A_MODES = [
+    'disabled',
+    'topology_only',
+    'foundational_hardening',
+];
+/**
+ * Topology validation policy values per §5.2.
+ */
+exports.TOPOLOGY_VALIDATION_POLICIES = ['blocking', 'warn_only'];
+/**
+ * Validate extension 3A mode field.
+ * Returns violation if mode is not a recognized 3A enum value.
+ * §5.2.
+ */
+function validateExtension3AMode(mode) {
+    if (mode === undefined || mode === null)
+        return [];
+    if (!exports.MODEL_EXTENSION_3A_MODES.includes(mode)) {
+        return [{
+                rule: '3A-spec §5.2',
+                message: `model_extension_3a_mode '${mode}' is not a recognized value. ` +
+                    `Allowed: ${exports.MODEL_EXTENSION_3A_MODES.join(', ')}.`,
+                severity: 'error',
+            }];
+    }
+    return [];
+}
+/**
+ * Validate topology_validation_policy field.
+ * §5.1, §5.2.
+ */
+function validateTopologyPolicy(policy) {
+    if (policy === undefined || policy === null)
+        return [];
+    if (!exports.TOPOLOGY_VALIDATION_POLICIES.includes(policy)) {
+        return [{
+                rule: '3A-spec §5.2',
+                message: `topology_validation_policy '${policy}' is not a recognized value. ` +
+                    `Allowed: ${exports.TOPOLOGY_VALIDATION_POLICIES.join(', ')}.`,
+                severity: 'error',
+            }];
+    }
+    return [];
+}
+/**
+ * Validate Extension 3A gate: if enable_model_extension_3a=false, 3A mode must be disabled.
+ * Backward compat: absent enable flag treated as false per §5.3.
+ * §5.3.
+ */
+function validateExtension3AGate(enable, mode) {
+    const effectiveEnable = enable ?? false;
+    const effectiveMode = mode ?? 'disabled';
+    if (!effectiveEnable && effectiveMode !== 'disabled') {
+        return [{
+                rule: '3A-spec §5.3',
+                message: `enable_model_extension_3a=false but model_extension_3a_mode='${effectiveMode}'. ` +
+                    `Mode must be 'disabled' when the 3A gate is false.`,
+                severity: 'error',
+            }];
+    }
+    return [];
+}
+/**
+ * Full 3A mode validation bundle.
+ * Call with scenario fields to get all mode-level violations.
+ */
+function validateExtension3AOperatingMode(params) {
+    return [
+        ...validateExtension3AMode(params.model_extension_3a_mode),
+        ...validateTopologyPolicy(params.topology_validation_policy),
+        ...validateExtension3AGate(params.enable_model_extension_3a, params.model_extension_3a_mode),
+    ];
 }
 //# sourceMappingURL=operating-mode.js.map

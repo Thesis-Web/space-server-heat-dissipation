@@ -116,3 +116,73 @@ export function validateScenarioBundle(
 export function clearValidatorCache(): void {
   validatorCache.clear();
 }
+
+// =============================================================================
+// Extension 3A schema registration and validation helpers
+// Governing law: 3A-spec §4.1, §10.1; dist-tree patch §4 (schema.ts patch target)
+// =============================================================================
+
+/**
+ * 3A schema IDs that must be resolvable in the schemas/ directory.
+ * These are additive to the baseline schema set.
+ */
+export const EXTENSION_3A_SCHEMA_IDS = [
+  'working-fluid',
+  'pickup-geometry',
+] as const;
+
+/**
+ * Validate a working-fluid catalog entry against the working-fluid schema.
+ * Used by 3A runtime to validate catalog entries before use.
+ * §7.1, §13.2.
+ */
+export function validateWorkingFluidEntry(
+  entry: unknown,
+  entryId?: string
+): ValidationResult {
+  return validateDocument('working-fluid', entry, entryId);
+}
+
+/**
+ * Validate a pickup-geometry catalog entry against the pickup-geometry schema.
+ * §8.1, §13.2.
+ */
+export function validatePickupGeometryEntry(
+  entry: unknown,
+  entryId?: string
+): ValidationResult {
+  return validateDocument('pickup-geometry', entry, entryId);
+}
+
+/**
+ * Validate a 3A-enabled scenario bundle:
+ * scenario + radiator + thermal-zones + working-fluid entries + pickup-geometry entries.
+ * §13 validation contract.
+ * Returns all validation results. Caller checks for any !valid result.
+ */
+export function validateScenarioBundle3A(
+  scenario: unknown,
+  subsystems: Record<string, unknown>,
+  workingFluidEntries: unknown[] = [],
+  pickupGeometryEntries: unknown[] = []
+): ValidationResult[] {
+  const results: ValidationResult[] = [];
+
+  // Baseline scenario + subsystems
+  results.push(validateDocument('scenario', scenario, 'scenario'));
+  for (const [schemaId, doc] of Object.entries(subsystems)) {
+    results.push(validateDocument(schemaId, doc, schemaId));
+  }
+
+  // 3A catalog entries
+  for (let i = 0; i < workingFluidEntries.length; i++) {
+    const entry = workingFluidEntries[i] as Record<string, unknown>;
+    results.push(validateWorkingFluidEntry(entry, String(entry?.working_fluid_id ?? `fluid-${i}`)));
+  }
+  for (let i = 0; i < pickupGeometryEntries.length; i++) {
+    const entry = pickupGeometryEntries[i] as Record<string, unknown>;
+    results.push(validatePickupGeometryEntry(entry, String(entry?.pickup_geometry_id ?? `geom-${i}`)));
+  }
+
+  return results;
+}

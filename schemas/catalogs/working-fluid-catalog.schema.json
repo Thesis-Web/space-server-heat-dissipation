@@ -1,0 +1,133 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://space-server-heat-dissipation/schemas/catalogs/working-fluid-catalog.schema.json",
+  "schema_id": "working-fluid-catalog",
+  "schema_version": "v0.1.0",
+  "title": "WorkingFluidCatalog",
+  "type": "object",
+  "required": [
+    "catalog_id",
+    "catalog_version",
+    "entries"
+  ],
+  "properties": {
+    "catalog_id": {
+      "type": "string"
+    },
+    "catalog_version": {
+      "type": "string"
+    },
+    "governed_by": {
+      "type": "string"
+    },
+    "authority_note": {
+      "type": "string"
+    },
+    "schema_ref": {
+      "type": "string"
+    },
+    "spec_ref": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "working_fluid_id",
+          "schema_version",
+          "label",
+          "fluid_class",
+          "phase_class",
+          "temp_operating_min_k",
+          "temp_operating_max_k",
+          "cp_basis_j_per_kgk",
+          "density_basis_kg_per_m3",
+          "thermal_conductivity_w_per_mk",
+          "viscosity_basis_pa_s",
+          "provenance_class",
+          "confidence_class",
+          "maturity_class",
+          "research_required",
+          "source_note"
+        ],
+        "properties": {
+          "working_fluid_id": {
+            "type": "string"
+          },
+          "schema_version": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "fluid_class": {
+            "type": "string"
+          },
+          "phase_class": {
+            "type": "string"
+          },
+          "temp_operating_min_k": {
+            "type": "number"
+          },
+          "temp_operating_max_k": {
+            "type": "number"
+          },
+          "cp_basis_j_per_kgk": {
+            "type": "number"
+          },
+          "density_basis_kg_per_m3": {
+            "type": "number"
+          },
+          "thermal_conductivity_w_per_mk": {
+            "type": "number"
+          },
+          "viscosity_basis_pa_s": {
+            "type": "number"
+          },
+          "gamma_ratio": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "latent_heat_basis_j_per_kg": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "provenance_class": {
+            "type": "string"
+          },
+          "confidence_class": {
+            "type": "string"
+          },
+          "maturity_class": {
+            "type": "string"
+          },
+          "research_required": {
+            "type": "boolean"
+          },
+          "source_note": {
+            "type": "string"
+          },
+          "pressure_notes": {
+            "type": "string"
+          },
+          "compatibility_notes": {
+            "type": "string"
+          },
+          "hazards": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

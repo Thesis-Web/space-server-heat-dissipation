@@ -45,4 +45,30 @@ export declare function validatePacketVersionDeclarations(packet: {
     engineering_spec_version: string;
     schema_bundle_version: string;
 }): CrossRefViolation[];
+/**
+ * Validate that upstream_zone_ref and downstream_zone_ref on each zone
+ * resolve to declared zone_ids and are not self-referential.
+ * §13.1 blocking rules: unresolved zone refs, self-referential refs.
+ */
+export declare function validateZoneTopologyRefs(zones: Array<{
+    zone_id: string;
+    upstream_zone_ref?: string | null;
+    downstream_zone_ref?: string | null;
+}>): CrossRefViolation[];
+/**
+ * Validate that working_fluid_ref values resolve in the provided catalog id set.
+ * §13.2 blocking rule: unresolved working_fluid_ref.
+ */
+export declare function validateWorkingFluidRefs(zones: Array<{
+    zone_id: string;
+    working_fluid_ref?: string | null;
+}>, availableFluidIds: string[]): CrossRefViolation[];
+/**
+ * Validate that pickup_geometry_ref values resolve in the provided catalog id set.
+ * §13.2 blocking rule: unresolved pickup_geometry_ref.
+ */
+export declare function validatePickupGeometryRefs(zones: Array<{
+    zone_id: string;
+    pickup_geometry_ref?: string | null;
+}>, availableGeomIds: string[]): CrossRefViolation[];
 //# sourceMappingURL=cross-reference.d.ts.map

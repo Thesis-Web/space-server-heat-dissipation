@@ -105,6 +105,13 @@
   .out-concern.concern-block { background: #1a0a0a; border-left-color: var(--error); color: var(--error); }
 </style>
   .ext2-badge { display: inline-block; font-size: 10px; padding: 2px 6px; border-radius: 3px; font-weight: 600; background: #1a1040; color: #a070ff; border: 1px solid #4a20a0; text-transform: uppercase; letter-spacing: .04em; }
+  .ext3a-badge { display: inline-block; font-size: 10px; padding: 2px 6px; border-radius: 3px; font-weight: 600; background: #0a1a10; color: #40c070; border: 1px solid #207040; text-transform: uppercase; letter-spacing: .04em; }
+  .zone-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 10px; }
+  .zone-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-weight: 600; font-size: 13px; }
+  .zone-validity { font-size: 11px; padding: 2px 8px; border-radius: 3px; margin-left: auto; }
+  .zone-validity-ok { background: #0a200f; color: #40c070; border: 1px solid #207040; }
+  .zone-validity-warn { background: #1a1400; color: #d0a030; border: 1px solid #705010; }
+  .zone-validity-block { background: #200a0a; color: #e05050; border: 1px solid #802020; }
   .note.ext2-exploratory { border-left-color: #7a20c0; background: #130a20; }
   .stage-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; }
   .stage-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 12px; font-weight: 600; color: var(--text-dim); }
@@ -251,6 +258,43 @@
         </select>
       </div>
       <div class="note warn-note">⚠ Extension 2 exploratory outputs carry no engineering authority. Research-required flags must be resolved before any commitment to exploratory values.</div>
+    </div>
+  </div>
+
+  <!-- ── Extension 3A — Scenario Enable  spec §5.3, blueprint §11 ── -->
+  <div class="section">
+    <div class="section-title">Model Extension 3A — Thermal Topology Hardening <span class="ext3a-badge">3A</span></div>
+    <div class="note">Enables multi-zone topology, convergence exchange, resistance-chain realism, radiator BOL/EOL lifecycle, and working-fluid / pickup-geometry catalogs. All 3A outputs are runtime-authoritative per spec §3.1.</div>
+    <div class="field-row"><label>Enable Extension 3A</label>
+      <select id="enable_model_extension_3a">
+        <option value="false">Disabled</option>
+        <option value="true">Enabled</option>
+      </select>
+    </div>
+    <div id="ext3a-scenario-fields" style="display:none;">
+      <div class="field-row"><label>3A Mode</label>
+        <select id="model_extension_3a_mode">
+          <option value="topology_only">topology_only — topology validation, no convergence</option>
+          <option value="resistance_chain">resistance_chain — topology + resistance chain</option>
+          <option value="full">full — topology + resistance + convergence + radiator lifecycle</option>
+        </select>
+      </div>
+      <div class="field-row"><label>Convergence Required</label>
+        <select id="convergence_required">
+          <option value="false">No — topology and resistance only</option>
+          <option value="true">Yes — convergence exchange zones declared</option>
+        </select>
+      </div>
+      <div class="field-row"><label>Max Convergence Iterations</label>
+        <input id="max_convergence_iterations" type="number" min="1" max="1000" value="50" />
+      </div>
+      <div class="field-row"><label>Convergence Tolerance (K)</label>
+        <input id="convergence_tolerance_k" type="number" min="0.001" step="0.001" value="0.1" />
+      </div>
+      <div class="field-row"><label>Runaway Multiplier</label>
+        <input id="runaway_multiplier" type="number" min="2" step="0.5" value="10" />
+      </div>
+      <div class="note">Runaway multiplier must be ≥ 2.0 per spec §5.4. Scenario blocks if convergence is declared but does not converge.</div>
     </div>
   </div>
 </div>
@@ -473,6 +517,17 @@
     </div>
   </div>
 
+  <!-- ── Extension 3A — Thermal Zone Blocks  blueprint §11.1 ── -->
+  <div class="section" id="ext3a-thermal-section" style="display:none;">
+    <div class="section-title">Thermal Zone Blocks <span class="ext3a-badge">3A</span></div>
+    <div class="note">Each zone block compiles into a canonical <code>thermal_zones[]</code> entry in the run packet. Zones are directed — declare upstream/downstream refs to form the topology graph. The runtime validates the graph and rejects cycles. Per blueprint §11.1, spec §6.</div>
+    <div id="zone-block-list" class="block-list"></div>
+    <div class="btn-row">
+      <button class="btn btn-secondary btn-sm" id="add-zone-block">+ Add Zone Block</button>
+    </div>
+    <div id="ext3a-topology-status" class="note" style="margin-top:10px;"></div>
+  </div>
+
   <!-- ── Extension 2 — Spectral Stage Blocks  spec §11, §14.3 ── -->
   <div class="section" id="ext2-thermal-section" style="display:none;">
     <div class="section-title">Spectral Stage Blocks <span class="ext2-badge">Exploratory</span></div>
@@ -551,6 +606,58 @@
         <option value="true">Yes — flag for review</option>
       </select>
     </div>
+  </div>
+
+  <!-- ── Extension 3A — Radiator Lifecycle  blueprint §11.3 ── -->
+  <div class="section" id="ext3a-radiator-section" style="display:none;">
+    <div class="section-title">Radiator Lifecycle — 3A Fields <span class="ext3a-badge">3A</span></div>
+    <div class="note">These fields feed the BOL/EOL sizing path in the runtime. All values are serialised into the run packet. Per blueprint §11.3, spec §9, §11.5–§11.9.</div>
+
+    <div class="field-row"><label>Cavity Emissivity Mode</label>
+      <select id="cavity_emissivity_mode">
+        <option value="disabled">disabled — surface emissivity only</option>
+        <option value="surface_only">surface_only — use surface emissivity as-is</option>
+        <option value="gray_cavity_approx">gray_cavity_approx — cavity correction applied</option>
+      </select>
+    </div>
+    <div id="ext3a-cavity-fields" style="display:none;">
+      <div class="field-row"><label>Cavity View Factor (F_cavity)</label>
+        <input id="cavity_view_factor" type="number" min="0.001" max="1.0" step="0.01" value="0.85" />
+      </div>
+    </div>
+
+    <div class="field-row"><label>Geometry Mode</label>
+      <select id="geometry_mode">
+        <option value="single_sided">single_sided — one emitting face</option>
+        <option value="double_sided_symmetric">double_sided_symmetric — equal faces</option>
+        <option value="double_sided_asymmetric">double_sided_asymmetric — different faces</option>
+      </select>
+    </div>
+    <div class="field-row"><label>Face A View Factor</label>
+      <input id="face_a_view_factor" type="number" min="0.001" max="1.0" step="0.01" value="1.0" />
+    </div>
+    <div id="ext3a-face-b-fields" style="display:none;">
+      <div class="field-row"><label>Face B View Factor</label>
+        <input id="face_b_view_factor" type="number" min="0.001" max="1.0" step="0.01" value="1.0" />
+      </div>
+    </div>
+
+    <div class="field-row"><label>BOL Emissivity (ε_BOL)</label>
+      <input id="surface_emissivity_bol" type="number" min="0.001" max="1.0" step="0.01" value="0.90" />
+    </div>
+    <div class="field-row"><label>Emissivity Degradation Fraction</label>
+      <input id="emissivity_degradation_fraction" type="number" min="0" max="0.999" step="0.01" value="0.05" />
+      <span class="note-inline">fraction of BOL ε lost at EOL</span>
+    </div>
+    <div class="field-row"><label>EOL Emissivity Override</label>
+      <input id="surface_emissivity_eol_override" type="number" min="0.001" max="1.0" step="0.01" placeholder="— use degradation fraction —" />
+      <span class="note-inline">overrides degradation fraction if set</span>
+    </div>
+    <div class="field-row"><label>Background Sink Temp Override (K)</label>
+      <input id="background_sink_temp_k_override" type="number" min="0" placeholder="— use scenario environment —" />
+    </div>
+
+    <div id="ext3a-bol-eol-preview" class="note" style="margin-top:8px;"></div>
   </div>
 
   <!-- ── Extension 2 — Radiator & Storage  spec §14.4 ── -->
@@ -676,6 +783,54 @@
   <div class="section" id="output-branches-card" style="display:none;">
     <div class="section-title">Optional Branches</div>
     <div id="out-branches-list" class="note"></div>
+  </div>
+
+  <!-- ── Extension 3A output — blueprint §11.4 ── -->
+  <div class="section" id="ext3a-output-section" style="display:none;">
+    <div class="section-title">Extension 3A — Thermal Topology &amp; Lifecycle Report <span class="ext3a-badge">3A</span></div>
+    <div class="note" style="margin-bottom:12px;">Runtime-authoritative 3A results. All values produced by server-side runtime execution per spec §3.1. Display-only preview computed from packet fields for verification.</div>
+
+    <!-- Topology report — blueprint §11.4 §12.1 -->
+    <div style="margin-bottom:12px;">
+      <div class="section-title" style="font-size:11px;margin-bottom:6px;">Topology Report</div>
+      <div id="ext3a-topology-report" class="note"></div>
+    </div>
+
+    <!-- Convergence report — blueprint §11.4 §12.2 -->
+    <div style="margin-bottom:12px;">
+      <div class="section-title" style="font-size:11px;margin-bottom:6px;">Convergence Report</div>
+      <div id="ext3a-convergence-report" class="note"></div>
+    </div>
+
+    <!-- Resistance-chain summary per zone — blueprint §11.4 -->
+    <div style="margin-bottom:12px;">
+      <div class="section-title" style="font-size:11px;margin-bottom:6px;">Resistance-Chain Summary</div>
+      <div id="ext3a-resistance-report" class="note"></div>
+    </div>
+
+    <!-- BOL/EOL radiator delta summary — blueprint §11.4 -->
+    <div style="margin-bottom:12px;">
+      <div class="section-title" style="font-size:11px;margin-bottom:6px;">BOL / EOL Radiator Delta</div>
+      <div id="ext3a-bol-eol-report" class="note"></div>
+    </div>
+
+    <!-- Radiation-pressure warning summary — blueprint §11.4 -->
+    <div style="margin-bottom:12px;">
+      <div class="section-title" style="font-size:11px;margin-bottom:6px;">Radiation-Pressure Summary <span class="note-inline">flag-only — no propagation engine per spec §3.6</span></div>
+      <div id="ext3a-radpressure-report" class="note"></div>
+    </div>
+
+    <!-- Defaults audit summary — blueprint §11.4 -->
+    <div style="margin-bottom:12px;">
+      <div class="section-title" style="font-size:11px;margin-bottom:6px;">Defaults Applied</div>
+      <div id="ext3a-defaults-report" class="note"></div>
+    </div>
+
+    <!-- Catalog IDs and versions used — blueprint §11.4 -->
+    <div style="margin-bottom:4px;">
+      <div class="section-title" style="font-size:11px;margin-bottom:6px;">Catalog IDs &amp; Versions</div>
+      <div id="ext3a-catalog-report" class="note"></div>
+    </div>
   </div>
 
   <!-- ── Extension 2 exploratory output — spec §14.5 ── -->

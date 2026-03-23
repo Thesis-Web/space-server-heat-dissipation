@@ -83,3 +83,151 @@ export function expandCatalogDefaults(
   }
   return `catalog-default-expansion: ${catalog_id} preset=${preset_id}`;
 }
+
+// =============================================================================
+// Extension 3A catalog resolution — working-fluid and pickup-geometry refs
+// Governing law: 3A-spec §7, §8, §13.2; dist-tree patch §7 (catalog-resolution.ts patch target)
+// =============================================================================
+
+export interface WorkingFluidEntry extends CatalogEntry {
+  working_fluid_id: string;
+  label: string;
+  fluid_class: string;
+  phase_class: string;
+  temp_operating_min_k: number;
+  temp_operating_max_k: number;
+  cp_basis_j_per_kgk: number;
+  density_basis_kg_per_m3: number;
+  thermal_conductivity_w_per_mk: number;
+  viscosity_basis_pa_s: number;
+  gamma_ratio: number | null;
+  latent_heat_basis_j_per_kg: number | null;
+  provenance_class: string;
+  confidence_class: string;
+  maturity_class: string;
+  research_required: boolean;
+  source_note: string;
+}
+
+export interface PickupGeometryEntry extends CatalogEntry {
+  pickup_geometry_id: string;
+  label: string;
+  geometry_class: string;
+  contact_mode: string;
+  nominal_contact_area_fraction: number;
+  nominal_spreading_factor: number;
+  /** OUTPUT-DRIVING: applied as multiplier in resistance chain. §8.4. */
+  nominal_resistance_multiplier: number;
+  manufacturability_class: string;
+  provenance_class: string;
+  confidence_class: string;
+  research_required: boolean;
+  source_note: string;
+}
+
+export interface WorkingFluidResolutionResult {
+  found: boolean;
+  entry: WorkingFluidEntry | null;
+  working_fluid_ref: string;
+  transform_trace_entry: string;
+}
+
+export interface PickupGeometryResolutionResult {
+  found: boolean;
+  entry: PickupGeometryEntry | null;
+  pickup_geometry_ref: string;
+  /** Resolved multiplier to apply in resistance chain. §8.4. */
+  nominal_resistance_multiplier: number;
+  transform_trace_entry: string;
+}
+
+/**
+ * Resolve a working_fluid_ref against the working-fluids catalog.
+ * Returns found=false when ref does not resolve — caller must block per §13.2.
+ * §7, §13.2.
+ */
+export function resolveWorkingFluidRef(
+  working_fluid_ref: string,
+  catalog: CatalogFile
+): WorkingFluidResolutionResult {
+  const result = resolveCatalogEntry<WorkingFluidEntry>(catalog, 'working_fluid_id', working_fluid_ref);
+  return {
+    found: result.found,
+    entry: result.entry,
+    working_fluid_ref,
+    transform_trace_entry: result.transform_trace_entry,
+  };
+}
+
+/**
+ * Resolve a pickup_geometry_ref against the pickup-geometries catalog.
+ * Returns found=false when ref does not resolve — caller must block per §13.2.
+ * Returns nominal_resistance_multiplier=1.0 as safe fallback when not found
+ * (caller must have already blocked on not-found; this prevents NaN propagation).
+ * §8, §13.2.
+ */
+export function resolvePickupGeometryRef(
+  pickup_geometry_ref: string,
+  catalog: CatalogFile
+): PickupGeometryResolutionResult {
+  const result = resolveCatalogEntry<PickupGeometryEntry>(catalog, 'pickup_geometry_id', pickup_geometry_ref);
+  return {
+    found: result.found,
+    entry: result.entry,
+    pickup_geometry_ref,
+    nominal_resistance_multiplier: result.entry?.nominal_resistance_multiplier ?? 1.0,
+    transform_trace_entry: result.transform_trace_entry,
+  };
+}
+
+/**
+ * Resolve all working_fluid_refs and pickup_geometry_refs for a zones array.
+ * Returns per-zone resolution results and a combined transform_trace.
+ * Blocking violations (unresolved refs) are returned as error strings — caller enforces.
+ * §13.2.
+ */
+export function resolveZoneCatalogRefs(
+  zones: Array<Record<string, unknown>>,
+  workingFluidCatalog: CatalogFile,
+  pickupGeometryCatalog: CatalogFile
+): {
+  workingFluidResults: Map<string, WorkingFluidResolutionResult>;
+  pickupGeometryResults: Map<string, PickupGeometryResolutionResult>;
+  transform_trace: string[];
+  blocking_errors: string[];
+} {
+  const workingFluidResults = new Map<string, WorkingFluidResolutionResult>();
+  const pickupGeometryResults = new Map<string, PickupGeometryResolutionResult>();
+  const transform_trace: string[] = [];
+  const blocking_errors: string[] = [];
+
+  for (const zone of zones) {
+    const zoneId = String(zone.zone_id ?? 'unknown');
+
+    const wfRef = zone.working_fluid_ref as string | null | undefined;
+    if (wfRef) {
+      const wfResult = resolveWorkingFluidRef(wfRef, workingFluidCatalog);
+      workingFluidResults.set(zoneId, wfResult);
+      transform_trace.push(wfResult.transform_trace_entry);
+      if (!wfResult.found) {
+        blocking_errors.push(
+          `zone[${zoneId}].working_fluid_ref '${wfRef}' not found in catalog '${workingFluidCatalog.catalog_id}@${workingFluidCatalog.catalog_version}'. §13.2`
+        );
+      }
+    }
+
+    const pgRef = zone.pickup_geometry_ref as string | null | undefined;
+    if (pgRef) {
+      const pgResult = resolvePickupGeometryRef(pgRef, pickupGeometryCatalog);
+      pickupGeometryResults.set(zoneId, pgResult);
+      transform_trace.push(pgResult.transform_trace_entry);
+      if (!pgResult.found) {
+        blocking_errors.push(
+          `zone[${zoneId}].pickup_geometry_ref '${pgRef}' not found in catalog '${pickupGeometryCatalog.catalog_id}@${pickupGeometryCatalog.catalog_version}'. §13.2`
+        );
+      }
+    }
+  }
+
+  return { workingFluidResults, pickupGeometryResults, transform_trace, blocking_errors };
+}

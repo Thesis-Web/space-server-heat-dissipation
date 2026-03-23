@@ -26,6 +26,7 @@ let CATALOGS = {};
 let payloadBlocks = [];
 let branchBlocks  = [];
 let stageBlocks   = []; // Extension 2 spectral stage blocks — spec §11
+let zoneBlocks    = []; // Extension 3A thermal zone blocks — spec §6, blueprint §11.1
 
 // ── Bootstrap ─────────────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", async () => {
@@ -60,6 +61,7 @@ async function loadCatalogs() {
   populateMaterialFamilyDropdowns();
   populateBranchPresets();
   populateExt2Dropdowns();
+  populateExt3aCatalogDropdowns(); // Extension 3A — blueprint §11.1
   updateFooterVersions();
 }
 
@@ -201,6 +203,8 @@ function wireAllFields() {
   });
   // Extension 2 enable toggle — spec §5.3, §14.1
   document.getElementById("enable_model_extension_2")?.addEventListener("change", onExt2EnableChange);
+  // Extension 3A enable toggle — blueprint §11.1
+  document.getElementById("enable_model_extension_3a")?.addEventListener("change", onExt3aEnableChange);
   // Extension 2 mode change
   document.getElementById("model_extension_2_mode")?.addEventListener("change", updateExt2OutputSection);
   // Source spectral profile dropdown — spec §6, §14.2
@@ -462,6 +466,12 @@ function updateOutputTab() {
   if (ext2OutSec) ext2OutSec.style.display = ext2Enabled ? "block" : "none";
   if (ext2Enabled) updateExt2OutputSection();
 
+  // Extension 3A output section visibility — blueprint §11.4
+  const ext3aEnabled = val("enable_model_extension_3a") === "true";
+  const ext3aOutSec = document.getElementById("ext3a-output-section");
+  if (ext3aOutSec) ext3aOutSec.style.display = ext3aEnabled ? "block" : "none";
+  if (ext3aEnabled) updateExt3aOutputSection();
+
   // Recompute for compat spans (used by openPacketOutput)
   const dc = numVal("device_count", 1);
   const dp = getDevicePowerAtState();
@@ -719,6 +729,28 @@ function buildPacket() {
     ext2_hot_island_storage_class: val("ext2_hot_island_storage_class") || null,
     ext2_mediator_temp_band_low_k: numVal("ext2_mediator_temp_band_low_k", 800),
     ext2_mediator_temp_band_high_k: numVal("ext2_mediator_temp_band_high_k", 1200),
+    // ── Extension 3A fields — spec §5.3, §6, §9, blueprint §11.1–§11.3 ─────
+    enable_model_extension_3a: val("enable_model_extension_3a") === "true",
+    model_extension_3a_mode: val("model_extension_3a_mode") || "topology_only",
+    convergence_required: val("convergence_required") === "true",
+    max_convergence_iterations: parseInt(val("max_convergence_iterations") || "50", 10),
+    convergence_tolerance_k: parseFloat(val("convergence_tolerance_k") || "0.1"),
+    runaway_multiplier: parseFloat(val("runaway_multiplier") || "10"),
+    thermal_zones: zoneBlocks.map(compileZoneBlock),
+    // Radiator lifecycle fields — spec §9, blueprint §11.3
+    cavity_emissivity_mode: val("cavity_emissivity_mode") || "disabled",
+    cavity_view_factor: parseFloat(val("cavity_view_factor") || "0.85") || 0.85,
+    geometry_mode: val("geometry_mode") || "single_sided",
+    face_a_view_factor: parseFloat(val("face_a_view_factor") || "1.0") || 1.0,
+    face_b_view_factor: parseFloat(val("face_b_view_factor") || "1.0") || 1.0,
+    surface_emissivity_bol: parseFloat(val("surface_emissivity_bol") || "0.90") || 0.90,
+    emissivity_degradation_fraction: parseFloat(val("emissivity_degradation_fraction") || "0.05") || 0.05,
+    surface_emissivity_eol_override: val("surface_emissivity_eol_override")
+      ? parseFloat(val("surface_emissivity_eol_override")) : null,
+    background_sink_temp_k_override: val("background_sink_temp_k_override")
+      ? parseFloat(val("background_sink_temp_k_override")) : null,
+    extension_3a_catalog_ids_used: val("enable_model_extension_3a") === "true"
+      ? ["working-fluids", "pickup-geometries"] : [],
     operator_notes: "",
     branding_metadata: {
       organization_name: val("org_name"),
@@ -1447,4 +1479,584 @@ function updateExt2OutputSection() {
       ).join("");
     }
   }
+}
+
+// =============================================================================
+// EXTENSION 3A — UI FUNCTIONS
+// Governing law: blueprint §11.1–§11.4, spec §5.3, §6, §9, §13, §14
+// Additive — Extension 2 functions above are untouched.
+// =============================================================================
+
+// ── Catalog selectors ─────────────────────────────────────────────────────────
+
+/**
+ * Populate working-fluid and pickup-geometry dropdowns from 3A catalogs.
+ * Blueprint §11.1 — catalog lookup for zone blocks.
+ */
+function populateExt3aCatalogDropdowns() {
+  // Nothing to populate at the page level; catalog options are injected per
+  // zone block on addZoneBlock(). Catalogs are available in CATALOGS at call time.
+}
+
+/**
+ * Build <option> HTML for working-fluid catalog entries.
+ * Spec §7, blueprint §11.1.
+ */
+function workingFluidOptions(selectedVal) {
+  const cat = CATALOGS["working-fluids"];
+  if (!cat || cat.load_error) return `<option value="">— catalog unavailable —</option>`;
+  let html = `<option value="">— select fluid —</option>`;
+  for (const e of (cat.entries || [])) {
+    const id = e.working_fluid_id || e.fluid_id || "";
+    const label = e.display_name || e.fluid_class || id;
+    const sel = id === selectedVal ? " selected" : "";
+    html += `<option value="${id}"${sel}>${label}</option>`;
+  }
+  return html;
+}
+
+/**
+ * Build <option> HTML for pickup-geometry catalog entries.
+ * Spec §8, blueprint §11.1.
+ */
+function pickupGeometryOptions(selectedVal) {
+  const cat = CATALOGS["pickup-geometries"];
+  if (!cat || cat.load_error) return `<option value="">— catalog unavailable —</option>`;
+  let html = `<option value="">— select geometry —</option>`;
+  for (const e of (cat.entries || [])) {
+    const id = e.pickup_geometry_id || "";
+    const label = e.display_name || e.geometry_class || id;
+    const sel = id === selectedVal ? " selected" : "";
+    html += `<option value="${id}"${sel}>${label}</option>`;
+  }
+  return html;
+}
+
+// ── Enable toggle ─────────────────────────────────────────────────────────────
+
+/**
+ * Handle Extension 3A enable/disable toggle.
+ * Shows/hides scenario fields and thermal/radiator/output sections.
+ * Blueprint §11.1–§11.4.
+ */
+function onExt3aEnableChange() {
+  const enabled = val("enable_model_extension_3a") === "true";
+  const scenFields = document.getElementById("ext3a-scenario-fields");
+  if (scenFields) scenFields.style.display = enabled ? "block" : "none";
+  const thermalSec = document.getElementById("ext3a-thermal-section");
+  if (thermalSec) thermalSec.style.display = enabled ? "block" : "none";
+  const radSec = document.getElementById("ext3a-radiator-section");
+  if (radSec) radSec.style.display = enabled ? "block" : "none";
+  const outSec = document.getElementById("ext3a-output-section");
+  if (outSec) outSec.style.display = enabled ? "block" : "none";
+  if (enabled) {
+    renderZoneBlocks();
+    updateExt3aOutputSection();
+    updateBolEolPreview();
+    wireExt3aRadiatorFields();
+  }
+  updateOutputTab();
+}
+
+// ── Zone block management ─────────────────────────────────────────────────────
+
+/**
+ * Return a deterministic zone_id for a new zone block.
+ * Spec §6.1 — zone_id must be unique within the scenario.
+ */
+function zoneBlockId(idx) {
+  return `zone-${String(idx).padStart(3, "0")}`;
+}
+
+/**
+ * Add a new thermal zone block with defaults per spec §12.
+ * Blueprint §11.1 — additive create control.
+ */
+function addZoneBlock(data = {}) {
+  const idx = zoneBlocks.length;
+  const block = {
+    zone_id:                data.zone_id               || zoneBlockId(idx),
+    label:                  data.label                 || `Zone ${idx + 1}`,
+    zone_role:              data.zone_role             || "standard",
+    isolation_boundary:     data.isolation_boundary    !== undefined ? data.isolation_boundary : false,
+    upstream_zone_ref:      data.upstream_zone_ref     || null,
+    downstream_zone_ref:    data.downstream_zone_ref   || null,
+    working_fluid_ref:      data.working_fluid_ref     || null,
+    pickup_geometry_ref:    data.pickup_geometry_ref   || null,
+    convergence_enabled:    data.convergence_enabled   !== undefined ? data.convergence_enabled : false,
+    // Resistance chain sub-object — spec §6.3, §11.2–§11.3
+    resistance_chain: {
+      r_junction_to_case_k_per_w:           data.resistance_chain?.r_junction_to_case_k_per_w           ?? null,
+      r_case_to_spreader_k_per_w:           data.resistance_chain?.r_case_to_spreader_k_per_w           ?? null,
+      r_spreader_to_pickup_nominal_k_per_w: data.resistance_chain?.r_spreader_to_pickup_nominal_k_per_w ?? null,
+      r_pickup_to_loop_k_per_w:             data.resistance_chain?.r_pickup_to_loop_k_per_w             ?? null,
+      r_loop_to_sink_k_per_w:               data.resistance_chain?.r_loop_to_sink_k_per_w               ?? null,
+    },
+    r_bridge_k_per_w: data.r_bridge_k_per_w ?? null,
+  };
+  zoneBlocks.push(block);
+  renderZoneBlocks();
+  updateTopologyStatus();
+}
+
+/**
+ * Remove a zone block by index. Rerender. Blueprint §11.1 — delete control.
+ */
+function removeZoneBlock(idx) {
+  zoneBlocks.splice(idx, 1);
+  renderZoneBlocks();
+  updateTopologyStatus();
+}
+
+/**
+ * Duplicate a zone block by index. Blueprint §11.1 — duplicate control.
+ */
+function duplicateZoneBlock(idx) {
+  const src = zoneBlocks[idx];
+  const copy = JSON.parse(JSON.stringify(src));
+  copy.zone_id = zoneBlockId(zoneBlocks.length);
+  copy.label = src.label + " (copy)";
+  zoneBlocks.splice(idx + 1, 0, copy);
+  renderZoneBlocks();
+  updateTopologyStatus();
+}
+
+/**
+ * Move a zone block up or down. Blueprint §11.1 — reorder control.
+ */
+function moveZoneBlock(idx, direction) {
+  const target = idx + direction;
+  if (target < 0 || target >= zoneBlocks.length) return;
+  const tmp = zoneBlocks[idx];
+  zoneBlocks[idx] = zoneBlocks[target];
+  zoneBlocks[target] = tmp;
+  renderZoneBlocks();
+  updateTopologyStatus();
+}
+
+/**
+ * Read a zone card's current field values back into zoneBlocks[idx].
+ * Called on every input change within a zone card.
+ */
+function syncZoneBlock(idx) {
+  const b = zoneBlocks[idx];
+  if (!b) return;
+  b.label              = document.getElementById(`z${idx}_label`)?.value             || b.label;
+  b.zone_role          = document.getElementById(`z${idx}_zone_role`)?.value         || b.zone_role;
+  b.isolation_boundary = document.getElementById(`z${idx}_isolation_boundary`)?.value === "true";
+  b.upstream_zone_ref  = document.getElementById(`z${idx}_upstream_zone_ref`)?.value  || null;
+  b.downstream_zone_ref= document.getElementById(`z${idx}_downstream_zone_ref`)?.value|| null;
+  b.working_fluid_ref  = document.getElementById(`z${idx}_working_fluid_ref`)?.value  || null;
+  b.pickup_geometry_ref= document.getElementById(`z${idx}_pickup_geometry_ref`)?.value|| null;
+  b.convergence_enabled= document.getElementById(`z${idx}_convergence_enabled`)?.value === "true";
+  b.r_bridge_k_per_w   = parseFloat(document.getElementById(`z${idx}_r_bridge`)?.value) || null;
+  const chain = b.resistance_chain;
+  chain.r_junction_to_case_k_per_w           = parseFloat(document.getElementById(`z${idx}_r_jc`)?.value)  || null;
+  chain.r_case_to_spreader_k_per_w           = parseFloat(document.getElementById(`z${idx}_r_cs`)?.value)  || null;
+  chain.r_spreader_to_pickup_nominal_k_per_w = parseFloat(document.getElementById(`z${idx}_r_spn`)?.value) || null;
+  chain.r_pickup_to_loop_k_per_w             = parseFloat(document.getElementById(`z${idx}_r_pl`)?.value)  || null;
+  chain.r_loop_to_sink_k_per_w               = parseFloat(document.getElementById(`z${idx}_r_ls`)?.value)  || null;
+  updateTopologyStatus();
+}
+
+/**
+ * Compile a zone block into the canonical thermal_zones[] entry format.
+ * Spec §6 — all fields must be present and typed.
+ */
+function compileZoneBlock(b) {
+  return {
+    zone_id:               b.zone_id,
+    label:                 b.label,
+    zone_role:             b.zone_role,
+    isolation_boundary:    b.isolation_boundary,
+    upstream_zone_ref:     b.upstream_zone_ref   || null,
+    downstream_zone_ref:   b.downstream_zone_ref || null,
+    working_fluid_ref:     b.working_fluid_ref   || null,
+    pickup_geometry_ref:   b.pickup_geometry_ref || null,
+    convergence_enabled:   b.convergence_enabled,
+    resistance_chain:      b.resistance_chain,
+    r_bridge_k_per_w:      b.r_bridge_k_per_w   ?? null,
+  };
+}
+
+/**
+ * Render all zone cards into #zone-block-list.
+ * Blueprint §11.1 — additive block editor.
+ */
+function renderZoneBlocks() {
+  const list = document.getElementById("zone-block-list");
+  if (!list) return;
+  list.innerHTML = "";
+
+  zoneBlocks.forEach((b, idx) => {
+    const chain = b.resistance_chain;
+    const rTotal = [
+      chain.r_junction_to_case_k_per_w,
+      chain.r_case_to_spreader_k_per_w,
+      chain.r_spreader_to_pickup_nominal_k_per_w,
+      chain.r_pickup_to_loop_k_per_w,
+      chain.r_loop_to_sink_k_per_w,
+    ].reduce((s, v) => s + (v ?? 0), 0);
+
+    const hasRef = b.upstream_zone_ref || b.downstream_zone_ref;
+    const validityClass = hasRef ? "zone-validity-ok" : "zone-validity-warn";
+    const validityText  = hasRef ? "✓ topology refs set" : "⚠ no topology refs";
+
+    const card = document.createElement("div");
+    card.className = "zone-card";
+    card.innerHTML = `
+      <div class="zone-header">
+        <span>Zone ${idx + 1}</span>
+        <input id="z${idx}_label" type="text" value="${b.label}"
+          style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:3px;padding:3px 7px;color:var(--text);font-size:12px;"
+          oninput="zoneBlocks[${idx}].label=this.value;updateTopologyStatus();" />
+        <span class="zone-validity ${validityClass}">${validityText}</span>
+        <button class="btn btn-secondary btn-sm" onclick="moveZoneBlock(${idx},-1)" title="Move up" style="padding:2px 7px;">▲</button>
+        <button class="btn btn-secondary btn-sm" onclick="moveZoneBlock(${idx},1)" title="Move down" style="padding:2px 7px;">▼</button>
+        <button class="btn btn-secondary btn-sm" onclick="duplicateZoneBlock(${idx})" title="Duplicate" style="padding:2px 7px;">⧉</button>
+        <button class="btn btn-secondary btn-sm" onclick="removeZoneBlock(${idx})" title="Remove" style="padding:2px 7px;color:var(--warn);">✕</button>
+      </div>
+      <div class="field-row"><label>Zone Role</label>
+        <select id="z${idx}_zone_role" onchange="syncZoneBlock(${idx})">
+          <option value="standard"${b.zone_role==="standard"?" selected":""}>standard</option>
+          <option value="convergence_exchange"${b.zone_role==="convergence_exchange"?" selected":""}>convergence_exchange</option>
+          <option value="radiator_emitter"${b.zone_role==="radiator_emitter"?" selected":""}>radiator_emitter</option>
+          <option value="pickup"${b.zone_role==="pickup"?" selected":""}>pickup</option>
+          <option value="transport"${b.zone_role==="transport"?" selected":""}>transport</option>
+          <option value="custom"${b.zone_role==="custom"?" selected":""}>custom</option>
+        </select>
+      </div>
+      <div class="field-row"><label>Isolation Boundary</label>
+        <select id="z${idx}_isolation_boundary" onchange="syncZoneBlock(${idx})">
+          <option value="false"${!b.isolation_boundary?" selected":""}>No</option>
+          <option value="true"${b.isolation_boundary?" selected":""}>Yes — bridge resistance applies</option>
+        </select>
+      </div>
+      <div class="field-row"><label>Upstream Zone Ref</label>
+        <input id="z${idx}_upstream_zone_ref" type="text" value="${b.upstream_zone_ref||""}"
+          placeholder="zone_id of upstream zone or blank"
+          oninput="syncZoneBlock(${idx})" />
+      </div>
+      <div class="field-row"><label>Downstream Zone Ref</label>
+        <input id="z${idx}_downstream_zone_ref" type="text" value="${b.downstream_zone_ref||""}"
+          placeholder="zone_id of downstream zone or blank"
+          oninput="syncZoneBlock(${idx})" />
+      </div>
+      <div class="field-row"><label>Working Fluid</label>
+        <select id="z${idx}_working_fluid_ref" onchange="syncZoneBlock(${idx})">
+          ${workingFluidOptions(b.working_fluid_ref||"")}
+        </select>
+      </div>
+      <div class="field-row"><label>Pickup Geometry</label>
+        <select id="z${idx}_pickup_geometry_ref" onchange="syncZoneBlock(${idx})">
+          ${pickupGeometryOptions(b.pickup_geometry_ref||"")}
+        </select>
+      </div>
+      <div class="field-row"><label>Convergence Exchange</label>
+        <select id="z${idx}_convergence_enabled" onchange="syncZoneBlock(${idx})">
+          <option value="false"${!b.convergence_enabled?" selected":""}>No</option>
+          <option value="true"${b.convergence_enabled?" selected":""}>Yes — declare convergence in scenario</option>
+        </select>
+      </div>
+      <div class="field-row"><label>Bridge Resistance (K/W)</label>
+        <input id="z${idx}_r_bridge" type="number" min="0" step="0.001"
+          value="${b.r_bridge_k_per_w??""}" placeholder="— n/a if no isolation boundary —"
+          oninput="syncZoneBlock(${idx})" />
+      </div>
+      <div style="margin-top:8px;">
+        <div class="section-title" style="font-size:11px;margin-bottom:4px;">
+          Resistance Chain — spec §6.3, §11.2 &nbsp;|&nbsp; R_total ≈ ${rTotal.toFixed(4)} K/W
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <div class="field-row"><label style="font-size:11px;">R junction→case (K/W)</label>
+            <input id="z${idx}_r_jc" type="number" min="0" step="0.001"
+              value="${chain.r_junction_to_case_k_per_w??""}" placeholder="null"
+              oninput="syncZoneBlock(${idx})" /></div>
+          <div class="field-row"><label style="font-size:11px;">R case→spreader (K/W)</label>
+            <input id="z${idx}_r_cs" type="number" min="0" step="0.001"
+              value="${chain.r_case_to_spreader_k_per_w??""}" placeholder="null"
+              oninput="syncZoneBlock(${idx})" /></div>
+          <div class="field-row"><label style="font-size:11px;">R spreader→pickup nominal (K/W)</label>
+            <input id="z${idx}_r_spn" type="number" min="0" step="0.001"
+              value="${chain.r_spreader_to_pickup_nominal_k_per_w??""}" placeholder="null"
+              oninput="syncZoneBlock(${idx})" /></div>
+          <div class="field-row"><label style="font-size:11px;">R pickup→loop (K/W)</label>
+            <input id="z${idx}_r_pl" type="number" min="0" step="0.001"
+              value="${chain.r_pickup_to_loop_k_per_w??""}" placeholder="null"
+              oninput="syncZoneBlock(${idx})" /></div>
+          <div class="field-row"><label style="font-size:11px;">R loop→sink (K/W)</label>
+            <input id="z${idx}_r_ls" type="number" min="0" step="0.001"
+              value="${chain.r_loop_to_sink_k_per_w??""}" placeholder="null"
+              oninput="syncZoneBlock(${idx})" /></div>
+        </div>
+      </div>`;
+    list.appendChild(card);
+  });
+
+  // Wire the add-zone-block button (idempotent)
+  const addBtn = document.getElementById("add-zone-block");
+  if (addBtn && !addBtn._wired3a) {
+    addBtn.addEventListener("click", () => addZoneBlock());
+    addBtn._wired3a = true;
+  }
+}
+
+/**
+ * Update the topology status panel below the zone block list.
+ * Lightweight client-side check — actual validation is runtime-authoritative.
+ * Blueprint §11.1 — per-zone defaults provenance display.
+ */
+function updateTopologyStatus() {
+  const el = document.getElementById("ext3a-topology-status");
+  if (!el) return;
+  if (zoneBlocks.length === 0) {
+    el.innerHTML = "No zone blocks defined. Add zones to declare the thermal topology.";
+    return;
+  }
+  const ids = new Set(zoneBlocks.map(b => b.zone_id));
+  const unlinked = zoneBlocks.filter(b => !b.upstream_zone_ref && !b.downstream_zone_ref);
+  const badRefs  = zoneBlocks.filter(b =>
+    (b.upstream_zone_ref   && !ids.has(b.upstream_zone_ref)) ||
+    (b.downstream_zone_ref && !ids.has(b.downstream_zone_ref))
+  );
+  const convergeZones = zoneBlocks.filter(b => b.convergence_enabled);
+  let html = `<strong>${zoneBlocks.length} zone(s) declared.</strong>`;
+  if (unlinked.length)
+    html += ` <span style="color:var(--warn);">⚠ ${unlinked.length} zone(s) have no topology refs.</span>`;
+  if (badRefs.length)
+    html += ` <span style="color:#e05050;">✗ ${badRefs.length} zone(s) reference unknown zone_ids.</span>`;
+  if (convergeZones.length)
+    html += ` <span style="color:var(--accent);">↻ ${convergeZones.length} convergence-exchange zone(s).</span>`;
+  if (!unlinked.length && !badRefs.length)
+    html += ` <span style="color:#40c070;">✓ Topology refs valid (runtime will confirm).</span>`;
+  el.innerHTML = html;
+}
+
+// ── Radiator lifecycle preview ────────────────────────────────────────────────
+
+/**
+ * Wire cavity mode and geometry mode change listeners for BOL/EOL preview.
+ * Blueprint §11.3. Called once when 3A is enabled.
+ */
+function wireExt3aRadiatorFields() {
+  ["cavity_emissivity_mode","geometry_mode",
+   "surface_emissivity_bol","emissivity_degradation_fraction",
+   "surface_emissivity_eol_override","background_sink_temp_k_override",
+   "face_a_view_factor","face_b_view_factor","cavity_view_factor"
+  ].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && !el._wired3a) {
+      el.addEventListener("input",  updateBolEolPreview);
+      el.addEventListener("change", updateBolEolPreview);
+      el._wired3a = true;
+    }
+  });
+  // Cavity fields visibility
+  const cavMode = document.getElementById("cavity_emissivity_mode");
+  if (cavMode && !cavMode._wired3aCav) {
+    cavMode.addEventListener("change", () => {
+      const show = cavMode.value === "gray_cavity_approx";
+      const cf = document.getElementById("ext3a-cavity-fields");
+      if (cf) cf.style.display = show ? "block" : "none";
+    });
+    cavMode._wired3aCav = true;
+  }
+  // Face B visibility
+  const geomMode = document.getElementById("geometry_mode");
+  if (geomMode && !geomMode._wired3aGeom) {
+    geomMode.addEventListener("change", () => {
+      const show = geomMode.value !== "single_sided";
+      const fb = document.getElementById("ext3a-face-b-fields");
+      if (fb) fb.style.display = show ? "block" : "none";
+    });
+    geomMode._wired3aGeom = true;
+  }
+  updateBolEolPreview();
+}
+
+/**
+ * Compute and display BOL/EOL emissivity and area preview.
+ * Display-only — all authoritative sizing is runtime per spec §3.1.
+ * Blueprint §11.3 — BOL/EOL area preview and delta summary.
+ */
+function updateBolEolPreview() {
+  const el = document.getElementById("ext3a-bol-eol-preview");
+  if (!el) return;
+  const eps_bol = parseFloat(val("surface_emissivity_bol") || "0.90") || 0.90;
+  const deg     = parseFloat(val("emissivity_degradation_fraction") || "0.05");
+  const eolOver = val("surface_emissivity_eol_override")
+    ? parseFloat(val("surface_emissivity_eol_override")) : null;
+  const eps_eol = eolOver !== null ? Math.max(1e-9, Math.min(1, eolOver))
+    : Math.max(1e-9, Math.min(1, eps_bol * (1 - deg)));
+  const Qt   = (() => {
+    const dc = numVal("device_count", 1);
+    const dp = getDevicePowerAtState();
+    const oh = numVal("w_dot_memory_w")+numVal("w_dot_storage_w")+
+               numVal("w_dot_network_w")+numVal("w_dot_power_conversion_w")+numVal("w_dot_control_w");
+    let nc = 0;
+    for (const b of payloadBlocks) {
+      const df = b.duty_mode === "continuous" ? 1.0 : (parseFloat(b.duty_fraction)||0);
+      nc += ((parseFloat(b.rf_comms_power_w)||0)+(parseFloat(b.telemetry_power_w)||0)+
+             (parseFloat(b.radar_power_w)||0)+(parseFloat(b.optical_crosslink_power_w)||0))*df;
+    }
+    return dc*dp + oh + nc;
+  })();
+  const T   = numVal("target_surface_temp_k", 1200);
+  const Ts  = numVal("sink_temp_k", 0);
+  const Fv  = numVal("face_a_view_factor", 1.0);
+  const geom = val("geometry_mode") || "single_sided";
+  const Fvb  = geom !== "single_sided" ? numVal("face_b_view_factor", 1.0) : 0;
+  const rad4 = Math.pow(T,4) - Math.pow(Ts,4);
+  const denBol = (eps_bol * SIGMA * (Fv + Fvb) * rad4);
+  const denEol = (eps_eol * SIGMA * (Fv + Fvb) * rad4);
+  const A_bol = denBol > 0 ? Qt / denBol : 0;
+  const A_eol = denEol > 0 ? Qt / denEol : 0;
+  const delta = A_eol - A_bol;
+  el.innerHTML =
+    `BOL ε = <strong>${eps_bol.toFixed(4)}</strong> → A_BOL ≈ <strong>${A_bol.toFixed(4)} m²</strong> &nbsp;|&nbsp; ` +
+    `EOL ε = <strong>${eps_eol.toFixed(4)}</strong> → A_EOL ≈ <strong>${A_eol.toFixed(4)} m²</strong> &nbsp;|&nbsp; ` +
+    `Δ = <strong style="color:${delta > 0.01 ? "var(--warn)" : "#40c070"};">${delta >= 0 ? "+" : ""}${delta.toFixed(4)} m²</strong>` +
+    `<br><span style="font-size:10px;color:var(--text-dim);">Display-only preview. Authoritative sizing requires runtime execution per spec §3.1.</span>`;
+}
+
+// ── Extension 3A output section ───────────────────────────────────────────────
+
+/**
+ * Populate the Extension 3A output section from current zoneBlocks state.
+ * Display-only structural summary — all numeric results from runtime.
+ * Blueprint §11.4.
+ */
+function updateExt3aOutputSection() {
+  _renderExt3aTopologyReport();
+  _renderExt3aConvergenceReport();
+  _renderExt3aResistanceReport();
+  _renderExt3aBolEolReport();
+  _renderExt3aRadPressureReport();
+  _renderExt3aDefaultsReport();
+  _renderExt3aCatalogReport();
+}
+
+function _renderExt3aTopologyReport() {
+  const el = document.getElementById("ext3a-topology-report");
+  if (!el) return;
+  if (zoneBlocks.length === 0) {
+    el.innerHTML = "No zones declared. Add zone blocks in Tab 4 — Thermal Architecture."; return;
+  }
+  const ids = zoneBlocks.map(b => b.zone_id);
+  let html = `<strong>${zoneBlocks.length} zone(s) declared.</strong><br>`;
+  html += `Declared topology order (UI order — runtime may reorder per Kahn sort): `;
+  html += ids.map((id,i) => `<code>${id}</code>${i < ids.length-1 ? " → " : ""}`).join("") + "<br>";
+  const conv = zoneBlocks.filter(b => b.convergence_enabled);
+  if (conv.length)
+    html += `Convergence-exchange zones: ${conv.map(b=>`<code>${b.zone_id}</code>`).join(", ")}<br>`;
+  const iso = zoneBlocks.filter(b => b.isolation_boundary);
+  if (iso.length)
+    html += `Isolation boundaries: ${iso.map(b=>`<code>${b.zone_id}</code>`).join(", ")}<br>`;
+  html += `<span style="font-size:10px;color:var(--text-dim);">Topology validation (cycle detection, ref completeness) is runtime-authoritative per spec §13.1.</span>`;
+  el.innerHTML = html;
+}
+
+function _renderExt3aConvergenceReport() {
+  const el = document.getElementById("ext3a-convergence-report");
+  if (!el) return;
+  const convReq = val("convergence_required") === "true";
+  const maxIter = parseInt(val("max_convergence_iterations")||"50", 10);
+  const tol     = parseFloat(val("convergence_tolerance_k")||"0.1");
+  const runaway = parseFloat(val("runaway_multiplier")||"10");
+  if (!convReq) {
+    el.innerHTML = "Convergence not required for this scenario. Declare convergence_required=true and add convergence_exchange zones to enable.";
+    return;
+  }
+  el.innerHTML =
+    `Convergence declared. Max iterations: <strong>${maxIter}</strong> &nbsp;|&nbsp; ` +
+    `Tolerance: <strong>${tol} K</strong> &nbsp;|&nbsp; ` +
+    `Runaway multiplier: <strong>${runaway}×</strong><br>` +
+    `<span style="font-size:10px;color:var(--text-dim);">Actual convergence status (converged / nonconverged / runaway / invalid) produced by runtime per spec §11.4.</span>`;
+}
+
+function _renderExt3aResistanceReport() {
+  const el = document.getElementById("ext3a-resistance-report");
+  if (!el) return;
+  if (zoneBlocks.length === 0) { el.innerHTML = "No zones declared."; return; }
+  const rows = zoneBlocks.map(b => {
+    const c = b.resistance_chain;
+    const r = [c.r_junction_to_case_k_per_w, c.r_case_to_spreader_k_per_w,
+               c.r_spreader_to_pickup_nominal_k_per_w,
+               c.r_pickup_to_loop_k_per_w, c.r_loop_to_sink_k_per_w]
+               .reduce((s,v) => s+(v??0), 0);
+    const allNull = [c.r_junction_to_case_k_per_w, c.r_case_to_spreader_k_per_w,
+                     c.r_spreader_to_pickup_nominal_k_per_w,
+                     c.r_pickup_to_loop_k_per_w, c.r_loop_to_sink_k_per_w].every(v=>v===null);
+    const flag = allNull ? " <span style='color:var(--warn);'>⚠ all null</span>" : "";
+    return `<tr><td><code>${b.zone_id}</code></td><td>${b.label}</td><td>${r.toFixed(4)} K/W${flag}</td></tr>`;
+  }).join("");
+  el.innerHTML =
+    `<table style="font-size:11px;width:100%;border-collapse:collapse;">` +
+    `<tr><th style="text-align:left;padding:2px 6px;">Zone ID</th>` +
+    `<th style="text-align:left;padding:2px 6px;">Label</th>` +
+    `<th style="text-align:left;padding:2px 6px;">R_total (K/W)</th></tr>${rows}</table>` +
+    `<span style="font-size:10px;color:var(--text-dim);">R_total shown is sum of declared terms. Junction temperature is runtime-authoritative per spec §11.3.</span>`;
+}
+
+function _renderExt3aBolEolReport() {
+  const el = document.getElementById("ext3a-bol-eol-report");
+  if (!el) return;
+  const eps_bol = parseFloat(val("surface_emissivity_bol")||"0.90")||0.90;
+  const deg     = parseFloat(val("emissivity_degradation_fraction")||"0.05");
+  const eolOver = val("surface_emissivity_eol_override") ? parseFloat(val("surface_emissivity_eol_override")) : null;
+  const eps_eol = eolOver !== null ? Math.max(1e-9,Math.min(1,eolOver))
+    : Math.max(1e-9, Math.min(1, eps_bol*(1-deg)));
+  const geom    = val("geometry_mode") || "single_sided";
+  const cavMode = val("cavity_emissivity_mode") || "disabled";
+  el.innerHTML =
+    `Geometry: <strong>${geom}</strong> &nbsp;|&nbsp; Cavity emissivity mode: <strong>${cavMode}</strong><br>` +
+    `BOL ε = <strong>${eps_bol.toFixed(4)}</strong> &nbsp;|&nbsp; EOL ε = <strong>${eps_eol.toFixed(4)}</strong>` +
+    (eolOver !== null ? " <span style='font-size:10px;'>(EOL override applied)</span>" :
+      ` &nbsp;|&nbsp; degradation fraction = ${(deg*100).toFixed(1)}%`) + `<br>` +
+    `<span style="font-size:10px;color:var(--text-dim);">BOL/EOL radiator area delta is runtime-authoritative per spec §11.5–§11.9. Preview values in Tab 5.</span>`;
+}
+
+function _renderExt3aRadPressureReport() {
+  const el = document.getElementById("ext3a-radpressure-report");
+  if (!el) return;
+  el.innerHTML =
+    `Radiation-pressure metrics are flag-only outputs per spec §3.6. No propagation engine is added by 3A. ` +
+    `Radiation pressure (Pa) and force (N) are computed by the runtime and emitted as warning flags only. ` +
+    `<span style="font-size:10px;color:var(--text-dim);">See runtime output for computed values after packet execution.</span>`;
+}
+
+function _renderExt3aDefaultsReport() {
+  const el = document.getElementById("ext3a-defaults-report");
+  if (!el) return;
+  // Report which zone-level fields are using runtime-injected defaults (null in UI)
+  const defaulted = [];
+  zoneBlocks.forEach(b => {
+    const c = b.resistance_chain;
+    if (!b.working_fluid_ref)   defaulted.push(`${b.zone_id}.working_fluid_ref`);
+    if (!b.pickup_geometry_ref) defaulted.push(`${b.zone_id}.pickup_geometry_ref`);
+    if (c.r_junction_to_case_k_per_w === null) defaulted.push(`${b.zone_id}.resistance_chain.r_junction_to_case_k_per_w`);
+  });
+  if (defaulted.length === 0) {
+    el.innerHTML = `<span style="color:#40c070;">✓ All declared zone fields have explicit values.</span>`;
+  } else {
+    el.innerHTML =
+      `${defaulted.length} field(s) will receive runtime defaults per spec §12:<br>` +
+      defaulted.map(f => `<code style="font-size:10px;">${f}</code>`).join(", ") +
+      `<br><span style="font-size:10px;color:var(--text-dim);">Defaults applied by runtime are listed in defaults_applied[] in the packet output.</span>`;
+  }
+}
+
+function _renderExt3aCatalogReport() {
+  const el = document.getElementById("ext3a-catalog-report");
+  if (!el) return;
+  const wfCat  = CATALOGS["working-fluids"];
+  const pgCat  = CATALOGS["pickup-geometries"];
+  const wfVer  = wfCat?.catalog_version  || "—";
+  const pgVer  = pgCat?.catalog_version  || "—";
+  const wfId   = wfCat?.catalog_id       || "working-fluids";
+  const pgId   = pgCat?.catalog_id       || "pickup-geometries";
+  el.innerHTML =
+    `<code>${wfId}</code> v${wfVer} &nbsp;|&nbsp; ` +
+    `<code>${pgId}</code> v${pgVer}<br>` +
+    `<span style="font-size:10px;color:var(--text-dim);">Catalog IDs and versions are serialised into the run packet per blueprint §11.4.</span>`;
 }

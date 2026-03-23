@@ -1,9 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "schema_id": "thermal-zone",
-  "schema_version": "v0.1.0",
+  "schema_version": "v0.2.0",
   "title": "ThermalZone",
-  "description": "Thermal zone definition. Governed by §19. UI-expansion additive fields per ui-expansion-spec-v0.1.5. SCHEMA-CONTRA-TZ-001: ANCHOR field name zone_label wins over BASE field name label; runtime must reconcile in Batch 3.",
+  "description": "Thermal zone definition. v0.2.0 adds Extension 3A topology, resistance-chain, working-fluid, and pickup-geometry fields per 3A-spec §6. Backward-compat with v0.1.0 fields preserved.",
   "type": "object",
   "required": [
     "zone_id",
@@ -17,8 +17,8 @@
   ],
   "additionalProperties": false,
   "properties": {
-    "zone_id": { "type": "string" },
-    "schema_version": { "type": "string", "pattern": "^v\\d+\\.\\d+\\.\\d+$" },
+    "zone_id":         { "type": "string" },
+    "schema_version":  { "type": "string", "pattern": "^v\\d+\\.\\d+\\.\\d+$" },
     "zone_label": {
       "type": "string",
       "description": "Human-readable zone label. SCHEMA-CONTRA-TZ-001: ANCHOR name wins over BASE 'label'."
@@ -27,47 +27,96 @@
       "type": "string",
       "enum": ["compute_vault", "hx_boundary", "high_temp_backbone", "radiator_emitter", "custom"]
     },
-    "target_temp_k": { "type": "number", "exclusiveMinimum": 0 },
-    "temp_min_k": { "type": "number", "exclusiveMinimum": 0 },
-    "temp_max_k": { "type": "number", "exclusiveMinimum": 0 },
-    "pressure_min_pa": { "type": "number", "minimum": 0 },
-    "pressure_max_pa": { "type": "number", "minimum": 0 },
+    "target_temp_k":    { "type": "number", "exclusiveMinimum": 0 },
+    "temp_min_k":       { "type": "number", "exclusiveMinimum": 0 },
+    "temp_max_k":       { "type": "number", "exclusiveMinimum": 0 },
+    "pressure_min_pa":  { "type": "number", "minimum": 0 },
+    "pressure_max_pa":  { "type": "number", "minimum": 0 },
     "zone_subtype": {
       "type": "string",
       "enum": [
-        "controlled_compute_vault",
-        "chipset_pickup_stage1",
-        "low_gradient_loop",
-        "eutectic_exchange_hub",
-        "regen_hot_island",
-        "active_hot_island",
-        "radiator_service_domain",
-        "payload_emitter_zone",
-        "branch_sink_zone",
-        "custom"
+        "controlled_compute_vault", "chipset_pickup_stage1", "low_gradient_loop",
+        "eutectic_exchange_hub", "regen_hot_island", "active_hot_island",
+        "radiator_service_domain", "payload_emitter_zone", "branch_sink_zone", "custom"
       ]
     },
-    "pickup_geometry": { "type": "string" },
+    "pickup_geometry":       { "type": "string" },
     "service_role": {
       "type": "string",
+      "enum": ["pickup", "transport", "exchange", "storage", "rejection", "payload", "branch_sink", "custom"]
+    },
+    "material_family_ref":   { "type": "string" },
+    "coupled_zone_refs":     { "type": "array", "items": { "type": "string" } },
+    "topology_role":         { "type": "string" },
+    "research_required":     { "type": "boolean" },
+    "notes":                 { "type": "string" },
+
+    "zone_role": {
+      "type": "string",
       "enum": [
-        "pickup",
-        "transport",
-        "exchange",
-        "storage",
-        "rejection",
-        "payload",
-        "branch_sink",
+        "compute_vault",
+        "hx_boundary",
+        "high_temp_backbone",
+        "radiator_emitter",
+        "convergence_exchange",
         "custom"
-      ]
+      ],
+      "description": "3A topology role for this zone. §6.2."
     },
-    "material_family_ref": { "type": "string" },
-    "coupled_zone_refs": {
-      "type": "array",
-      "items": { "type": "string" }
+    "flow_direction": {
+      "type": "string",
+      "enum": ["source", "sink", "bidirectional", "isolated"],
+      "default": "isolated",
+      "description": "Declared flow direction for this zone. §6.3. Default: isolated."
     },
-    "topology_role": { "type": "string" },
-    "research_required": { "type": "boolean" },
-    "notes": { "type": "string" }
+    "isolation_boundary": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this zone declares a thermal isolation boundary. §6.1."
+    },
+    "upstream_zone_ref": {
+      "type": ["string", "null"],
+      "default": null,
+      "description": "zone_id of the upstream neighbor zone. §6.1. Must not equal zone_id."
+    },
+    "downstream_zone_ref": {
+      "type": ["string", "null"],
+      "default": null,
+      "description": "zone_id of the downstream neighbor zone. §6.1. Must not equal zone_id."
+    },
+    "bridge_resistance_k_per_w": {
+      "type": ["number", "null"],
+      "default": null,
+      "exclusiveMinimum": 0,
+      "description": "Thermal resistance of isolation bridge in K/W. Required when isolation_boundary=true. §6.4, §11.2."
+    },
+    "working_fluid_ref": {
+      "type": ["string", "null"],
+      "default": null,
+      "description": "ID of the working fluid from the working-fluid catalog. §6.1, §7."
+    },
+    "pickup_geometry_ref": {
+      "type": ["string", "null"],
+      "default": null,
+      "description": "ID of the pickup geometry from the pickup-geometry catalog. §6.1, §8."
+    },
+    "convergence_enabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this zone participates in convergence iteration. Required true when zone_role=convergence_exchange. §6.4."
+    },
+    "resistance_chain": {
+      "type": ["object", "null"],
+      "default": null,
+      "description": "Junction-to-sink resistance chain sub-object. §6.5.",
+      "additionalProperties": false,
+      "properties": {
+        "r_junction_to_case_k_per_w":           { "type": ["number", "null"], "minimum": 0 },
+        "r_case_to_spreader_k_per_w":           { "type": ["number", "null"], "minimum": 0 },
+        "r_spreader_to_pickup_nominal_k_per_w": { "type": ["number", "null"], "minimum": 0 },
+        "r_pickup_to_loop_k_per_w":             { "type": ["number", "null"], "minimum": 0 },
+        "r_loop_to_sink_k_per_w":               { "type": ["number", "null"], "minimum": 0 }
+      }
+    }
   }
 }

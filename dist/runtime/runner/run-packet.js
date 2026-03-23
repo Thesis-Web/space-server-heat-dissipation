@@ -14,6 +14,8 @@ const radiation_1 = require("../formulas/radiation");
 const bounds_1 = require("../validators/bounds");
 const power_cycle_1 = require("../formulas/power-cycle");
 const constants_1 = require("../constants/constants");
+// ── Extension 3A dispatch — additive per spec §14.1, DIFF-3A-EXT2-COHABIT-001 ─
+const run_extension_3a_1 = require("./run-extension-3a");
 /**
  * Execute a run packet through all runtime steps per spec §27.
  */
@@ -88,6 +90,18 @@ function executeRunPacket(input) {
         research_required_items: input.research_required_items,
     });
     transform_trace.push(`validation: blocking=${validation.blocking.length} warnings=${validation.warnings.length}`);
+    // ── Extension 3A dispatch — spec §14.1, DIFF-3A-EXT2-COHABIT-001 ─────────
+    // Purely additive. Extension-2 path above is untouched.
+    // Runs only when caller supplies extension_3a_input (i.e. scenario has
+    // enable_model_extension_3a=true). Result attaches as extension_3a_result.
+    let extension_3a_result;
+    if (input.extension_3a_input !== undefined) {
+        extension_3a_result = (0, run_extension_3a_1.runExtension3A)(input.extension_3a_input);
+        transform_trace.push(`extension-3a: enabled=${extension_3a_result.extension_3a_enabled}` +
+            ` topology_valid=${extension_3a_result.topology_valid}` +
+            ` convergence_status=${extension_3a_result.convergence_status}` +
+            ` blocking_errors=${extension_3a_result.blocking_errors.length}`);
+    }
     return {
         packet_id: input.packet_id,
         scenario_id: input.scenario_id,
@@ -98,6 +112,7 @@ function executeRunPacket(input) {
         transform_trace,
         runtime_authority_declaration: "runtime",
         versions: constants_1.RUNTIME_VERSIONS,
+        ...(extension_3a_result !== undefined ? { extension_3a_result } : {}),
     };
 }
 //# sourceMappingURL=run-packet.js.map

@@ -191,3 +191,102 @@ export function modeViolationsToFlags(violations: OperatingModeViolation[]): Fla
     )
   );
 }
+
+// =============================================================================
+// Extension 3A — operating mode validation
+// Governing law: 3A-spec §5.1–§5.3; dist-tree patch §5 (operating-mode.ts patch target)
+// =============================================================================
+
+/**
+ * 3A mode enum values per §5.2.
+ */
+export const MODEL_EXTENSION_3A_MODES = [
+  'disabled',
+  'topology_only',
+  'foundational_hardening',
+] as const;
+export type ModelExtension3AMode = typeof MODEL_EXTENSION_3A_MODES[number];
+
+/**
+ * Topology validation policy values per §5.2.
+ */
+export const TOPOLOGY_VALIDATION_POLICIES = ['blocking', 'warn_only'] as const;
+export type TopologyValidationPolicy = typeof TOPOLOGY_VALIDATION_POLICIES[number];
+
+/**
+ * Validate extension 3A mode field.
+ * Returns violation if mode is not a recognized 3A enum value.
+ * §5.2.
+ */
+export function validateExtension3AMode(
+  mode: string | undefined | null
+): OperatingModeViolation[] {
+  if (mode === undefined || mode === null) return [];
+  if (!(MODEL_EXTENSION_3A_MODES as readonly string[]).includes(mode)) {
+    return [{
+      rule: '3A-spec §5.2',
+      message: `model_extension_3a_mode '${mode}' is not a recognized value. ` +
+        `Allowed: ${MODEL_EXTENSION_3A_MODES.join(', ')}.`,
+      severity: 'error',
+    }];
+  }
+  return [];
+}
+
+/**
+ * Validate topology_validation_policy field.
+ * §5.1, §5.2.
+ */
+export function validateTopologyPolicy(
+  policy: string | undefined | null
+): OperatingModeViolation[] {
+  if (policy === undefined || policy === null) return [];
+  if (!(TOPOLOGY_VALIDATION_POLICIES as readonly string[]).includes(policy)) {
+    return [{
+      rule: '3A-spec §5.2',
+      message: `topology_validation_policy '${policy}' is not a recognized value. ` +
+        `Allowed: ${TOPOLOGY_VALIDATION_POLICIES.join(', ')}.`,
+      severity: 'error',
+    }];
+  }
+  return [];
+}
+
+/**
+ * Validate Extension 3A gate: if enable_model_extension_3a=false, 3A mode must be disabled.
+ * Backward compat: absent enable flag treated as false per §5.3.
+ * §5.3.
+ */
+export function validateExtension3AGate(
+  enable: boolean | undefined | null,
+  mode: string | undefined | null
+): OperatingModeViolation[] {
+  const effectiveEnable = enable ?? false;
+  const effectiveMode = mode ?? 'disabled';
+
+  if (!effectiveEnable && effectiveMode !== 'disabled') {
+    return [{
+      rule: '3A-spec §5.3',
+      message: `enable_model_extension_3a=false but model_extension_3a_mode='${effectiveMode}'. ` +
+        `Mode must be 'disabled' when the 3A gate is false.`,
+      severity: 'error',
+    }];
+  }
+  return [];
+}
+
+/**
+ * Full 3A mode validation bundle.
+ * Call with scenario fields to get all mode-level violations.
+ */
+export function validateExtension3AOperatingMode(params: {
+  enable_model_extension_3a?: boolean | null;
+  model_extension_3a_mode?: string | null;
+  topology_validation_policy?: string | null;
+}): OperatingModeViolation[] {
+  return [
+    ...validateExtension3AMode(params.model_extension_3a_mode),
+    ...validateTopologyPolicy(params.topology_validation_policy),
+    ...validateExtension3AGate(params.enable_model_extension_3a, params.model_extension_3a_mode),
+  ];
+}

@@ -318,7 +318,7 @@ function normalizeExtension2(scenarioExt2Enabled, stages, catalogResolverFn) {
     for (const stage of stages) {
         const resolved = catalogResolverFn(stage);
         // Build derived source profile if no catalog ref per §6.5
-        let effectiveSourceProfile = resolved.sourceProfile;
+        const effectiveSourceProfile = resolved.sourceProfile;
         if (stage.source_spectral_profile_ref === null && stage.enabled) {
             // No catalog ref — cannot derive without basis temperature; log
             allWarnings.push(`Stage ${stage.spectral_stage_id}: no source_spectral_profile_ref and no derived profile basis temperature available. band_match_score derivation skipped.`);

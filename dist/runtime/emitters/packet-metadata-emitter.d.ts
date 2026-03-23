@@ -93,4 +93,37 @@ export declare function emitScenarioSummaryMarkdown(params: {
     research_required_items: string[];
     runtime_authority_declaration: string;
 }): string;
+export interface Extension3AGeneratedArtifact {
+    artifact_type: 'topology_report' | 'defaults_audit' | 'convergence_trace';
+    name: string;
+    byte_length: number;
+    spec_section: string;
+}
+export interface Extension3APacketMetadataAddition {
+    enable_model_extension_3a: boolean;
+    model_extension_3a_mode: string;
+    topology_report_policy: string;
+    defaults_audit_version: string | null;
+    extension_3a_catalog_versions: {
+        working_fluids: string | null;
+        pickup_geometries: string | null;
+    };
+    generated_artifacts_3a: Extension3AGeneratedArtifact[];
+}
+/**
+ * Build 3A addition to packet metadata.
+ * §10.1: topology_report_policy, defaults_audit_version, catalog_versions, generated_artifacts[].
+ * §10.2: any generated report must appear in packet metadata and file manifest.
+ */
+export declare function buildExtension3APacketMetadata(params: {
+    enable_model_extension_3a: boolean;
+    model_extension_3a_mode: string;
+    topology_report_policy?: string;
+    defaults_audit_version?: string | null;
+    working_fluids_catalog_version?: string | null;
+    pickup_geometries_catalog_version?: string | null;
+    topology_report_content?: string | null;
+    defaults_audit_content?: string | null;
+    convergence_trace_content?: string | null;
+}): Extension3APacketMetadataAddition;
 //# sourceMappingURL=packet-metadata-emitter.d.ts.map

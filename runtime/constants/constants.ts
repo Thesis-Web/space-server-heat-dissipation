@@ -133,6 +133,62 @@ export const RUNTIME_VERSIONS = {
 
 
 // =============================================================================
+// § F — Extension 3A foundational hardening constants
+// =============================================================================
+//
+// Governing law: orbital-thermal-trade-system-model-extension-3a-engineering-spec-v0.4.1
+//
+// These constants are authoritative for all 3A runtime modules. They must be
+// imported from here — no 3A module may re-declare sigma or c inline.
+// =============================================================================
+
+/**
+ * Speed of light in vacuum.
+ * c = 299 792 458 m/s  (exact, SI definition)
+ * Used in radiation-pressure flag metric: p_rad = q'' / c  (§11.10)
+ */
+export const SPEED_OF_LIGHT_M_PER_S = 299_792_458;
+
+/**
+ * Default max iterations for convergence loop. §5.4, §12.1
+ */
+export const CONVERGENCE_MAX_ITERATIONS_DEFAULT = 25;
+
+/**
+ * Default absolute tolerance for convergence (watts). §5.4, §12.1
+ */
+export const CONVERGENCE_TOLERANCE_ABS_W_DEFAULT = 1.0;
+
+/**
+ * Default relative tolerance fraction for convergence. §5.4, §12.1
+ */
+export const CONVERGENCE_TOLERANCE_REL_FRACTION_DEFAULT = 0.001;
+
+/**
+ * Default runaway multiplier. §5.4, §12.1
+ * Minimum is 2.0 per §5.4 rationale note.
+ */
+export const CONVERGENCE_RUNAWAY_MULTIPLIER_DEFAULT = 4.0;
+
+/**
+ * Minimum allowed runaway multiplier. §5.4.
+ * At 1.0 runaway would trip on any non-trivial transient.
+ */
+export const CONVERGENCE_RUNAWAY_MULTIPLIER_MIN = 2.0;
+
+/**
+ * Default topology validation policy. §5.1, §12.1
+ */
+export const TOPOLOGY_VALIDATION_POLICY_DEFAULT = 'blocking' as const;
+
+/**
+ * Extension 3A version token — emitted in packet metadata.
+ */
+export const EXTENSION_3A_SPEC_VERSION = 'v0.4.1' as const;
+export const EXTENSION_3A_BLUEPRINT_VERSION = 'v0.4.1' as const;
+
+
+// =============================================================================
 // § E — TRM exploratory layer hooks  (Extension 2 forward surface)
 // =============================================================================
 //

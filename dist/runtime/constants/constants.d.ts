@@ -93,6 +93,43 @@ export declare const RUNTIME_VERSIONS: {
     readonly blueprint: "v0.1.1";
 };
 /**
+ * Speed of light in vacuum.
+ * c = 299 792 458 m/s  (exact, SI definition)
+ * Used in radiation-pressure flag metric: p_rad = q'' / c  (§11.10)
+ */
+export declare const SPEED_OF_LIGHT_M_PER_S = 299792458;
+/**
+ * Default max iterations for convergence loop. §5.4, §12.1
+ */
+export declare const CONVERGENCE_MAX_ITERATIONS_DEFAULT = 25;
+/**
+ * Default absolute tolerance for convergence (watts). §5.4, §12.1
+ */
+export declare const CONVERGENCE_TOLERANCE_ABS_W_DEFAULT = 1;
+/**
+ * Default relative tolerance fraction for convergence. §5.4, §12.1
+ */
+export declare const CONVERGENCE_TOLERANCE_REL_FRACTION_DEFAULT = 0.001;
+/**
+ * Default runaway multiplier. §5.4, §12.1
+ * Minimum is 2.0 per §5.4 rationale note.
+ */
+export declare const CONVERGENCE_RUNAWAY_MULTIPLIER_DEFAULT = 4;
+/**
+ * Minimum allowed runaway multiplier. §5.4.
+ * At 1.0 runaway would trip on any non-trivial transient.
+ */
+export declare const CONVERGENCE_RUNAWAY_MULTIPLIER_MIN = 2;
+/**
+ * Default topology validation policy. §5.1, §12.1
+ */
+export declare const TOPOLOGY_VALIDATION_POLICY_DEFAULT: "blocking";
+/**
+ * Extension 3A version token — emitted in packet metadata.
+ */
+export declare const EXTENSION_3A_SPEC_VERSION: "v0.4.1";
+export declare const EXTENSION_3A_BLUEPRINT_VERSION: "v0.4.1";
+/**
  * Division-by-zero guard for spectral band-width calculations.
  * Denominator: source_band_width_um = max(delta_lambda, TRM_BAND_WIDTH_EPSILON_UM)
  * Extension 2 spec §13.3.

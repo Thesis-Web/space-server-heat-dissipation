@@ -1,58 +1,126 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "schema_id": "working-fluid",
-  "schema_version": "v0.1.0",
+  "schema_version": "v0.2.0",
   "title": "WorkingFluid",
-  "description": "Working fluid property envelope for thermal stage use. Governed by §20.",
+  "description": "Working fluid catalog entry. v0.2.0 adds Extension 3A intrinsic numeric properties and provenance fields per 3A-spec §7. Legacy fluid_id field preserved as optional backward-compat. Canonical 3A ID is working_fluid_id.",
   "type": "object",
   "required": [
-    "fluid_id",
+    "working_fluid_id",
     "schema_version",
     "label",
-    "medium_class",
-    "intended_use_domain",
-    "temp_min_k",
-    "temp_max_k",
-    "pressure_notes",
-    "compatibility_notes",
-    "hazards",
-    "maturity_class"
+    "fluid_class",
+    "phase_class",
+    "temp_operating_min_k",
+    "temp_operating_max_k",
+    "cp_basis_j_per_kgk",
+    "density_basis_kg_per_m3",
+    "thermal_conductivity_w_per_mk",
+    "viscosity_basis_pa_s",
+    "provenance_class",
+    "confidence_class",
+    "maturity_class",
+    "research_required",
+    "source_note"
   ],
   "additionalProperties": false,
   "properties": {
-    "fluid_id": { "type": "string" },
+    "working_fluid_id": {
+      "type": "string",
+      "description": "Canonical 3A fluid ID. Referenced by thermal-zone.working_fluid_ref. §7.1."
+    },
+    "fluid_id": {
+      "type": "string",
+      "description": "DEPRECATED: legacy baseline fluid ID. Preserved for backward compat with pre-3A entries. Use working_fluid_id for 3A."
+    },
     "schema_version": { "type": "string", "pattern": "^v\\d+\\.\\d+\\.\\d+$" },
     "label": { "type": "string" },
+
+    "fluid_class": {
+      "type": "string",
+      "enum": ["noble_gas", "molecular_gas", "liquid_metal", "phase_change_refrigerant", "water_family", "custom"],
+      "description": "Fluid class per 3A-spec §7.2."
+    },
     "medium_class": {
       "type": "string",
-      "enum": ["gas", "liquid", "two_phase", "liquid_metal", "molten_salt", "custom"]
+      "enum": ["gas", "liquid", "two_phase", "liquid_metal", "molten_salt", "custom"],
+      "description": "LEGACY: baseline medium_class field. Preserved for backward compat."
+    },
+    "phase_class": {
+      "type": "string",
+      "enum": ["single_phase_gas", "single_phase_liquid", "two_phase_allowed", "custom"],
+      "description": "Phase class per 3A-spec §7.3."
     },
     "intended_use_domain": {
       "type": "string",
-      "enum": ["cold_loop", "hot_backbone", "radiator_loop", "storage_interface", "custom"]
+      "enum": ["cold_loop", "hot_backbone", "radiator_loop", "storage_interface", "custom"],
+      "description": "LEGACY: baseline intended_use_domain. Preserved for backward compat."
     },
-    "temp_min_k": { "type": "number", "exclusiveMinimum": 0 },
-    "temp_max_k": { "type": "number", "exclusiveMinimum": 0 },
-    "pressure_notes": { "type": "string" },
-    "compatibility_notes": { "type": "string" },
-    "hazards": { "type": "string" },
-    "maturity_class": {
-      "type": "string",
-      "enum": ["flight_proven", "trl_6_plus", "trl_4_5", "conceptual", "research_required"]
-    },
-    "default_cp_j_per_kgk": {
+
+    "temp_operating_min_k": { "type": "number", "exclusiveMinimum": 0, "description": "Operating temperature minimum K. §7.1." },
+    "temp_operating_max_k": { "type": "number", "exclusiveMinimum": 0, "description": "Operating temperature maximum K. §7.1." },
+    "temp_min_k":           { "type": "number", "exclusiveMinimum": 0, "description": "LEGACY: alias for temp_operating_min_k." },
+    "temp_max_k":           { "type": "number", "exclusiveMinimum": 0, "description": "LEGACY: alias for temp_operating_max_k." },
+
+    "cp_basis_j_per_kgk": {
       "type": "number",
       "exclusiveMinimum": 0,
-      "description": "Fixed cp for runtime abstraction per §20.1."
+      "description": "Specific heat capacity basis J/kg/K. Intrinsic. §7.1."
     },
-    "default_density_kg_per_m3": {
+    "density_basis_kg_per_m3": {
       "type": "number",
-      "exclusiveMinimum": 0
+      "exclusiveMinimum": 0,
+      "description": "Density basis kg/m³. Intrinsic. §7.1."
     },
+    "thermal_conductivity_w_per_mk": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Thermal conductivity W/m/K. Intrinsic. §7.1."
+    },
+    "viscosity_basis_pa_s": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Dynamic viscosity Pa·s basis. Intrinsic. §7.1."
+    },
+    "gamma_ratio": {
+      "type": ["number", "null"],
+      "exclusiveMinimum": 0,
+      "description": "Specific heat ratio gamma (Cp/Cv). Nullable for non-gases. §7.1."
+    },
+    "latent_heat_basis_j_per_kg": {
+      "type": ["number", "null"],
+      "exclusiveMinimum": 0,
+      "description": "Latent heat of vaporization J/kg. Nullable for non-phase-change use. §7.1."
+    },
+
+    "provenance_class": {
+      "type": "string",
+      "enum": ["sourced_authoritative", "sourced_secondary", "operator_estimated", "research_required"],
+      "description": "Data provenance class per §7.1, §15.1."
+    },
+    "confidence_class": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "unknown"],
+      "description": "Confidence class per §7.1."
+    },
+    "maturity_class": {
+      "type": "string",
+      "enum": ["flight_proven", "trl_6_plus", "trl_4_5", "conceptual", "research_required"],
+      "description": "Maturity class. Covers legacy and 3A use."
+    },
+    "research_required": { "type": "boolean", "description": "Whether further research is required before operational use. §7.1." },
+    "source_note":       { "type": "string",  "description": "Source citation or provenance note. §7.1." },
+
+    "default_cp_j_per_kgk":       { "type": "number", "exclusiveMinimum": 0, "description": "LEGACY: baseline cp field. Use cp_basis_j_per_kgk for 3A." },
+    "default_density_kg_per_m3":  { "type": "number", "exclusiveMinimum": 0, "description": "LEGACY: baseline density field. Use density_basis_kg_per_m3 for 3A." },
     "sourcing_status": {
       "type": "string",
-      "enum": ["operator-estimated", "sourced", "inferred", "research-required"]
+      "enum": ["operator-estimated", "sourced", "inferred", "research-required"],
+      "description": "LEGACY: sourcing status. 3A uses provenance_class."
     },
-    "notes": { "type": "string" }
+    "pressure_notes":       { "type": "string" },
+    "compatibility_notes":  { "type": "string" },
+    "hazards":              { "type": "string" },
+    "notes":                { "type": "string" }
   }
 }

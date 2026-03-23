@@ -1,9 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "schema_id": "scenario",
-  "schema_version": "v0.1.0",
+  "schema_version": "v0.2.0",
   "title": "Scenario",
-  "description": "Top-level orchestration schema for an orbital thermal trade scenario. Governed by \u00a715 of engineering spec v0.1.0. UI-expansion additive fields per ui-expansion-spec-v0.1.5. SCHEMA-CONTRA-SC-001/002/003/004 logged \u2014 see field-level comments.",
+  "description": "Top-level orchestration schema for an orbital thermal trade scenario. Governed by \u00a715 of engineering spec v0.1.0. UI-expansion additive fields per ui-expansion-spec-v0.1.5. SCHEMA-CONTRA-SC-001/002/003/004 logged \u2014 see field-level comments. v0.2.0 adds Extension 3A fields: enable_model_extension_3a, model_extension_3a_mode, thermal_zones[], topology_validation_policy, convergence_control, defaults_audit_version. Extension-2 fields preserved.",
   "type": "object",
   "required": [
     "scenario_id",
@@ -334,6 +334,83 @@
       "type": "boolean",
       "default": true,
       "description": "When true, placeholder or hypothesis_only provenance on output-driving fields raises blocking caution per spec \u00a712.5."
+    },
+    "enable_model_extension_3a": {
+      "type": "boolean",
+      "default": false,
+      "description": "Extension 3A enable gate per 3A-spec \u00a75.1. If false, all 3A fields are absent/null/ignored. Backward-compat: absent field treated as false per \u00a75.3."
+    },
+    "model_extension_3a_mode": {
+      "type": "string",
+      "enum": [
+        "disabled",
+        "topology_only",
+        "foundational_hardening"
+      ],
+      "default": "disabled",
+      "description": "Extension 3A operating mode per 3A-spec \u00a75.2."
+    },
+    "thermal_zones": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "default": [],
+      "description": "3A canonical thermal zone objects array. Compiled from UI additive blocks. Per 3A-spec \u00a75.1, \u00a76. Coexists with thermal_zone_refs (id references)."
+    },
+    "topology_validation_policy": {
+      "type": "string",
+      "enum": [
+        "blocking",
+        "warn_only"
+      ],
+      "default": "blocking",
+      "description": "3A topology validation policy. \u00a75.1\u2013\u00a75.2, \u00a713.1."
+    },
+    "convergence_control": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "default": null,
+      "description": "3A convergence control parameters per \u00a75.4.",
+      "additionalProperties": false,
+      "properties": {
+        "max_iterations": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 500,
+          "default": 25
+        },
+        "tolerance_abs_w": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "default": 1.0
+        },
+        "tolerance_rel_fraction": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "default": 0.001
+        },
+        "runaway_multiplier": {
+          "type": "number",
+          "minimum": 2.0,
+          "default": 4.0
+        },
+        "blocking_on_nonconvergence": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "defaults_audit_version": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": null,
+      "description": "3A defaults audit artifact version reference. \u00a75.1, \u00a710.1."
     }
   }
 }

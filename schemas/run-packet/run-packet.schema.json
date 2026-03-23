@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "schema_id": "run-packet",
-  "schema_version": "v0.1.0",
+  "schema_version": "v0.2.0",
   "title": "RunPacket",
   "description": "Deterministic handoff artifact from browser UI to hub AI workflow. Governed by \u00a725. UI-expansion additive fields per ui-expansion-spec-v0.1.5. SCHEMA-CONTRA-RP-001: branch_selection_summary ANCHOR=object, BASE=string; ANCHOR wins. SCHEMA-CONTRA-RP-002: ai_role_instructions ANCHOR=object, BASE=string; ANCHOR wins. SCHEMA-CONTRA-RP-003 RESOLVED: file_manifest item key is name per ui-expansion-spec-v0.1.5 \u00a7180.",
   "type": "object",
@@ -295,6 +295,78 @@
         "type": "object"
       },
       "description": "Per-stage exploratory result objects per spec \u00a716.2."
+    },
+    "enable_model_extension_3a": {
+      "type": "boolean",
+      "default": false,
+      "description": "3A enable gate mirrored from scenario. \u00a75.1."
+    },
+    "model_extension_3a_mode": {
+      "type": "string",
+      "enum": [
+        "disabled",
+        "topology_only",
+        "foundational_hardening"
+      ],
+      "default": "disabled",
+      "description": "3A mode mirrored from scenario. \u00a75.2."
+    },
+    "topology_report_policy": {
+      "type": "string",
+      "enum": [
+        "always",
+        "on_warning",
+        "never"
+      ],
+      "default": "always",
+      "description": "3A topology report emission policy per \u00a710.1."
+    },
+    "defaults_audit_version": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": null,
+      "description": "3A defaults audit artifact version. \u00a710.1."
+    },
+    "extension_3a_catalog_versions": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "default": null,
+      "description": "3A catalog version references per \u00a710.1.",
+      "additionalProperties": false,
+      "properties": {
+        "working_fluids": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "pickup_geometries": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "extension_3a_result": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "default": null,
+      "description": "3A runtime structured result. Contains topology, convergence, resistance, radiator BOL/EOL, radiation-pressure outputs per \u00a714.1."
+    },
+    "extension_3a_topology_report": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "default": null,
+      "description": "3A topology report emitter output. \u00a714, topology-report.ts."
     }
   }
 }

@@ -42,11 +42,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.EXTENSION_3A_SCHEMA_IDS = void 0;
 exports.loadSchema = loadSchema;
 exports.validateDocument = validateDocument;
 exports.assertValid = assertValid;
 exports.validateScenarioBundle = validateScenarioBundle;
 exports.clearValidatorCache = clearValidatorCache;
+exports.validateWorkingFluidEntry = validateWorkingFluidEntry;
+exports.validatePickupGeometryEntry = validatePickupGeometryEntry;
+exports.validateScenarioBundle3A = validateScenarioBundle3A;
 const ajv_1 = __importDefault(require("ajv"));
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
@@ -121,5 +125,56 @@ function validateScenarioBundle(scenario, subsystems) {
  */
 function clearValidatorCache() {
     validatorCache.clear();
+}
+// =============================================================================
+// Extension 3A schema registration and validation helpers
+// Governing law: 3A-spec §4.1, §10.1; dist-tree patch §4 (schema.ts patch target)
+// =============================================================================
+/**
+ * 3A schema IDs that must be resolvable in the schemas/ directory.
+ * These are additive to the baseline schema set.
+ */
+exports.EXTENSION_3A_SCHEMA_IDS = [
+    'working-fluid',
+    'pickup-geometry',
+];
+/**
+ * Validate a working-fluid catalog entry against the working-fluid schema.
+ * Used by 3A runtime to validate catalog entries before use.
+ * §7.1, §13.2.
+ */
+function validateWorkingFluidEntry(entry, entryId) {
+    return validateDocument('working-fluid', entry, entryId);
+}
+/**
+ * Validate a pickup-geometry catalog entry against the pickup-geometry schema.
+ * §8.1, §13.2.
+ */
+function validatePickupGeometryEntry(entry, entryId) {
+    return validateDocument('pickup-geometry', entry, entryId);
+}
+/**
+ * Validate a 3A-enabled scenario bundle:
+ * scenario + radiator + thermal-zones + working-fluid entries + pickup-geometry entries.
+ * §13 validation contract.
+ * Returns all validation results. Caller checks for any !valid result.
+ */
+function validateScenarioBundle3A(scenario, subsystems, workingFluidEntries = [], pickupGeometryEntries = []) {
+    const results = [];
+    // Baseline scenario + subsystems
+    results.push(validateDocument('scenario', scenario, 'scenario'));
+    for (const [schemaId, doc] of Object.entries(subsystems)) {
+        results.push(validateDocument(schemaId, doc, schemaId));
+    }
+    // 3A catalog entries
+    for (let i = 0; i < workingFluidEntries.length; i++) {
+        const entry = workingFluidEntries[i];
+        results.push(validateWorkingFluidEntry(entry, String(entry?.working_fluid_id ?? `fluid-${i}`)));
+    }
+    for (let i = 0; i < pickupGeometryEntries.length; i++) {
+        const entry = pickupGeometryEntries[i];
+        results.push(validatePickupGeometryEntry(entry, String(entry?.pickup_geometry_id ?? `geom-${i}`)));
+    }
+    return results;
 }
 //# sourceMappingURL=schema.js.map

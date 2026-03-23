@@ -54,4 +54,56 @@ export interface FlagEmitResult {
     has_blocking_flags: boolean;
 }
 export declare function emitFlags(flags: Flag[]): FlagEmitResult;
+export declare const FLAG_IDS_3A: {
+    readonly TOPOLOGY_CYCLE_DETECTED: "topology_cycle_detected";
+    readonly TOPOLOGY_DISCONNECTED_ZONE: "topology_disconnected_zone";
+    readonly TOPOLOGY_SINGLE_NEIGHBOR_BIDI: "topology_single_neighbor_bidirectional";
+    readonly TOPOLOGY_NO_CONVERGENCE_PEER: "topology_no_convergence_peer";
+    readonly CONVERGENCE_NONCONVERGED: "convergence_nonconverged";
+    readonly CONVERGENCE_RUNAWAY: "convergence_runaway";
+    readonly CONVERGENCE_TEMP_CLAMPED: "convergence_temp_clamped";
+    readonly RADIATION_PRESSURE_WARNING: "radiation_pressure_screening_warning";
+    readonly RESERVE_MARGIN_INSUFFICIENT: "reserve_margin_insufficient";
+    readonly T_SINK_UNRESOLVED: "t_sink_unresolved";
+    readonly RESISTANCE_ALL_NULL_WITH_LOAD: "resistance_all_null_with_load";
+    readonly BRIDGE_LOSS_HIGH: "bridge_loss_high";
+};
+/**
+ * Emit radiation-pressure warning flag. §11.10, §3.6.
+ * Flag-only: no propagation engine is triggered.
+ */
+export declare function makeFlagRadiationPressureWarning(p_rad_pa: number, f_rad_n: number, subsystem?: string): Flag;
+/**
+ * Emit convergence failure warning flag. §13.4.
+ */
+export declare function makeFlagConvergenceNonconverged(iterations: number, subsystem?: string): Flag;
+/**
+ * Emit convergence runaway flag. §13.4.
+ */
+export declare function makeFlagConvergenceRunaway(iterations: number, subsystem?: string): Flag;
+/**
+ * Emit reserve margin insufficient flag. §11.9.
+ */
+export declare function makeFlagReserveMarginInsufficient(radiator_id: string, a_eol: number, declared_area: number): Flag;
+/**
+ * Emit T_sink unresolved blocking flag. §9.4, §13.3.
+ */
+export declare function makeFlagTSinkUnresolved(radiator_id: string): Flag;
+/**
+ * Emit topology cycle detected flag. §13.1.
+ */
+export declare function makeFlagTopologyCycle(): Flag;
+/**
+ * Emit all 3A flags for an Extension3AResult.
+ * Convenience bundler — caller adds these flags to the runtime flag list.
+ */
+export declare function emit3AFlags(result: {
+    topology_cycle_detected: boolean;
+    convergence_status: string;
+    convergence_iterations: number;
+    reserve_margin_sufficient: boolean | null;
+    t_sink_source: string;
+    radiation_pressure_pa: number | null;
+    radiation_pressure_force_n: number | null;
+}): Flag[];
 //# sourceMappingURL=flag-emitter.d.ts.map

@@ -99,6 +99,11 @@ const CATALOG_SCHEMA_MAP = {
   "cavity-geometries": "cavity-geometry-catalog",
   "source-spectral-profiles": "source-spectral-profile-catalog",
   "research-evidence-classes": "research-evidence-class-catalog",
+  // Extension 3A catalog wrappers — spec §4.1, §4.2 — wired session 5
+  "working-fluids":    "working-fluid-catalog",
+  "pickup-geometries": "pickup-geometry-catalog",
+  // defaults-audit-3a is a spec §4.2 audit artifact, not a data catalog
+  // — intentional skip, no entry-level schema exists or is required
 };
 
 const catalogFiles = walkDir(CATALOGS_DIR, ".json");

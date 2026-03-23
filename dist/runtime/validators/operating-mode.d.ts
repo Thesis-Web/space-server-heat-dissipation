@@ -41,4 +41,40 @@ export declare function checkScavengingSignificance(branch_id: string, branch_ou
  * Convert OperatingModeViolations to Flags.
  */
 export declare function modeViolationsToFlags(violations: OperatingModeViolation[]): Flag[];
+/**
+ * 3A mode enum values per §5.2.
+ */
+export declare const MODEL_EXTENSION_3A_MODES: readonly ["disabled", "topology_only", "foundational_hardening"];
+export type ModelExtension3AMode = typeof MODEL_EXTENSION_3A_MODES[number];
+/**
+ * Topology validation policy values per §5.2.
+ */
+export declare const TOPOLOGY_VALIDATION_POLICIES: readonly ["blocking", "warn_only"];
+export type TopologyValidationPolicy = typeof TOPOLOGY_VALIDATION_POLICIES[number];
+/**
+ * Validate extension 3A mode field.
+ * Returns violation if mode is not a recognized 3A enum value.
+ * §5.2.
+ */
+export declare function validateExtension3AMode(mode: string | undefined | null): OperatingModeViolation[];
+/**
+ * Validate topology_validation_policy field.
+ * §5.1, §5.2.
+ */
+export declare function validateTopologyPolicy(policy: string | undefined | null): OperatingModeViolation[];
+/**
+ * Validate Extension 3A gate: if enable_model_extension_3a=false, 3A mode must be disabled.
+ * Backward compat: absent enable flag treated as false per §5.3.
+ * §5.3.
+ */
+export declare function validateExtension3AGate(enable: boolean | undefined | null, mode: string | undefined | null): OperatingModeViolation[];
+/**
+ * Full 3A mode validation bundle.
+ * Call with scenario fields to get all mode-level violations.
+ */
+export declare function validateExtension3AOperatingMode(params: {
+    enable_model_extension_3a?: boolean | null;
+    model_extension_3a_mode?: string | null;
+    topology_validation_policy?: string | null;
+}): OperatingModeViolation[];
 //# sourceMappingURL=operating-mode.d.ts.map

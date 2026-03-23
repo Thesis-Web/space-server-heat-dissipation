@@ -19,7 +19,7 @@
  * no runtime authority until Extension 2 is implemented and reviewed.
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TRM_CONFIDENCE_CLASS = exports.TRM_MATURITY_CLASS = exports.TRM_PROVENANCE_CLASS = exports.TRM_BAND_MATCH_SCORE_DEFAULT = exports.TRM_CAPTURE_EFFICIENCY_DEFAULT = exports.TRM_ETA_MAX = exports.TRM_ETA_MIN = exports.TRM_BAND_WIDTH_EPSILON_UM = exports.RUNTIME_VERSIONS = exports.BLUEPRINT_VERSION = exports.SCHEMA_BUNDLE_VERSION = exports.ENGINEERING_SPEC_VERSION = exports.RUNTIME_VERSION = exports.THERMAL_POLICY_MARGINS = exports.SUPPORTED_ORBIT_CLASSES = exports.DEFAULT_INTERPOLATION_RULE = exports.LOW_SIGNIFICANCE_THRESHOLD_FRACTION = exports.RESERVE_MARGIN_DEFAULT = exports.EPSILON_RAD_DEFAULT = exports.T_REF_DEFAULT_K = exports.T_ABSOLUTE_ZERO_K = exports.T_SINK_EFFECTIVE_DEFAULT_K = exports.T_SINK_DEEP_SPACE_K = exports.WIEN_DISPLACEMENT_UM_K = exports.STEFAN_BOLTZMANN = exports.SIGMA_W_M2_K4 = void 0;
+exports.TRM_CONFIDENCE_CLASS = exports.TRM_MATURITY_CLASS = exports.TRM_PROVENANCE_CLASS = exports.TRM_BAND_MATCH_SCORE_DEFAULT = exports.TRM_CAPTURE_EFFICIENCY_DEFAULT = exports.TRM_ETA_MAX = exports.TRM_ETA_MIN = exports.TRM_BAND_WIDTH_EPSILON_UM = exports.EXTENSION_3A_BLUEPRINT_VERSION = exports.EXTENSION_3A_SPEC_VERSION = exports.TOPOLOGY_VALIDATION_POLICY_DEFAULT = exports.CONVERGENCE_RUNAWAY_MULTIPLIER_MIN = exports.CONVERGENCE_RUNAWAY_MULTIPLIER_DEFAULT = exports.CONVERGENCE_TOLERANCE_REL_FRACTION_DEFAULT = exports.CONVERGENCE_TOLERANCE_ABS_W_DEFAULT = exports.CONVERGENCE_MAX_ITERATIONS_DEFAULT = exports.SPEED_OF_LIGHT_M_PER_S = exports.RUNTIME_VERSIONS = exports.BLUEPRINT_VERSION = exports.SCHEMA_BUNDLE_VERSION = exports.ENGINEERING_SPEC_VERSION = exports.RUNTIME_VERSION = exports.THERMAL_POLICY_MARGINS = exports.SUPPORTED_ORBIT_CLASSES = exports.DEFAULT_INTERPOLATION_RULE = exports.LOW_SIGNIFICANCE_THRESHOLD_FRACTION = exports.RESERVE_MARGIN_DEFAULT = exports.EPSILON_RAD_DEFAULT = exports.T_REF_DEFAULT_K = exports.T_ABSOLUTE_ZERO_K = exports.T_SINK_EFFECTIVE_DEFAULT_K = exports.T_SINK_DEEP_SPACE_K = exports.WIEN_DISPLACEMENT_UM_K = exports.STEFAN_BOLTZMANN = exports.SIGMA_W_M2_K4 = void 0;
 // =============================================================================
 // § A — Blackbody and radiation physics
 // =============================================================================
@@ -111,6 +111,52 @@ exports.RUNTIME_VERSIONS = {
     schema_bundle: exports.SCHEMA_BUNDLE_VERSION,
     blueprint: exports.BLUEPRINT_VERSION,
 };
+// =============================================================================
+// § F — Extension 3A foundational hardening constants
+// =============================================================================
+//
+// Governing law: orbital-thermal-trade-system-model-extension-3a-engineering-spec-v0.4.1
+//
+// These constants are authoritative for all 3A runtime modules. They must be
+// imported from here — no 3A module may re-declare sigma or c inline.
+// =============================================================================
+/**
+ * Speed of light in vacuum.
+ * c = 299 792 458 m/s  (exact, SI definition)
+ * Used in radiation-pressure flag metric: p_rad = q'' / c  (§11.10)
+ */
+exports.SPEED_OF_LIGHT_M_PER_S = 299_792_458;
+/**
+ * Default max iterations for convergence loop. §5.4, §12.1
+ */
+exports.CONVERGENCE_MAX_ITERATIONS_DEFAULT = 25;
+/**
+ * Default absolute tolerance for convergence (watts). §5.4, §12.1
+ */
+exports.CONVERGENCE_TOLERANCE_ABS_W_DEFAULT = 1.0;
+/**
+ * Default relative tolerance fraction for convergence. §5.4, §12.1
+ */
+exports.CONVERGENCE_TOLERANCE_REL_FRACTION_DEFAULT = 0.001;
+/**
+ * Default runaway multiplier. §5.4, §12.1
+ * Minimum is 2.0 per §5.4 rationale note.
+ */
+exports.CONVERGENCE_RUNAWAY_MULTIPLIER_DEFAULT = 4.0;
+/**
+ * Minimum allowed runaway multiplier. §5.4.
+ * At 1.0 runaway would trip on any non-trivial transient.
+ */
+exports.CONVERGENCE_RUNAWAY_MULTIPLIER_MIN = 2.0;
+/**
+ * Default topology validation policy. §5.1, §12.1
+ */
+exports.TOPOLOGY_VALIDATION_POLICY_DEFAULT = 'blocking';
+/**
+ * Extension 3A version token — emitted in packet metadata.
+ */
+exports.EXTENSION_3A_SPEC_VERSION = 'v0.4.1';
+exports.EXTENSION_3A_BLUEPRINT_VERSION = 'v0.4.1';
 // =============================================================================
 // § E — TRM exploratory layer hooks  (Extension 2 forward surface)
 // =============================================================================
