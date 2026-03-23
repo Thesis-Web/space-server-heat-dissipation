@@ -1,0 +1,128 @@
+{
+  "schema_version": "3c-catalog-1",
+  "extension_id": "3c",
+  "_catalog_doc": "docs/catalogs/exploratory-concepts-extension-3c.json",
+  "_governing_blueprint": "docs/blueprints/orbital-thermal-trade-system-model-extension-3c-blueprint-v0.1.0.md",
+  "_governing_spec": "docs/engineering-specs/orbital-thermal-trade-system-model-extension-3c-engineering-spec-v0.1.0.md",
+  "_schema_ref": "schemas/exploratory-concept-catalog/exploratory-concept-catalog.schema.json",
+  "_build_note": "Metadata-only catalog. No runtime authority. No numeric output effect. TPV excluded. All promotion requires future canonical extension.",
+  "entries": [
+    {
+      "schema_version": "3c-1",
+      "extension_id": "3c",
+      "concept_id": "EXT-DISC-007",
+      "title": "GEO Scavenging / Ambient Collection",
+      "short_label": "GEO Scavenging",
+      "summary": "Exploratory concept investigating the potential to harvest ambient thermal or radiative energy in geosynchronous orbit conditions for supplemental heat management. Preserved as metadata only under Extension 3C. No current runtime thermal credit or scenario authority is granted. This concept requires promotion via a future canonical extension before any numeric or operative model authority is conferred.",
+      "provenance_evidence_class": "tier5_model_inference",
+      "provenance_sources": ["ext-disc-007-lineage", "exploratory-ideation-record-3c"],
+      "maturity_state": "concept_only",
+      "confidence_state": "low",
+      "output_effect_class": "metadata_only_no_runtime_effect",
+      "promotion_requirement": "future_canonical_extension_required",
+      "no_current_runtime_authority": true,
+      "render_visibility": "catalog_and_appendix_read_only",
+      "caveats": [
+        "No active runtime authority under Extension 3C.",
+        "No thermal credit, no packet authority, no scenario execution authority.",
+        "Ambient scavenging mechanisms in GEO are speculative and unvalidated at this maturity level.",
+        "Any numeric benefit claims require future rigorous extension law."
+      ],
+      "notes": [
+        "Preserved from prior ideation lineage for governance continuity and evidence traceability.",
+        "Concept ID EXT-DISC-007 carries no active runtime semantics under this catalog.",
+        "Downstream owner hint: planned Extension 4 may evaluate promotion scope."
+      ],
+      "explicit_non_goals": [
+        "no runtime thermal credit",
+        "no packet authority",
+        "no scenario execution authority",
+        "no numeric output mutation",
+        "no radiator area reduction claim",
+        "no enhancement factor definition",
+        "no hidden runtime state"
+      ],
+      "tpv_exclusion_acknowledged": true,
+      "downstream_owner_hint": "planned_extension_4",
+      "tags": ["geo", "ambient-collection", "scavenging", "exploratory", "metadata-only"]
+    },
+    {
+      "schema_version": "3c-1",
+      "extension_id": "3c",
+      "concept_id": "EXT-DISC-018",
+      "title": "Near-Field Radiative Transfer Enhancement",
+      "short_label": "Near-Field Radiative",
+      "summary": "Exploratory concept examining near-field radiative transfer mechanisms as a potential avenue for enhanced thermal dissipation beyond classical far-field Stefan-Boltzmann limits. Preserved as metadata only under Extension 3C. No current runtime thermal credit or scenario authority is granted. This concept requires promotion via a future canonical extension before any numeric or operative model authority is conferred.",
+      "provenance_evidence_class": "tier5_model_inference",
+      "provenance_sources": ["ext-disc-018-lineage", "exploratory-ideation-record-3c"],
+      "maturity_state": "concept_only",
+      "confidence_state": "low",
+      "output_effect_class": "metadata_only_no_runtime_effect",
+      "promotion_requirement": "future_canonical_extension_required",
+      "no_current_runtime_authority": true,
+      "render_visibility": "catalog_and_appendix_read_only",
+      "caveats": [
+        "No active runtime authority under Extension 3C.",
+        "No thermal credit, no packet authority, no scenario execution authority.",
+        "Near-field radiative transfer in the space server context is at concept-only maturity.",
+        "Any numeric benefit claims require future rigorous extension law."
+      ],
+      "notes": [
+        "Preserved from prior ideation lineage for governance continuity and evidence traceability.",
+        "Concept ID EXT-DISC-018 carries no active runtime semantics under this catalog.",
+        "Downstream owner hint: planned Extension 4 may evaluate promotion scope."
+      ],
+      "explicit_non_goals": [
+        "no runtime thermal credit",
+        "no packet authority",
+        "no scenario execution authority",
+        "no numeric output mutation",
+        "no radiator area reduction claim",
+        "no enhancement factor definition",
+        "no hidden runtime state"
+      ],
+      "tpv_exclusion_acknowledged": true,
+      "downstream_owner_hint": "planned_extension_4",
+      "tags": ["near-field", "radiative-transfer", "enhancement", "exploratory", "metadata-only"]
+    },
+    {
+      "schema_version": "3c-1",
+      "extension_id": "3c",
+      "concept_id": "EXT-DISC-019",
+      "title": "Osmotic / Chemical Gradient Cooling",
+      "short_label": "Osmotic Gradient Cooling",
+      "summary": "Exploratory concept investigating osmotic or chemical gradient mechanisms as potential non-traditional cooling pathways for space server thermal management. Preserved as metadata only under Extension 3C. No current runtime thermal credit or scenario authority is granted. This concept requires promotion via a future canonical extension before any numeric or operative model authority is conferred.",
+      "provenance_evidence_class": "tier5_model_inference",
+      "provenance_sources": ["ext-disc-019-lineage", "exploratory-ideation-record-3c"],
+      "maturity_state": "concept_only",
+      "confidence_state": "low",
+      "output_effect_class": "metadata_only_no_runtime_effect",
+      "promotion_requirement": "future_canonical_extension_required",
+      "no_current_runtime_authority": true,
+      "render_visibility": "catalog_and_appendix_read_only",
+      "caveats": [
+        "No active runtime authority under Extension 3C.",
+        "No thermal credit, no packet authority, no scenario execution authority.",
+        "Osmotic and chemical gradient cooling mechanisms for space applications are at concept-only maturity.",
+        "Any numeric benefit claims require future rigorous extension law."
+      ],
+      "notes": [
+        "Preserved from prior ideation lineage for governance continuity and evidence traceability.",
+        "Concept ID EXT-DISC-019 carries no active runtime semantics under this catalog.",
+        "Downstream owner hint: planned Extension 4 may evaluate promotion scope."
+      ],
+      "explicit_non_goals": [
+        "no runtime thermal credit",
+        "no packet authority",
+        "no scenario execution authority",
+        "no numeric output mutation",
+        "no radiator area reduction claim",
+        "no enhancement factor definition",
+        "no hidden runtime state"
+      ],
+      "tpv_exclusion_acknowledged": true,
+      "downstream_owner_hint": "planned_extension_4",
+      "tags": ["osmotic", "chemical-gradient", "cooling", "exploratory", "metadata-only"]
+    }
+  ]
+}

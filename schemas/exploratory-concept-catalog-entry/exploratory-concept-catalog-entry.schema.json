@@ -1,0 +1,175 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://space-server-heat-dissipation/schemas/exploratory-concept-catalog-entry/exploratory-concept-catalog-entry.schema.json",
+  "schema_id": "exploratory-concept-catalog-entry",
+  "schema_version": "v0.1.0",
+  "extension_id": "3c",
+  "title": "ExploratoryConceptCatalogEntry",
+  "description": "A single metadata-only exploratory concept catalog entry. No runtime authority. Governed by Extension 3C blueprint v0.1.0 and engineering spec v0.1.0.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "extension_id",
+    "concept_id",
+    "title",
+    "short_label",
+    "summary",
+    "provenance_evidence_class",
+    "provenance_sources",
+    "maturity_state",
+    "confidence_state",
+    "output_effect_class",
+    "promotion_requirement",
+    "no_current_runtime_authority",
+    "render_visibility",
+    "caveats",
+    "notes",
+    "explicit_non_goals",
+    "tpv_exclusion_acknowledged"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "3c-1",
+      "description": "Schema version literal. Must equal 3c-1. Spec §4.2."
+    },
+    "extension_id": {
+      "type": "string",
+      "const": "3c",
+      "description": "Extension identifier literal. Must equal 3c. Spec §4.2."
+    },
+    "concept_id": {
+      "type": "string",
+      "enum": ["EXT-DISC-007", "EXT-DISC-018", "EXT-DISC-019"],
+      "description": "Discovery concept identifier. One of the three canonical 3C concepts. Spec §4.2, §6."
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160,
+      "description": "Full concept title. 1-160 chars. Spec §4.2."
+    },
+    "short_label": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "description": "Short display label. 1-64 chars. Spec §4.2."
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1500,
+      "description": "Descriptive summary. 1-1500 chars. Must not claim active numeric benefit. Spec §4.2, §4.3."
+    },
+    "provenance_evidence_class": {
+      "type": "string",
+      "enum": [
+        "tier1_primary",
+        "tier2_analyst",
+        "tier3_technical_press",
+        "tier4_operator_discussion",
+        "tier5_model_inference"
+      ],
+      "description": "Evidence tier classification. Spec §4.1 EvidenceClass."
+    },
+    "provenance_sources": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "description": "At least one source token or citation label. Spec §4.2."
+    },
+    "maturity_state": {
+      "type": "string",
+      "enum": [
+        "concept_only",
+        "early_theoretical",
+        "bench_principle",
+        "prototype_candidate",
+        "research_watch"
+      ],
+      "description": "Concept maturity state. Spec §4.1 MaturityState."
+    },
+    "confidence_state": {
+      "type": "string",
+      "enum": [
+        "low",
+        "low_medium",
+        "medium",
+        "medium_high",
+        "high"
+      ],
+      "description": "Confidence state in the concept. Spec §4.1 ConfidenceState."
+    },
+    "output_effect_class": {
+      "type": "string",
+      "const": "metadata_only_no_runtime_effect",
+      "description": "Output effect class. Must equal metadata_only_no_runtime_effect. Spec §4.1, §4.3."
+    },
+    "promotion_requirement": {
+      "type": "string",
+      "const": "future_canonical_extension_required",
+      "description": "Promotion requirement. Must equal future_canonical_extension_required. Spec §4.1, §4.3."
+    },
+    "no_current_runtime_authority": {
+      "type": "boolean",
+      "const": true,
+      "description": "Literal true. Must equal true. Spec §4.2, §4.3."
+    },
+    "render_visibility": {
+      "type": "string",
+      "enum": [
+        "hidden",
+        "catalog_read_only",
+        "appendix_read_only",
+        "catalog_and_appendix_read_only"
+      ],
+      "default": "catalog_read_only",
+      "description": "Read-only render visibility options only. Spec §4.1 RenderVisibility, §4.2."
+    },
+    "caveats": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Caveats array. May be empty but field must exist. Spec §4.2."
+    },
+    "notes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Notes array. May be empty but field must exist. Spec §4.2."
+    },
+    "explicit_non_goals": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 4,
+      "description": "Must include at least no runtime thermal credit, no packet authority, no scenario execution authority, no numeric output mutation. Spec §4.2, §4.3."
+    },
+    "tpv_exclusion_acknowledged": {
+      "type": "boolean",
+      "const": true,
+      "description": "TPV exclusion acknowledgement. Must equal true. Spec §4.2, §4.3."
+    },
+    "downstream_owner_hint": {
+      "type": "string",
+      "const": "planned_extension_4",
+      "description": "Optional. If present must equal planned_extension_4. Spec §4.2."
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Optional descriptive tags. Spec §4.2."
+    }
+  },
+  "additionalProperties": false,
+  "_prohibited_field_prefixes": [
+    "iteration_count",
+    "convergence_tolerance",
+    "non_convergence_behavior",
+    "recaptured_power",
+    "exported_power",
+    "onboard_heat_return",
+    "radiator_area_reduction",
+    "feedback_pass",
+    "rerun_behavior"
+  ],
+  "_spec_ref": "extension-3c-engineering-spec-v0.1.0 §4",
+  "_blueprint_ref": "extension-3c-blueprint-v0.1.0"
+}

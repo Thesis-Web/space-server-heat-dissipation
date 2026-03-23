@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://space-server-heat-dissipation/schemas/exploratory-concept-catalog/exploratory-concept-catalog.schema.json",
+  "schema_id": "exploratory-concept-catalog",
+  "schema_version": "v0.1.0",
+  "extension_id": "3c",
+  "title": "ExploratoryConceptCatalog",
+  "description": "The canonical 3C metadata-only exploratory concept catalog collection. Contains exactly three entries at initial 3C release. No runtime authority. Governed by Extension 3C blueprint v0.1.0 and engineering spec v0.1.0.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "extension_id",
+    "entries"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "3c-catalog-1",
+      "description": "Schema version literal. Must equal 3c-catalog-1. Spec §5.1."
+    },
+    "extension_id": {
+      "type": "string",
+      "const": "3c",
+      "description": "Extension identifier literal. Must equal 3c. Spec §5.1."
+    },
+    "entries": {
+      "type": "array",
+      "description": "Exactly 3 entries at initial 3C release. One for each of EXT-DISC-007, EXT-DISC-018, EXT-DISC-019. No duplicates. Spec §5.2, §6.",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "$ref": "https://space-server-heat-dissipation/schemas/exploratory-concept-catalog-entry/exploratory-concept-catalog-entry.schema.json"
+      },
+      "uniqueItems": true
+    }
+  },
+  "additionalProperties": false,
+  "_collection_invariants": {
+    "entries_length": "must equal 3 at initial 3C release",
+    "duplicate_concept_ids": "forbidden",
+    "required_concept_ids": ["EXT-DISC-007", "EXT-DISC-018", "EXT-DISC-019"],
+    "extra_concept_ids": "forbidden in initial 3C release"
+  },
+  "_spec_ref": "extension-3c-engineering-spec-v0.1.0 §5",
+  "_blueprint_ref": "extension-3c-blueprint-v0.1.0"
+}
