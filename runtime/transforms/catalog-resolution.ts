@@ -231,3 +231,89 @@ export function resolveZoneCatalogRefs(
 
   return { workingFluidResults, pickupGeometryResults, transform_trace, blocking_errors };
 }
+
+// =============================================================================
+// Extension 3B catalog resolution
+// Governing law: 3B-spec §10, §12.1, §12.2, §12.3
+// Blueprint: 3B-blueprint §5.4
+// Resolves preset IDs against the three 3B preset catalogs.
+// Does not replace or mutate 3A or baseline catalog resolution logic.
+// =============================================================================
+
+export interface Preset3BResolutionResult {
+  preset_id: string;
+  found: boolean;
+  preset_entry: Record<string, unknown> | null;
+  catalog_id: string;
+  catalog_version: string;
+  transform_trace_entry: string;
+}
+
+/**
+ * Resolve a vault-gas-environment preset ID against its catalog.
+ * 3B-spec §10.1, §12.1.
+ */
+export function resolveVaultGasPreset(
+  presetId: string,
+  catalog: { catalog_id: string; catalog_version: string; presets: Record<string, unknown>[] }
+): Preset3BResolutionResult {
+  const entry = catalog.presets.find(
+    (p) => (p['preset_id'] as string) === presetId
+  ) ?? null;
+  return {
+    preset_id: presetId,
+    found: entry !== null,
+    preset_entry: entry,
+    catalog_id: catalog.catalog_id,
+    catalog_version: catalog.catalog_version,
+    transform_trace_entry: entry
+      ? `vault-gas-preset resolved: '${presetId}' from '${catalog.catalog_id}@${catalog.catalog_version}'`
+      : `vault-gas-preset NOT FOUND: '${presetId}' in '${catalog.catalog_id}@${catalog.catalog_version}' — 3B-spec §10.1`
+  };
+}
+
+/**
+ * Resolve a transport-implementation preset ID against its catalog.
+ * 3B-spec §10.2, §12.2.
+ */
+export function resolveTransportImplementationPreset(
+  presetId: string,
+  catalog: { catalog_id: string; catalog_version: string; presets: Record<string, unknown>[] }
+): Preset3BResolutionResult {
+  const entry = catalog.presets.find(
+    (p) => (p['preset_id'] as string) === presetId
+  ) ?? null;
+  return {
+    preset_id: presetId,
+    found: entry !== null,
+    preset_entry: entry,
+    catalog_id: catalog.catalog_id,
+    catalog_version: catalog.catalog_version,
+    transform_trace_entry: entry
+      ? `transport-impl-preset resolved: '${presetId}' from '${catalog.catalog_id}@${catalog.catalog_version}'`
+      : `transport-impl-preset NOT FOUND: '${presetId}' in '${catalog.catalog_id}@${catalog.catalog_version}' — 3B-spec §10.2`
+  };
+}
+
+/**
+ * Resolve an eclipse-state preset ID against its catalog.
+ * 3B-spec §10.3, §12.3.
+ */
+export function resolveEclipseStatePreset(
+  presetId: string,
+  catalog: { catalog_id: string; catalog_version: string; presets: Record<string, unknown>[] }
+): Preset3BResolutionResult {
+  const entry = catalog.presets.find(
+    (p) => (p['preset_id'] as string) === presetId
+  ) ?? null;
+  return {
+    preset_id: presetId,
+    found: entry !== null,
+    preset_entry: entry,
+    catalog_id: catalog.catalog_id,
+    catalog_version: catalog.catalog_version,
+    transform_trace_entry: entry
+      ? `eclipse-state-preset resolved: '${presetId}' from '${catalog.catalog_id}@${catalog.catalog_version}'`
+      : `eclipse-state-preset NOT FOUND: '${presetId}' in '${catalog.catalog_id}@${catalog.catalog_version}' — 3B-spec §10.3`
+  };
+}

@@ -1,0 +1,86 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "schema_id": "eclipse-state-preset-catalog",
+  "schema_version": "v0.1.0",
+  "title": "EclipseStatePresetCatalog",
+  "description": "Catalog schema for eclipse-state presets. Populates explicit canonical operating_state fields. 3B-spec \u00a710.3.",
+  "type": "object",
+  "required": [
+    "catalog_id",
+    "catalog_version",
+    "presets"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "catalog_id": {
+      "type": "string"
+    },
+    "catalog_version": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string",
+      "default": ""
+    },
+    "presets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "preset_id",
+          "preset_version",
+          "label",
+          "current_state",
+          "storage_support_enabled",
+          "compute_derate_fraction",
+          "noncritical_branch_disable_refs",
+          "notes"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "preset_id": {
+            "type": "string"
+          },
+          "preset_version": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "current_state": {
+            "type": "string",
+            "enum": [
+              "sunlit",
+              "eclipse",
+              "custom"
+            ]
+          },
+          "storage_support_enabled": {
+            "type": "boolean"
+          },
+          "storage_ref": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "compute_derate_fraction": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "noncritical_branch_disable_refs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "$id": "https://space-server-heat-dissipation/schemas/catalogs/eclipse-state-preset-catalog.schema.json"
+}

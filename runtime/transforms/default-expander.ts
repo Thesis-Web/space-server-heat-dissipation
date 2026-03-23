@@ -330,3 +330,161 @@ export function injectRadiator3ADefaults(
 
   return injected;
 }
+
+// =============================================================================
+// Extension 3B default expansion
+// Governing law: 3B-spec §12A
+// Every new optional 3B field must be injected deterministically before schema
+// and bounds validation. Parent 3B objects absent from the scenario must be
+// materialized with the exact field defaults defined in 3B-spec §5–§8.
+// =============================================================================
+
+/**
+ * Inject Extension 3B scenario-level defaults.
+ * 3B-spec §12A: scenario-level fields.
+ * Returns array of field paths where defaults were injected.
+ */
+export function injectScenario3BDefaults(
+  scenario: Record<string, unknown>
+): string[] {
+  const injected: string[] = [];
+
+  function injectField(field: string, defaultVal: unknown): void {
+    if (scenario[field] === undefined || scenario[field] === null) {
+      scenario[field] = defaultVal;
+      injected.push(`scenario.${field}`);
+    }
+  }
+
+  // 3B-spec §5.1
+  injectField('enable_model_extension_3b', false);
+  injectField('model_extension_3b_mode', 'disabled');
+  injectField('operating_state', null);
+  injectField('extension_3b_catalog_versions', null);
+
+  return injected;
+}
+
+/**
+ * Inject Extension 3B per-zone defaults onto a mutable zone object.
+ * 3B-spec §12A: thermal-zone-level fields.
+ * Materializes vault_gas_environment_model, transport_implementation,
+ * and loop_model with all spec-declared defaults if absent.
+ * Returns array of field paths where defaults were injected.
+ */
+export function injectZone3BDefaults(
+  zone: Record<string, unknown>
+): string[] {
+  const injected: string[] = [];
+  const zoneId = String(zone['zone_id'] ?? 'unknown');
+
+  // vault_gas_environment_model — 3B-spec §6.1
+  if (zone['vault_gas_environment_model'] === undefined || zone['vault_gas_environment_model'] === null) {
+    zone['vault_gas_environment_model'] = {
+      mode: 'none',
+      preset_id: null,
+      preset_version: null,
+      gas_presence_mode: 'none',
+      gas_species_ref: null,
+      pressure_pa: null,
+      convection_assumption_mode: 'disabled',
+      effective_h_internal_w_per_m2_k: null,
+      exchange_area_m2: null,
+      contamination_outgassing_mode: 'none',
+      manual_override_fields: [],
+      notes: ''
+    };
+    injected.push(`thermal_zones[${zoneId}].vault_gas_environment_model (full object — spec §6.1 defaults)`);
+  }
+
+  // transport_implementation — 3B-spec §6.2
+  if (zone['transport_implementation'] === undefined || zone['transport_implementation'] === null) {
+    zone['transport_implementation'] = {
+      mode: 'none',
+      preset_id: null,
+      preset_version: null,
+      transport_class: 'passive',
+      pump_model_mode: 'none',
+      pump_power_input_w: null,
+      pump_efficiency_fraction: null,
+      pressure_drop_pa: null,
+      mass_flow_kg_per_s: null,
+      fluid_density_kg_per_m3_override: null,
+      gas_management_mode: 'not_applicable',
+      allowable_void_fraction: null,
+      declared_void_fraction: null,
+      bubble_blanketing_penalty_fraction: null,
+      gas_lock_flow_derate_fraction: null,
+      separator_type: 'none',
+      notes: ''
+    };
+    injected.push(`thermal_zones[${zoneId}].transport_implementation (full object — spec §6.2 defaults)`);
+  }
+
+  // loop_model — 3B-spec §6.3 (aggregation only)
+  if (zone['loop_model'] === undefined || zone['loop_model'] === null) {
+    zone['loop_model'] = {
+      loop_id: null,
+      upstream_loop_ref: null,
+      downstream_loop_ref: null,
+      derived_total_parasitic_w: null,
+      derived_effective_loop_resistance_addition_k_per_w: null,
+      notes: ''
+    };
+    injected.push(`thermal_zones[${zoneId}].loop_model (full object — spec §6.3 defaults)`);
+  }
+
+  return injected;
+}
+
+/**
+ * Inject Extension 3B conversion-branch defaults.
+ * 3B-spec §12A: conversion-branch-level TEG fields.
+ * Returns array of field paths where defaults were injected.
+ */
+export function injectBranch3BDefaults(
+  branch: Record<string, unknown>
+): string[] {
+  const injected: string[] = [];
+  const branchId = String(branch['branch_id'] ?? 'unknown');
+
+  function injectField(field: string, defaultVal: unknown): void {
+    if (branch[field] === undefined || branch[field] === null) {
+      branch[field] = defaultVal;
+      injected.push(`conversion_branch[${branchId}].${field}`);
+    }
+  }
+
+  // 3B-spec §8 TEG boundedness defaults
+  injectField('teg_carnot_fraction_cap', 0.20);
+  injectField('teg_residual_heat_on_node', true);
+  injectField('teg_subordinate_to_rejection', true);
+
+  return injected;
+}
+
+/**
+ * Inject Extension 3B run-packet defaults.
+ * 3B-spec §12A: run-packet-level fields.
+ * Returns array of field paths where defaults were injected.
+ */
+export function injectRunPacket3BDefaults(
+  packet: Record<string, unknown>
+): string[] {
+  const injected: string[] = [];
+
+  function injectField(field: string, defaultVal: unknown): void {
+    if (packet[field] === undefined || packet[field] === null) {
+      packet[field] = defaultVal;
+      injected.push(`run_packet.${field}`);
+    }
+  }
+
+  // 3B-spec §9
+  injectField('enable_model_extension_3b', false);
+  injectField('model_extension_3b_mode', 'disabled');
+  injectField('extension_3b_catalog_versions', null);
+  injectField('extension_3b_result', null);
+
+  return injected;
+}

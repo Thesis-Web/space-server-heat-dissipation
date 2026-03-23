@@ -241,3 +241,64 @@ export function buildExtension3APacketMetadata(params: {
     generated_artifacts_3a: artifacts,
   };
 }
+
+// =============================================================================
+// Extension 3B packet metadata additions
+// Governing law: 3B-spec §10.5 — resolved 3B preset IDs, preset versions, and
+// catalog-version lineage must emit through the canonical packet-metadata emitter
+// path in addition to being present on extension_3b_result.preset_provenance.
+// Blueprint: 3B-blueprint §5.4 (provenance law)
+// =============================================================================
+
+export interface Extension3BPresetProvenanceEntry {
+  zone_id: string | null;
+  object_type: string;
+  preset_catalog_id: string;
+  preset_entry_id: string;
+  preset_version: string;
+  manual_override_fields: string[];
+}
+
+export interface Extension3BPacketMetadataAddition {
+  enable_model_extension_3b: boolean;
+  model_extension_3b_mode: string;
+  extension_3b_catalog_versions: {
+    vault_gas_environment_presets: string | null;
+    transport_implementation_presets: string | null;
+    eclipse_state_presets: string | null;
+  };
+  preset_provenance: Extension3BPresetProvenanceEntry[];
+  spec_version: string;
+  blueprint_version: string;
+}
+
+/**
+ * buildExtension3BPacketMetadata
+ * 3B-spec §10.5: emit resolved 3B preset IDs, versions, and catalog-version
+ * lineage through the canonical packet-metadata emitter path.
+ * This is called in addition to extension_3b_result.preset_provenance —
+ * both surfaces must carry the provenance data.
+ */
+export function buildExtension3BPacketMetadata(params: {
+  enable_model_extension_3b: boolean;
+  model_extension_3b_mode: string;
+  spec_version?: string;
+  blueprint_version?: string;
+  vault_gas_environment_presets_catalog_version?: string | null;
+  transport_implementation_presets_catalog_version?: string | null;
+  eclipse_state_presets_catalog_version?: string | null;
+  preset_provenance?: Extension3BPresetProvenanceEntry[];
+}): Extension3BPacketMetadataAddition {
+  return {
+    enable_model_extension_3b: params.enable_model_extension_3b,
+    model_extension_3b_mode: params.model_extension_3b_mode,
+    extension_3b_catalog_versions: {
+      vault_gas_environment_presets: params.vault_gas_environment_presets_catalog_version ?? null,
+      transport_implementation_presets: params.transport_implementation_presets_catalog_version ?? null,
+      eclipse_state_presets: params.eclipse_state_presets_catalog_version ?? null,
+    },
+    preset_provenance: params.preset_provenance ?? [],
+    spec_version: params.spec_version ?? 'v0.1.1',
+    blueprint_version: params.blueprint_version ?? 'v0.1.1',
+  };
+}

@@ -333,3 +333,72 @@ export function emit3AFlags(result: {
 
   return flags;
 }
+
+// =============================================================================
+// Extension 3B flag emission
+// Governing law: 3B-spec §13, §14 (blocking_errors, warnings)
+// Blueprint: 3B-blueprint §5.6
+// 3B warnings and blocking errors must emit through the canonical flag path.
+// Additive. Does not mutate baseline or 3A flag IDs.
+// =============================================================================
+
+export const FLAG_IDS_3B = {
+  VAULT_GAS_CONVECTION_MISSING_H:     '3B-VAULT-GAS-001',
+  VAULT_GAS_CONVECTION_MISSING_AREA:  '3B-VAULT-GAS-002',
+  VAULT_GAS_ELEVATED_OUTGASSING:      '3B-VAULT-GAS-W001',
+  TRANSPORT_DIRECT_POWER_MISSING:     '3B-TRANSPORT-001',
+  TRANSPORT_PRESSURE_DROP_MISSING:    '3B-TRANSPORT-002',
+  TRANSPORT_DENSITY_UNRESOLVED:       '3B-TRANSPORT-005',
+  GAS_MGMT_VOID_EXCEEDED_BLOCKING:    '3B-GAS-MGMT-001',
+  GAS_MGMT_VOID_EXCEEDED_WARNING:     '3B-GAS-MGMT-W001',
+  GAS_MGMT_PENALTY_OUT_OF_RANGE:      '3B-GAS-MGMT-002',
+  TEG_NOT_SUBORDINATE:                '3B-TEG-001',
+  TEG_TEMPS_MISSING:                  '3B-TEG-002',
+  TEG_THOT_LEQ_TCOLD:                 '3B-TEG-003',
+  TEG_ETA_EXCEEDS_CARNOT:             '3B-TEG-W001',
+  TEG_RESIDUAL_OFF_NODE:              '3B-TEG-W002',
+  ECLIPSE_STORAGE_REF_MISSING:        '3B-ECLIPSE-001',
+  ECLIPSE_DERATE_OUT_OF_RANGE:        '3B-ECLIPSE-002',
+  ECLIPSE_STATE_CUSTOM:               '3B-ECLIPSE-W001',
+  NORM_PRESET_NOT_FOUND:              '3B-NORM-001',
+  MODE_GATE_VIOLATION:                '3B-BOUNDS-001',
+} as const;
+
+/**
+ * Emit 3B flags from extension_3b_result blocking_errors and warnings.
+ * 3B-spec §13, §14.
+ */
+export function emit3BFlags(result: {
+  blocking_errors: string[];
+  warnings: string[];
+}): Flag[] {
+  const flags: Flag[] = [];
+
+  for (const err of result.blocking_errors) {
+    flags.push(makeFlag(
+      err.split(':')[0]?.trim() ?? '3B-ERROR',
+      'error',
+      err,
+      'extension_3b',
+      'blocking_errors',
+      err,
+      null,
+      true
+    ));
+  }
+
+  for (const warn of result.warnings) {
+    flags.push(makeFlag(
+      warn.split(':')[0]?.trim() ?? '3B-WARN',
+      'warning',
+      warn,
+      'extension_3b',
+      'warnings',
+      warn,
+      null,
+      false
+    ));
+  }
+
+  return flags;
+}

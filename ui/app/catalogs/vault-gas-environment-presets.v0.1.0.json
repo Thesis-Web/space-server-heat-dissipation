@@ -1,0 +1,46 @@
+{
+  "catalog_id": "vault-gas-environment-presets",
+  "catalog_version": "v0.1.0",
+  "description": "Vault gas environment presets for 3B subsystem-depth modeling. 3B-spec §10.1.",
+  "presets": [
+    {
+      "preset_id": "vge-hard-vacuum",
+      "preset_version": "v0.1.0",
+      "label": "Hard Vacuum (No Gas Environment)",
+      "gas_presence_mode": "none",
+      "gas_species_ref": null,
+      "pressure_pa": 0,
+      "convection_assumption_mode": "disabled",
+      "effective_h_internal_w_per_m2_k": null,
+      "exchange_area_m2": null,
+      "contamination_outgassing_mode": "none",
+      "notes": "Default hard-vacuum assumption. No gas convection contribution to resistance chain."
+    },
+    {
+      "preset_id": "vge-trace-fill-convection-disabled",
+      "preset_version": "v0.1.0",
+      "label": "Trace Gas Fill — Convection Disabled",
+      "gas_presence_mode": "trace_fill",
+      "gas_species_ref": null,
+      "pressure_pa": 1.0,
+      "convection_assumption_mode": "disabled",
+      "effective_h_internal_w_per_m2_k": null,
+      "exchange_area_m2": null,
+      "contamination_outgassing_mode": "nominal_clean",
+      "notes": "Trace gas presence acknowledged but convection contribution not modeled. Operator must override if convection is relevant."
+    },
+    {
+      "preset_id": "vge-low-pressure-nitrogen-convection-fixed",
+      "preset_version": "v0.1.0",
+      "label": "Low-Pressure Nitrogen — Fixed-h Convection",
+      "gas_presence_mode": "pressurized",
+      "gas_species_ref": "n2-gas",
+      "pressure_pa": 1000.0,
+      "convection_assumption_mode": "preset_fixed_h",
+      "effective_h_internal_w_per_m2_k": 5.0,
+      "exchange_area_m2": 0.05,
+      "contamination_outgassing_mode": "nominal_clean",
+      "notes": "Conservative low-pressure nitrogen fill with nominal convection assumption. Override h and area for site-specific conditions."
+    }
+  ]
+}

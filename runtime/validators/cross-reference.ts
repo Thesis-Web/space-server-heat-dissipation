@@ -240,3 +240,98 @@ export function validatePickupGeometryRefs(
   }
   return violations;
 }
+
+// =============================================================================
+// Extension 3B cross-reference validation
+// Governing law: 3B-spec §13, §5.3, §6.1, §6.2, §12
+// Blueprint: 3B-blueprint §13
+// Additive. Does not mutate baseline or 3A cross-reference validators.
+// =============================================================================
+
+/**
+ * Validate 3B vault-gas-environment preset_id references.
+ * Blocks if preset_id declared but not found in catalog.
+ * 3B-spec §13.2.
+ */
+export function validateVaultGasPresetRefs(
+  zones: Array<{ zone_id: string; vault_gas_environment_model?: { mode: string; preset_id?: string | null } | null }>,
+  availablePresetIds: string[]
+): CrossRefViolation[] {
+  const violations: CrossRefViolation[] = [];
+  const presetSet = new Set(availablePresetIds);
+
+  for (const zone of zones) {
+    const vgem = zone.vault_gas_environment_model;
+    if (vgem?.mode === 'preset' && vgem.preset_id && !presetSet.has(vgem.preset_id)) {
+      violations.push({
+        field: `thermal_zones[${zone.zone_id}].vault_gas_environment_model.preset_id`,
+        ref_value: vgem.preset_id,
+        message: `Zone '${zone.zone_id}' vault_gas_environment_model.preset_id '${vgem.preset_id}' not found in vault-gas-environment-presets catalog. 3B-spec §13.2`,
+      });
+    }
+  }
+  return violations;
+}
+
+/**
+ * Validate 3B transport-implementation preset_id references.
+ * 3B-spec §13.3.
+ */
+export function validateTransportImplPresetRefs(
+  zones: Array<{ zone_id: string; transport_implementation?: { mode: string; preset_id?: string | null } | null }>,
+  availablePresetIds: string[]
+): CrossRefViolation[] {
+  const violations: CrossRefViolation[] = [];
+  const presetSet = new Set(availablePresetIds);
+
+  for (const zone of zones) {
+    const ti = zone.transport_implementation;
+    if (ti?.mode === 'preset' && ti.preset_id && !presetSet.has(ti.preset_id)) {
+      violations.push({
+        field: `thermal_zones[${zone.zone_id}].transport_implementation.preset_id`,
+        ref_value: ti.preset_id,
+        message: `Zone '${zone.zone_id}' transport_implementation.preset_id '${ti.preset_id}' not found in transport-implementation-presets catalog. 3B-spec §13.3`,
+      });
+    }
+  }
+  return violations;
+}
+
+/**
+ * Validate 3B eclipse-state preset_id reference on scenario.operating_state.
+ * 3B-spec §5.4.
+ */
+export function validateEclipseStatePresetRef(
+  operatingState: { state_resolution_mode: string; preset_id?: string | null } | null | undefined,
+  availablePresetIds: string[]
+): CrossRefViolation[] {
+  if (!operatingState || operatingState.state_resolution_mode !== 'preset') return [];
+  if (!operatingState.preset_id) return [];
+  const presetSet = new Set(availablePresetIds);
+  if (!presetSet.has(operatingState.preset_id)) {
+    return [{
+      field: 'scenario.operating_state.preset_id',
+      ref_value: operatingState.preset_id,
+      message: `scenario.operating_state.preset_id '${operatingState.preset_id}' not found in eclipse-state-presets catalog. 3B-spec §5.4`,
+    }];
+  }
+  return [];
+}
+
+/**
+ * Validate 3B storage_ref resolves when storage_support_enabled.
+ * 3B-spec §13.1.
+ */
+export function validateStorageRef3B(
+  operatingState: { storage_support_enabled: boolean; storage_ref?: string | null } | null | undefined
+): CrossRefViolation[] {
+  if (!operatingState?.storage_support_enabled) return [];
+  if (!operatingState.storage_ref) {
+    return [{
+      field: 'scenario.operating_state.storage_ref',
+      ref_value: '(null)',
+      message: 'operating_state.storage_support_enabled=true but storage_ref is null or unresolved. 3B-spec §13.1',
+    }];
+  }
+  return [];
+}

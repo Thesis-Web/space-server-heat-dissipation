@@ -3,7 +3,7 @@
   "schema_id": "run-packet",
   "schema_version": "v0.2.0",
   "title": "RunPacket",
-  "description": "Deterministic handoff artifact from browser UI to hub AI workflow. Governed by \u00a725. UI-expansion additive fields per ui-expansion-spec-v0.1.5. SCHEMA-CONTRA-RP-001: branch_selection_summary ANCHOR=object, BASE=string; ANCHOR wins. SCHEMA-CONTRA-RP-002: ai_role_instructions ANCHOR=object, BASE=string; ANCHOR wins. SCHEMA-CONTRA-RP-003 RESOLVED: file_manifest item key is name per ui-expansion-spec-v0.1.5 \u00a7180.",
+  "description": "Deterministic handoff artifact from browser UI to hub AI workflow. Governed by \u00a725. UI-expansion additive fields per ui-expansion-spec-v0.1.5. SCHEMA-CONTRA-RP-001: branch_selection_summary ANCHOR=object, BASE=string; ANCHOR wins. SCHEMA-CONTRA-RP-002: ai_role_instructions ANCHOR=object, BASE=string; ANCHOR wins. SCHEMA-CONTRA-RP-003 RESOLVED: file_manifest item key is name per ui-expansion-spec-v0.1.5 \u00a7180. v0.2.0 adds 3B enable gate, mode, catalog provenance, and additive result fields per 3B-spec \u00a79.",
   "type": "object",
   "required": [
     "packet_id",
@@ -367,6 +367,40 @@
       ],
       "default": null,
       "description": "3A topology report emitter output. \u00a714, topology-report.ts."
+    },
+    "enable_model_extension_3b": {
+      "type": "boolean",
+      "default": false,
+      "description": "Mirrored scenario 3B enable gate. 3B-spec \u00a79."
+    },
+    "model_extension_3b_mode": {
+      "type": "string",
+      "enum": [
+        "disabled",
+        "subsystem_depth_only",
+        "subsystem_depth_with_eclipse",
+        "full_3b"
+      ],
+      "default": "disabled",
+      "description": "Mirrored scenario 3B mode. 3B-spec \u00a79."
+    },
+    "extension_3b_catalog_versions": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "default": null,
+      "description": "3B preset catalog provenance object. 3B-spec \u00a79.",
+      "additionalProperties": true
+    },
+    "extension_3b_result": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "default": null,
+      "description": "Additive 3B structured result. Must not contain baseline or extension_3a_result copies. 3B-spec \u00a79, \u00a714.",
+      "additionalProperties": true
     }
   }
 }

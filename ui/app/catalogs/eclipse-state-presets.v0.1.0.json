@@ -1,0 +1,40 @@
+{
+  "catalog_id": "eclipse-state-presets",
+  "catalog_version": "v0.1.0",
+  "description": "Eclipse-state presets for 3B operating-state authority. 3B-spec §10.3.",
+  "presets": [
+    {
+      "preset_id": "es-sunlit-full-power",
+      "preset_version": "v0.1.0",
+      "label": "Sunlit — Full Power, No Derate",
+      "current_state": "sunlit",
+      "storage_support_enabled": false,
+      "storage_ref": null,
+      "compute_derate_fraction": 0,
+      "noncritical_branch_disable_refs": [],
+      "notes": "Nominal sunlit state. Solar-dependent source terms fully active. No compute derate. No storage drawdown."
+    },
+    {
+      "preset_id": "es-eclipse-no-storage",
+      "preset_version": "v0.1.0",
+      "label": "Eclipse — No Storage Support",
+      "current_state": "eclipse",
+      "storage_support_enabled": false,
+      "storage_ref": null,
+      "compute_derate_fraction": 0.20,
+      "noncritical_branch_disable_refs": [],
+      "notes": "Eclipse with 20% compute derate and no storage drawdown. Solar-dependent source terms suppressed."
+    },
+    {
+      "preset_id": "es-eclipse-with-storage",
+      "preset_version": "v0.1.0",
+      "label": "Eclipse — With Storage Support",
+      "current_state": "eclipse",
+      "storage_support_enabled": true,
+      "storage_ref": null,
+      "compute_derate_fraction": 0.10,
+      "noncritical_branch_disable_refs": [],
+      "notes": "Eclipse with storage drawdown enabled. storage_ref must be resolved by operator before run. 10% compute derate as conservative default."
+    }
+  ]
+}

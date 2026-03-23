@@ -74,6 +74,11 @@ export interface Extension3AResult {
   spec_version: string;
   blueprint_version: string;
 
+  // §10.1 packet metadata fields — HOLE-3A-METADATA-001: topology_report_policy
+  // has no scenario field yet; defaults to 'always' per buildExtension3APacketMetadata fallback
+  topology_report_policy: string;
+  defaults_audit_version: string | null;
+
   // §14.1 required output fields
   topology_valid: boolean;
   topology_cycle_detected: boolean;
@@ -222,6 +227,9 @@ export function runExtension3A(input: Extension3AInput): Extension3AResult {
       model_extension_3a_mode: 'disabled',
       spec_version: EXTENSION_3A_SPEC_VERSION,
       blueprint_version: EXTENSION_3A_BLUEPRINT_VERSION,
+      // §10.1 metadata fields — HOLE-3A-METADATA-001: topology_report_policy has no scenario field; defaults 'always'
+      topology_report_policy: 'always',
+      defaults_audit_version: null,
       topology_valid: true,
       topology_cycle_detected: false,
       topology_order: [],
@@ -499,6 +507,9 @@ export function runExtension3A(input: Extension3AInput): Extension3AResult {
     model_extension_3a_mode: norm.model_extension_3a_mode,
     spec_version: EXTENSION_3A_SPEC_VERSION,
     blueprint_version: EXTENSION_3A_BLUEPRINT_VERSION,
+    // §10.1 metadata fields — HOLE-3A-METADATA-001: topology_report_policy has no scenario field; defaults 'always'
+    topology_report_policy: 'always',
+    defaults_audit_version: norm.defaults_audit_version,
     topology_valid: topoResult.valid,
     topology_cycle_detected: topoResult.cycle_detected,
     topology_order: topoResult.topology_order,

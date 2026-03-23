@@ -1,6 +1,10 @@
 /**
  * state-compiler.js — compiles UI state to canonical payload files
  * Governing law: ui-expansion-spec-v0.1.5 §5.3, §9.3–9.5, §19, §20, §24
+ * 3B-spec §16: 3B fields compiled into canonical payload objects only.
+ *   No browser-only hidden 3B state permitted (§16.1).
+ *   Preset-loaded values remain visible and editable (§16.2).
+ *   Preset provenance emitted on payload and run packet (§16.3).
  *
  * The UI state model is an intermediate representation.
  * This module serialises it to the canonical runtime payload family.
@@ -168,6 +172,13 @@ export function compileStateToPayloads(state, catalogs) {
     generated_aggregate_payload_ref: generated_aggregate_ref,
     transform_trace,
     research_required_items: state.research_required_items || [],
+    // ── Extension 3B scenario fields — 3B-spec §16.1 ─────────────────────────
+    // All 3B fields emitted into canonical payload. No browser-only hidden state.
+    // Preset-loaded values remain explicit and visible per §16.2.
+    enable_model_extension_3b: state.enable_model_extension_3b ?? false,
+    model_extension_3b_mode: state.model_extension_3b_mode ?? "disabled",
+    operating_state: state.operating_state ?? null,
+    extension_3b_catalog_versions: state.extension_3b_catalog_versions ?? null,
   };
 
   const scenario_content = JSON.stringify(scenario, null, 2);
@@ -209,6 +220,15 @@ export function compileStateToPayloads(state, catalogs) {
     validation_summary: state.validation_summary || {},
     risk_summary: state.risk_summary || {},
     research_required_items: state.research_required_items || [],
+    // ── Extension 3B run-packet fields — 3B-spec §16.1, §16.3 ────────────────
+    // Mirrored gate and mode. Preset provenance emitted per §16.3.
+    enable_model_extension_3b: state.enable_model_extension_3b ?? false,
+    model_extension_3b_mode: state.model_extension_3b_mode ?? "disabled",
+    extension_3b_catalog_versions: state.extension_3b_catalog_versions ?? null,
+    // preset_provenance: compiled from resolved preset loads in state.
+    // Must carry preset_catalog_id, preset_entry_id, preset_version, overridden_fields per §16.3.
+    extension_3b_preset_provenance: state.extension_3b_preset_provenance ?? [],
+    extension_3b_result: null, // populated by runtime runner after dispatch
   };
 
   const run_packet_content = JSON.stringify(run_packet, null, 2);

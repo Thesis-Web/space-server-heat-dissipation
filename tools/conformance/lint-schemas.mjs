@@ -104,6 +104,11 @@ const CATALOG_SCHEMA_MAP = {
   "pickup-geometries": "pickup-geometry-catalog",
   // defaults-audit-3a is a spec §4.2 audit artifact, not a data catalog
   // — intentional skip, no entry-level schema exists or is required
+  // Extension 3B catalog wrappers — 3B-spec §10.4
+  // All three 3B catalog data files must participate in this conformance gate.
+  "vault-gas-environment-presets":     "vault-gas-environment-preset-catalog",
+  "transport-implementation-presets":  "transport-implementation-preset-catalog",
+  "eclipse-state-presets":             "eclipse-state-preset-catalog",
 };
 
 const catalogFiles = walkDir(CATALOGS_DIR, ".json");

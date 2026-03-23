@@ -290,3 +290,83 @@ export function validateExtension3AOperatingMode(params: {
     ...validateExtension3AGate(params.enable_model_extension_3a, params.model_extension_3a_mode),
   ];
 }
+
+// =============================================================================
+// Extension 3B operating-mode validation
+// Governing law: 3B-spec §13.1, §5.2
+// Blueprint: 3B-blueprint §13
+// Additive. Does not mutate 3A mode validators.
+// =============================================================================
+
+const VALID_3B_MODES = ['disabled', 'subsystem_depth_only', 'subsystem_depth_with_eclipse', 'full_3b'];
+
+/**
+ * Validate model_extension_3b_mode enum.
+ * 3B-spec §5.2.
+ */
+export function validateExtension3BMode(
+  mode?: string | null
+): OperatingModeViolation[] {
+  if (mode === undefined || mode === null) return [];
+  if (!VALID_3B_MODES.includes(mode)) {
+    return [{
+      rule: '3B-spec §5.2',
+      message: `model_extension_3b_mode '${mode}' is not a valid 3B mode. Expected one of: ${VALID_3B_MODES.join(', ')}.`,
+      severity: 'error',
+    }];
+  }
+  return [];
+}
+
+/**
+ * Validate 3B enable gate: enabled=true requires mode != disabled.
+ * 3B-spec §13.1.
+ */
+export function validateExtension3BGate(
+  enabled?: boolean | null,
+  mode?: string | null
+): OperatingModeViolation[] {
+  if (!enabled) return [];
+  if (!mode || mode === 'disabled') {
+    return [{
+      rule: '3B-spec §13.1',
+      message: `enable_model_extension_3b=true requires model_extension_3b_mode != disabled (current: '${mode ?? 'null'}').`,
+      severity: 'error',
+    }];
+  }
+  return [];
+}
+
+/**
+ * Validate eclipse-semantics modes require resolvable operating_state.
+ * 3B-spec §13.1.
+ */
+export function validateEclipseSemanticsModeGate(
+  mode?: string | null,
+  hasResolvableOperatingState?: boolean
+): OperatingModeViolation[] {
+  if (mode !== 'subsystem_depth_with_eclipse' && mode !== 'full_3b') return [];
+  if (!hasResolvableOperatingState) {
+    return [{
+      rule: '3B-spec §13.1',
+      message: `model_extension_3b_mode='${mode}' requires resolvable operating_state but none is present.`,
+      severity: 'error',
+    }];
+  }
+  return [];
+}
+
+/**
+ * Full 3B mode validation bundle. 3B-spec §13.1, §5.2.
+ */
+export function validateExtension3BOperatingMode(params: {
+  enable_model_extension_3b?: boolean | null;
+  model_extension_3b_mode?: string | null;
+  has_resolvable_operating_state?: boolean;
+}): OperatingModeViolation[] {
+  return [
+    ...validateExtension3BMode(params.model_extension_3b_mode),
+    ...validateExtension3BGate(params.enable_model_extension_3b, params.model_extension_3b_mode),
+    ...validateEclipseSemanticsModeGate(params.model_extension_3b_mode, params.has_resolvable_operating_state),
+  ];
+}

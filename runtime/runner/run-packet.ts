@@ -14,6 +14,10 @@ import { validatePowerCycleEfficiency, validateHeatLiftCop, checkNoSilentUplift 
 import { RUNTIME_VERSIONS } from "../constants/constants";
 // ── Extension 3A dispatch — additive per spec §14.1, DIFF-3A-EXT2-COHABIT-001 ─
 import { runExtension3A, type Extension3AInput, type Extension3AResult } from "./run-extension-3a";
+// ── Extension 3A packet metadata builder — 3A-spec §10.1–§10.2 (WIRE-3A-METADATA-001) ─
+import { buildExtension3APacketMetadata, type Extension3APacketMetadataAddition } from "../emitters/packet-metadata-emitter";
+// ── Extension 3B dispatch — additive per 3B-spec §15.3 ──────────────────────
+import { runExtension3B, type Extension3BInput, type Extension3BResult } from "./run-extension-3b";
 
 export interface BranchInput {
   branch_id: string;
@@ -43,6 +47,10 @@ export interface RunPacketInput {
   // Present only when enable_model_extension_3a=true on the scenario.
   // If absent the 3A runner is not called and baseline path is unchanged.
   extension_3a_input?: Extension3AInput;
+  // ── Extension 3B — additive optional dispatch input, 3B-spec §15.3 ────────
+  // Present only when enable_model_extension_3b=true on the scenario.
+  // Dispatcher order: baseline → 3A → 3B. Result attaches as extension_3b_result.
+  extension_3b_input?: Extension3BInput;
 }
 
 export interface RunPacketOutput {
@@ -58,6 +66,15 @@ export interface RunPacketOutput {
   // ── Extension 3A result — additive optional, spec §14.1 ─────────────────
   // Present only when extension_3a_input was supplied and runExtension3A ran.
   extension_3a_result?: Extension3AResult;
+  // ── Extension 3A packet metadata — 3A-spec §10.1–§10.2 (WIRE-3A-METADATA-001) ──
+  // Present only when extension_3a_input was supplied and runExtension3A ran.
+  // Carries topology_report_policy, defaults_audit_version, catalog versions,
+  // and generated_artifacts[] per §10.2 visibility requirement.
+  extension_3a_packet_metadata?: Extension3APacketMetadataAddition;
+  // ── Extension 3B result — additive optional, 3B-spec §15.3 ──────────────
+  // Present only when extension_3b_input was supplied and runExtension3B ran.
+  // Must not contain copies of baseline_result or extension_3a_result.
+  extension_3b_result?: Extension3BResult;
 }
 
 /**
@@ -148,6 +165,7 @@ export function executeRunPacket(input: RunPacketInput): RunPacketOutput {
   // Runs only when caller supplies extension_3a_input (i.e. scenario has
   // enable_model_extension_3a=true). Result attaches as extension_3a_result.
   let extension_3a_result: Extension3AResult | undefined;
+  let extension_3a_packet_metadata: Extension3APacketMetadataAddition | undefined;
   if (input.extension_3a_input !== undefined) {
     extension_3a_result = runExtension3A(input.extension_3a_input);
     transform_trace.push(
@@ -155,6 +173,47 @@ export function executeRunPacket(input: RunPacketInput): RunPacketOutput {
       ` topology_valid=${extension_3a_result.topology_valid}` +
       ` convergence_status=${extension_3a_result.convergence_status}` +
       ` blocking_errors=${extension_3a_result.blocking_errors.length}`
+    );
+    // §10.1–§10.2: build packet metadata envelope (WIRE-3A-METADATA-001)
+    // catalog versions pulled from catalogs input if present; graceful null fallback
+    const cats = input.extension_3a_input.catalogs;
+    extension_3a_packet_metadata = buildExtension3APacketMetadata({
+      enable_model_extension_3a: extension_3a_result.extension_3a_enabled,
+      model_extension_3a_mode: extension_3a_result.model_extension_3a_mode,
+      topology_report_policy: extension_3a_result.topology_report_policy,
+      defaults_audit_version: extension_3a_result.defaults_audit_version,
+      working_fluids_catalog_version: cats?.working_fluid_catalog?.catalog_version ?? null,
+      pickup_geometries_catalog_version: cats?.pickup_geometry_catalog?.catalog_version ?? null,
+    });
+    transform_trace.push(
+      `extension-3a-metadata: artifacts=${extension_3a_packet_metadata.generated_artifacts_3a.length}` +
+      ` defaults_audit_version=${extension_3a_packet_metadata.defaults_audit_version ?? 'null'}`
+    );
+  }
+
+  // ── Extension 3B dispatch — 3B-spec §15.3 ───────────────────────────────
+  // Purely additive. Baseline and 3A paths above are untouched.
+  // Runs only when caller supplies extension_3b_input.
+  // Dispatcher order enforced: baseline → 3A → 3B.
+  // Result attaches under extension_3b_result only; must not mutate
+  // baseline_result or extension_3a_result (3B-spec §14, blueprint §4.3).
+  let extension_3b_result: Extension3BResult | undefined;
+  if (input.extension_3b_input !== undefined) {
+    // Wire 3A outputs into the 3B baseline-or-3A context per spec §14A
+    const b3bInput: Extension3BInput = {
+      ...input.extension_3b_input,
+      baselineOr3AContext: {
+        extension3AResult: (extension_3a_result ?? null) as Record<string, unknown> | null,
+        radiatorResult: (radiator_result ?? null) as unknown as Record<string, unknown> | null,
+        aggregationResult: (aggregation_result ?? null) as unknown as Record<string, unknown> | null,
+      },
+    };
+    extension_3b_result = runExtension3B(b3bInput);
+    transform_trace.push(
+      `extension-3b: enabled=${extension_3b_result.extension_3b_enabled}` +
+      ` mode=${extension_3b_result.model_extension_3b_mode}` +
+      ` blocking_errors=${extension_3b_result.blocking_errors.length}` +
+      ` q_dot_total_reject_3b_w=${extension_3b_result.q_dot_total_reject_3b_w}`
     );
   }
 
@@ -169,5 +228,7 @@ export function executeRunPacket(input: RunPacketInput): RunPacketOutput {
     runtime_authority_declaration: "runtime",
     versions: RUNTIME_VERSIONS,
     ...(extension_3a_result !== undefined ? { extension_3a_result } : {}),
+    ...(extension_3a_packet_metadata !== undefined ? { extension_3a_packet_metadata } : {}),
+    ...(extension_3b_result !== undefined ? { extension_3b_result } : {}),
   };
 }

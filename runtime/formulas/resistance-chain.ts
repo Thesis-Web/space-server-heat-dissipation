@@ -158,3 +158,65 @@ export function computeZoneResistanceTotals(
 
   return results;
 }
+
+// =============================================================================
+// Extension 3B additive resistance terms
+// Governing law: 3B-spec §11.6, §5.2 (resistance-chain coupling law)
+// Blueprint: 3B-blueprint §5.2
+// Computes the effective 3B loop resistance by adding 3B vault-gas and bubble
+// penalty terms onto the 3A base resistance. Does NOT overwrite 3A terms.
+// =============================================================================
+
+export interface Extension3BResistanceAddition {
+  zone_id: string;
+  r_loop_to_sink_base_k_per_w: number | null;
+  r_vault_gas_environment_k_per_w: number;
+  r_bubble_penalty_k_per_w: number;
+  r_loop_to_sink_effective_3b_k_per_w: number | null;
+  trace: string[];
+}
+
+/**
+ * computeEffective3BLoopResistance
+ * 3B-spec §11.6:
+ *   r_loop_to_sink_effective_3b = r_loop_to_sink_base + r_vault + r_bubble
+ *
+ * r_loop_to_sink_base comes from the 3A resistance-chain result (r_loop_to_sink_k_per_w).
+ * 3B must report additive components separately and must not overwrite 3A base terms.
+ */
+export function computeEffective3BLoopResistance(
+  zoneId: string,
+  rLoopToSinkBase: number | null,
+  rVaultGas: number,
+  rBubble: number
+): Extension3BResistanceAddition {
+  const trace: string[] = [];
+
+  if (rLoopToSinkBase === null) {
+    trace.push(
+      `zone ${zoneId}: r_loop_to_sink_base is null (3A chain not present or not computed); r_effective_3b also null`
+    );
+    return {
+      zone_id: zoneId,
+      r_loop_to_sink_base_k_per_w: null,
+      r_vault_gas_environment_k_per_w: rVaultGas,
+      r_bubble_penalty_k_per_w: rBubble,
+      r_loop_to_sink_effective_3b_k_per_w: null,
+      trace
+    };
+  }
+
+  const rEffective = rLoopToSinkBase + rVaultGas + rBubble;
+  trace.push(
+    `r_effective_3b = r_base(${rLoopToSinkBase.toFixed(6)}) + r_vault(${rVaultGas.toFixed(6)}) + r_bubble(${rBubble.toFixed(6)}) = ${rEffective.toFixed(6)} K/W`
+  );
+
+  return {
+    zone_id: zoneId,
+    r_loop_to_sink_base_k_per_w: rLoopToSinkBase,
+    r_vault_gas_environment_k_per_w: rVaultGas,
+    r_bubble_penalty_k_per_w: rBubble,
+    r_loop_to_sink_effective_3b_k_per_w: rEffective,
+    trace
+  };
+}

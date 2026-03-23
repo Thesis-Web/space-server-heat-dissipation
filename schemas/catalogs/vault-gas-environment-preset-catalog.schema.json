@@ -1,0 +1,115 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "schema_id": "vault-gas-environment-preset-catalog",
+  "schema_version": "v0.1.0",
+  "title": "VaultGasEnvironmentPresetCatalog",
+  "description": "Catalog schema for vault gas environment presets. Each entry populates explicit canonical vault_gas_environment_model fields. 3B-spec \u00a710.1.",
+  "type": "object",
+  "required": [
+    "catalog_id",
+    "catalog_version",
+    "presets"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "catalog_id": {
+      "type": "string"
+    },
+    "catalog_version": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string",
+      "default": ""
+    },
+    "presets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "preset_id",
+          "preset_version",
+          "label",
+          "gas_presence_mode",
+          "gas_species_ref",
+          "pressure_pa",
+          "convection_assumption_mode",
+          "effective_h_internal_w_per_m2_k",
+          "exchange_area_m2",
+          "contamination_outgassing_mode",
+          "notes"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "preset_id": {
+            "type": "string"
+          },
+          "preset_version": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "gas_presence_mode": {
+            "type": "string",
+            "enum": [
+              "none",
+              "trace_fill",
+              "pressurized",
+              "custom"
+            ]
+          },
+          "gas_species_ref": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "pressure_pa": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "convection_assumption_mode": {
+            "type": "string",
+            "enum": [
+              "disabled",
+              "operator_fixed_h",
+              "preset_fixed_h",
+              "custom"
+            ]
+          },
+          "effective_h_internal_w_per_m2_k": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "exchange_area_m2": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "exclusiveMinimum": 0
+          },
+          "contamination_outgassing_mode": {
+            "type": "string",
+            "enum": [
+              "none",
+              "nominal_clean",
+              "elevated_unknown",
+              "custom"
+            ]
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "$id": "https://space-server-heat-dissipation/schemas/catalogs/vault-gas-environment-preset-catalog.schema.json"
+}

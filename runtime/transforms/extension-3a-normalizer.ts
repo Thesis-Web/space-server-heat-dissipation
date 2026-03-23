@@ -70,6 +70,8 @@ export interface Extension3ANormalizationResult {
   normalized_radiators: NormalizedRadiator3A[];
   defaults_applied: string[];
   transform_trace: string[];
+  // §12.2, §10.1: audit version passes through to packet metadata
+  defaults_audit_version: string | null;
 }
 
 // ── Main normalizer ───────────────────────────────────────────────────────────
@@ -113,6 +115,7 @@ export function normalizeExtension3A(
       normalized_radiators: [],
       defaults_applied,
       transform_trace,
+      defaults_audit_version: scenarioDefaults.defaults_audit_version,
     };
   }
 
@@ -162,5 +165,6 @@ export function normalizeExtension3A(
     normalized_radiators,
     defaults_applied,
     transform_trace,
+    defaults_audit_version: scenarioDefaults.defaults_audit_version,
   };
 }

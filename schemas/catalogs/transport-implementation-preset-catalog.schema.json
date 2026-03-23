@@ -1,0 +1,169 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "schema_id": "transport-implementation-preset-catalog",
+  "schema_version": "v0.1.0",
+  "title": "TransportImplementationPresetCatalog",
+  "description": "Catalog schema for transport implementation presets. Each entry populates explicit canonical transport_implementation fields. Primitive pump ownership must be present. 3B-spec \u00a710.2.",
+  "type": "object",
+  "required": [
+    "catalog_id",
+    "catalog_version",
+    "presets"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "catalog_id": {
+      "type": "string"
+    },
+    "catalog_version": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string",
+      "default": ""
+    },
+    "presets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "preset_id",
+          "preset_version",
+          "label",
+          "transport_class",
+          "pump_model_mode",
+          "gas_management_mode",
+          "allowable_void_fraction",
+          "bubble_blanketing_penalty_fraction",
+          "gas_lock_flow_derate_fraction",
+          "separator_type",
+          "notes"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "preset_id": {
+            "type": "string"
+          },
+          "preset_version": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "transport_class": {
+            "type": "string",
+            "enum": [
+              "passive",
+              "pumped_single_phase_liquid",
+              "pumped_gas",
+              "two_phase_managed",
+              "custom"
+            ]
+          },
+          "pump_model_mode": {
+            "type": "string",
+            "enum": [
+              "none",
+              "direct_power",
+              "pressure_drop_flow",
+              "preset",
+              "custom"
+            ]
+          },
+          "pump_power_input_w": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "pump_efficiency_fraction": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "exclusiveMinimum": 0,
+            "maximum": 1
+          },
+          "pressure_drop_pa": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "mass_flow_kg_per_s": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "fluid_density_kg_per_m3_override": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "exclusiveMinimum": 0
+          },
+          "gas_management_mode": {
+            "type": "string",
+            "enum": [
+              "not_applicable",
+              "single_phase_intended",
+              "gas_managed",
+              "custom"
+            ]
+          },
+          "allowable_void_fraction": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 1
+          },
+          "declared_void_fraction": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 1
+          },
+          "bubble_blanketing_penalty_fraction": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 1
+          },
+          "gas_lock_flow_derate_fraction": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 1
+          },
+          "separator_type": {
+            "type": "string",
+            "enum": [
+              "none",
+              "membrane",
+              "vortex",
+              "capillary_trap",
+              "reservoir",
+              "custom"
+            ]
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "$id": "https://space-server-heat-dissipation/schemas/catalogs/transport-implementation-preset-catalog.schema.json"
+}

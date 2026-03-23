@@ -62,6 +62,7 @@ async function loadCatalogs() {
   populateBranchPresets();
   populateExt2Dropdowns();
   populateExt3aCatalogDropdowns(); // Extension 3A — blueprint §11.1
+  populateExt3bCatalogDropdowns(); // Extension 3B — 3B-spec §16
   updateFooterVersions();
 }
 
@@ -205,6 +206,8 @@ function wireAllFields() {
   document.getElementById("enable_model_extension_2")?.addEventListener("change", onExt2EnableChange);
   // Extension 3A enable toggle — blueprint §11.1
   document.getElementById("enable_model_extension_3a")?.addEventListener("change", onExt3aEnableChange);
+  // Extension 3B enable toggle and preset event wiring — 3B-spec §16
+  wireExt3bEvents();
   // Extension 2 mode change
   document.getElementById("model_extension_2_mode")?.addEventListener("change", updateExt2OutputSection);
   // Source spectral profile dropdown — spec §6, §14.2
@@ -760,6 +763,17 @@ function buildPacket() {
     },
     validation_summary: {},
     risk_summary: {},
+    // ── Extension 3B fields — 3B-spec §16.1, §16.2, §16.3 ───────────────────
+    // All 3B state compiles into canonical payload fields only.
+    // Preset-loaded values remain visible and editable per §16.2.
+    enable_model_extension_3b: val("enable_model_extension_3b") === "true",
+    model_extension_3b_mode: val("model_extension_3b_mode") || "disabled",
+    // operating_state: populated from UI controls or preset load; null if not configured
+    operating_state: _compile3BOperatingState(),
+    // extension_3b_catalog_versions: populated from loaded catalogs
+    extension_3b_catalog_versions: _compile3BCatalogVersions(),
+    // preset provenance: collected from any 3B preset loads in this session
+    extension_3b_preset_provenance: _ext3bPresetProvenance,
   };
 
   const { files, transform_trace, warnings } = compileStateToPayloads(state, CATALOGS);
@@ -2059,4 +2073,211 @@ function _renderExt3aCatalogReport() {
     `<code>${wfId}</code> v${wfVer} &nbsp;|&nbsp; ` +
     `<code>${pgId}</code> v${pgVer}<br>` +
     `<span style="font-size:10px;color:var(--text-dim);">Catalog IDs and versions are serialised into the run packet per blueprint §11.4.</span>`;
+}
+
+// =============================================================================
+// EXTENSION 3B — UI FUNCTIONS
+// Governing law: 3B-spec §16.1–§16.3
+// Blueprint: 3B-blueprint §9 (operator mode design), §5.4 (operator-acceleration law)
+//
+// Operator controls for vault-gas environment, transport implementation,
+// gas-management, TEG boundedness, and eclipse-state authority.
+// Preset-loaded values remain visible and editable per §16.2.
+// All state compiles into canonical payload fields only — no hidden UI state.
+// =============================================================================
+
+/** Session-scoped preset provenance accumulator. 3B-spec §16.3. */
+let _ext3bPresetProvenance = [];
+
+/**
+ * Compile 3B operating_state from UI controls.
+ * Returns null if 3B is disabled or operating_state not configured.
+ * 3B-spec §16.1.
+ */
+function _compile3BOperatingState() {
+  if (val("enable_model_extension_3b") !== "true") return null;
+  const currentState = val("ext3b_current_state");
+  if (!currentState) return null;
+  return {
+    current_state: currentState || "sunlit",
+    state_resolution_mode: val("ext3b_state_resolution_mode") || "explicit",
+    preset_id: val("ext3b_operating_state_preset_id") || null,
+    preset_version: val("ext3b_operating_state_preset_version") || null,
+    storage_support_enabled: val("ext3b_storage_support_enabled") === "true",
+    storage_ref: val("ext3b_storage_ref") || null,
+    compute_derate_fraction: parseFloat(val("ext3b_compute_derate_fraction") || "0") || 0,
+    noncritical_branch_disable_refs: [],
+    notes: val("ext3b_operating_state_notes") || ""
+  };
+}
+
+/**
+ * Compile 3B catalog versions from loaded catalogs.
+ * 3B-spec §10.5.
+ */
+function _compile3BCatalogVersions() {
+  if (val("enable_model_extension_3b") !== "true") return null;
+  return {
+    vault_gas_environment_presets: CATALOGS["vault-gas-environment-presets"]?.catalog_version ?? null,
+    transport_implementation_presets: CATALOGS["transport-implementation-presets"]?.catalog_version ?? null,
+    eclipse_state_presets: CATALOGS["eclipse-state-presets"]?.catalog_version ?? null
+  };
+}
+
+/**
+ * Load a vault-gas-environment preset into zone UI fields.
+ * Preset values are written into visible form fields per §16.2.
+ * Provenance is recorded per §16.3.
+ * 3B-spec §10.1, §16.2, §16.3.
+ */
+function loadVaultGasPreset(zoneId, presetId) {
+  const cat = CATALOGS["vault-gas-environment-presets"];
+  if (!cat || !Array.isArray(cat.presets)) return;
+  const entry = cat.presets.find(p => p.preset_id === presetId);
+  if (!entry) { console.warn(`vault-gas preset not found: ${presetId}`); return; }
+
+  // Write all preset values into visible form fields
+  setVal(`ext3b_vge_mode_${zoneId}`, "preset");
+  setVal(`ext3b_vge_gas_presence_mode_${zoneId}`, entry.gas_presence_mode);
+  setVal(`ext3b_vge_gas_species_ref_${zoneId}`, entry.gas_species_ref || "");
+  setVal(`ext3b_vge_pressure_pa_${zoneId}`, entry.pressure_pa ?? "");
+  setVal(`ext3b_vge_convection_mode_${zoneId}`, entry.convection_assumption_mode);
+  setVal(`ext3b_vge_h_internal_${zoneId}`, entry.effective_h_internal_w_per_m2_k ?? "");
+  setVal(`ext3b_vge_exchange_area_${zoneId}`, entry.exchange_area_m2 ?? "");
+  setVal(`ext3b_vge_contamination_mode_${zoneId}`, entry.contamination_outgassing_mode);
+  setVal(`ext3b_vge_preset_id_${zoneId}`, presetId);
+  setVal(`ext3b_vge_preset_version_${zoneId}`, entry.preset_version);
+
+  // Record provenance per §16.3
+  _ext3bPresetProvenance = _ext3bPresetProvenance.filter(
+    p => !(p.zone_id === zoneId && p.object_type === "vault_gas_environment_model")
+  );
+  _ext3bPresetProvenance.push({
+    zone_id: zoneId,
+    object_type: "vault_gas_environment_model",
+    preset_catalog_id: "vault-gas-environment-presets",
+    preset_entry_id: presetId,
+    preset_version: entry.preset_version,
+    manual_override_fields: []
+  });
+  console.log(`3B: vault-gas preset loaded for zone ${zoneId}: ${presetId}`);
+}
+
+/**
+ * Load a transport-implementation preset into zone UI fields.
+ * 3B-spec §10.2, §16.2, §16.3.
+ */
+function loadTransportImplPreset(zoneId, presetId) {
+  const cat = CATALOGS["transport-implementation-presets"];
+  if (!cat || !Array.isArray(cat.presets)) return;
+  const entry = cat.presets.find(p => p.preset_id === presetId);
+  if (!entry) { console.warn(`transport-impl preset not found: ${presetId}`); return; }
+
+  setVal(`ext3b_ti_mode_${zoneId}`, "preset");
+  setVal(`ext3b_ti_transport_class_${zoneId}`, entry.transport_class);
+  setVal(`ext3b_ti_pump_model_mode_${zoneId}`, entry.pump_model_mode);
+  setVal(`ext3b_ti_pump_power_input_w_${zoneId}`, entry.pump_power_input_w ?? "");
+  setVal(`ext3b_ti_pump_efficiency_${zoneId}`, entry.pump_efficiency_fraction ?? "");
+  setVal(`ext3b_ti_pressure_drop_pa_${zoneId}`, entry.pressure_drop_pa ?? "");
+  setVal(`ext3b_ti_mass_flow_${zoneId}`, entry.mass_flow_kg_per_s ?? "");
+  setVal(`ext3b_ti_gas_mgmt_mode_${zoneId}`, entry.gas_management_mode);
+  setVal(`ext3b_ti_allowable_void_${zoneId}`, entry.allowable_void_fraction ?? "");
+  setVal(`ext3b_ti_declared_void_${zoneId}`, entry.declared_void_fraction ?? "");
+  setVal(`ext3b_ti_bubble_penalty_${zoneId}`, entry.bubble_blanketing_penalty_fraction ?? "");
+  setVal(`ext3b_ti_gas_lock_derate_${zoneId}`, entry.gas_lock_flow_derate_fraction ?? "");
+  setVal(`ext3b_ti_separator_type_${zoneId}`, entry.separator_type);
+  setVal(`ext3b_ti_preset_id_${zoneId}`, presetId);
+  setVal(`ext3b_ti_preset_version_${zoneId}`, entry.preset_version);
+
+  _ext3bPresetProvenance = _ext3bPresetProvenance.filter(
+    p => !(p.zone_id === zoneId && p.object_type === "transport_implementation")
+  );
+  _ext3bPresetProvenance.push({
+    zone_id: zoneId,
+    object_type: "transport_implementation",
+    preset_catalog_id: "transport-implementation-presets",
+    preset_entry_id: presetId,
+    preset_version: entry.preset_version,
+    manual_override_fields: []
+  });
+  console.log(`3B: transport-impl preset loaded for zone ${zoneId}: ${presetId}`);
+}
+
+/**
+ * Load an eclipse-state preset into scenario operating_state UI fields.
+ * 3B-spec §10.3, §16.2, §16.3.
+ */
+function loadEclipseStatePreset(presetId) {
+  const cat = CATALOGS["eclipse-state-presets"];
+  if (!cat || !Array.isArray(cat.presets)) return;
+  const entry = cat.presets.find(p => p.preset_id === presetId);
+  if (!entry) { console.warn(`eclipse-state preset not found: ${presetId}`); return; }
+
+  setVal("ext3b_current_state", entry.current_state);
+  setVal("ext3b_state_resolution_mode", "preset");
+  setVal("ext3b_operating_state_preset_id", presetId);
+  setVal("ext3b_operating_state_preset_version", entry.preset_version);
+  setVal("ext3b_storage_support_enabled", String(entry.storage_support_enabled));
+  setVal("ext3b_compute_derate_fraction", String(entry.compute_derate_fraction));
+
+  _ext3bPresetProvenance = _ext3bPresetProvenance.filter(
+    p => !(p.zone_id === null && p.object_type === "operating_state")
+  );
+  _ext3bPresetProvenance.push({
+    zone_id: null,
+    object_type: "operating_state",
+    preset_catalog_id: "eclipse-state-presets",
+    preset_entry_id: presetId,
+    preset_version: entry.preset_version,
+    manual_override_fields: []
+  });
+  console.log(`3B: eclipse-state preset loaded: ${presetId}`);
+}
+
+/**
+ * Populate 3B preset dropdowns from loaded catalogs.
+ * Called on catalog load. 3B-spec §16.
+ */
+function populateExt3bCatalogDropdowns() {
+  const vgeCat = CATALOGS["vault-gas-environment-presets"];
+  const tiCat  = CATALOGS["transport-implementation-presets"];
+  const esCat  = CATALOGS["eclipse-state-presets"];
+
+  // Populate eclipse-state preset dropdown
+  const esSelect = document.getElementById("ext3b_eclipse_state_preset_select");
+  if (esSelect && esCat?.presets) {
+    esSelect.innerHTML = `<option value="">-- Select preset --</option>` +
+      esCat.presets.map(p => `<option value="${p.preset_id}">${p.label}</option>`).join("");
+    esSelect.onchange = () => { if (esSelect.value) loadEclipseStatePreset(esSelect.value); };
+  }
+
+  console.log("3B: catalog dropdowns populated — vge:", vgeCat?.presets?.length ?? 0,
+    "ti:", tiCat?.presets?.length ?? 0, "es:", esCat?.presets?.length ?? 0);
+}
+
+/**
+ * Handle 3B enable toggle. 3B-spec §16.1.
+ */
+function onExt3bEnableChange() {
+  const enabled = val("enable_model_extension_3b") === "true";
+  const ext3bFields = document.getElementById("ext3b-scenario-fields");
+  if (ext3bFields) ext3bFields.style.display = enabled ? "block" : "none";
+  _ext3bPresetProvenance = [];
+  updateSummary();
+}
+
+// Wire 3B event listeners — called from initPage()
+function wireExt3bEvents() {
+  document.getElementById("enable_model_extension_3b")
+    ?.addEventListener("change", onExt3bEnableChange);
+  document.getElementById("ext3b_eclipse_state_preset_select")
+    ?.addEventListener("change", (e) => { if (e.target.value) loadEclipseStatePreset(e.target.value); });
+}
+
+/** Helper: setVal — set form element value safely */
+function setVal(id, value) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (el.type === "checkbox") { el.checked = value === true || value === "true"; }
+  else { el.value = value ?? ""; }
 }
