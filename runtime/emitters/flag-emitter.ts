@@ -402,3 +402,84 @@ export function emit3BFlags(result: {
 
   return flags;
 }
+
+// =============================================================================
+// Extension 4 flag IDs and factory helpers
+// Governing law: ext4-spec-v0.1.4 §13.3–§13.5, §18.3
+// Blueprint: blueprint-v0.1.4 §Controls-and-Gates
+// Minimum required IDs per §18.3. Additive only. Does not mutate baseline,
+// 3A, or 3B flag IDs.
+// =============================================================================
+
+export const FLAG_IDS_EXT4 = {
+  // Informational — §13.5, §18.3
+  INFO_DISABLED:                      'EXT4-INFO-DISABLED',
+  INFO_ONEPASS:                       'EXT4-INFO-ONEPASS',
+  INFO_ONEPASS_NO_3A:                 'EXT4-INFO-ONEPASS-NO-3A',
+  INFO_ZERO_INTERCEPT:                'EXT4-INFO-ZERO-INTERCEPT',
+  INFO_ZERO_EFFICIENCY:               'EXT4-INFO-ZERO-EFFICIENCY',
+
+  // Warnings — §13.4, §18.3
+  WARN_NO_EXPORT:                     'EXT4-WARN-NO-EXPORT',
+  WARN_SEPARATE_COOLING_UNINTEGRATED: 'EXT4-WARN-SEPARATE-COOLING-UNINTEGRATED',
+  WARN_NONCONVERGED:                  'EXT4-WARN-NONCONVERGED',
+  WARN_ZERO_BASE_REF:                 'EXT4-WARN-ZERO-BASE-REF',
+
+  // Errors — §13.3, §18.3
+  ERR_MISSING_CONFIG:                 'EXT4-ERR-MISSING-CONFIG',
+  ERR_MISSING_3A_AUTHORITY:           'EXT4-ERR-MISSING-3A-AUTHORITY',
+  ERR_INVALID_BOUNDS:                 'EXT4-ERR-INVALID-BOUNDS',
+  ERR_RUNAWAY:                        'EXT4-ERR-RUNAWAY',
+} as const;
+
+/**
+ * Emit Extension 4 flags from extension_4_result blocking_errors and warnings.
+ * ext4-spec §13.3–§13.5, §18.3. Additive — does not mutate 3A/3B flags.
+ *
+ * Routes known stable flag IDs to their declared severity.
+ * Unknown codes default to 'warning' for warnings, 'error' for blocking errors.
+ */
+export function emit4Flags(result: {
+  extension_4_enabled: boolean;
+  model_extension_4_mode: string;
+  blocking_errors: string[];
+  warnings: string[];
+}): Flag[] {
+  const flags: Flag[] = [];
+
+  // Disabled informational flag §13.5
+  if (!result.extension_4_enabled) {
+    flags.push(makeFlagInfo(
+      FLAG_IDS_EXT4.INFO_DISABLED,
+      'Extension 4 disabled — zero numeric authority. ext4-spec §3 rule 3.',
+      'extension_4',
+      'enable_model_extension_4'
+    ));
+    return flags;
+  }
+
+  // Blocking errors → error severity
+  for (const err of result.blocking_errors) {
+    const flag_id = err.split(':')[0]?.trim() ?? 'EXT4-ERR-UNKNOWN';
+    flags.push(makeFlagError(
+      flag_id,
+      err,
+      'extension_4',
+      'blocking_errors',
+      err
+    ));
+  }
+
+  // Warnings — route INFO_ prefixed codes to info severity, rest to warning
+  for (const warn of result.warnings) {
+    const flag_id = warn.split(':')[0]?.trim() ?? 'EXT4-WARN-UNKNOWN';
+    const isInfo = flag_id.startsWith('EXT4-INFO-');
+    if (isInfo) {
+      flags.push(makeFlagInfo(flag_id, warn, 'extension_4', 'warnings', warn));
+    } else {
+      flags.push(makeFlagWarning(flag_id, warn, 'extension_4', 'warnings', warn));
+    }
+  }
+
+  return flags;
+}

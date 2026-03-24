@@ -1,0 +1,4 @@
+
+> space-server-heat-dissipation@0.1.2 test
+> jest --runInBand
+

@@ -507,6 +507,37 @@
       "default": null,
       "description": "3B preset catalog provenance. Spec \u00a75.1.",
       "additionalProperties": true
+    },
+    "enable_model_extension_4": {
+      "type": "boolean",
+      "default": false,
+      "description": "Extension 4 enable gate. Off by default. ext4-spec-v0.1.4 \u00a75.1, \u00a73 rule 3."
+    },
+    "model_extension_4_mode": {
+      "type": "string",
+      "enum": [
+        "disabled",
+        "one_pass",
+        "iterative"
+      ],
+      "default": "disabled",
+      "description": "Extension 4 operating mode. 'iterative' is canonical when enabled. ext4-spec-v0.1.4 \u00a75.2."
+    },
+    "tpv_recapture_config": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "default": null,
+      "description": "Canonical TPV recapture configuration object. Required when enable_model_extension_4=true. Shape defined in schemas/tpv-recapture-config/tpv-recapture-config.schema.json. ext4-spec-v0.1.4 \u00a75.3, \u00a77.1."
+    },
+    "extension_4_catalog_versions": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "default": null,
+      "description": "Pass-through provenance metadata only. SHALL NOT carry numeric authority into runtime. Shape intentionally loose in v0.1.4 per \u00a77.3 shape-looseness acceptance note. ext4-spec-v0.1.4 \u00a75.1, \u00a76.2, \u00a77.3."
     }
   }
 }

@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "target": "ES2022",
+    "esModuleInterop": true,
+    "lib": ["ES2022"],
+    "strict": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noImplicitReturns": false,
+    "skipLibCheck": true
+  }
+}

@@ -179,6 +179,12 @@ export function compileStateToPayloads(state, catalogs) {
     model_extension_3b_mode: state.model_extension_3b_mode ?? "disabled",
     operating_state: state.operating_state ?? null,
     extension_3b_catalog_versions: state.extension_3b_catalog_versions ?? null,
+    // ── Extension 4 scenario fields — ext4-spec §19.4, §5.1 ──────────────────
+    // No hidden state. All ext4 fields emitted into canonical payload. §3 rule 13.
+    enable_model_extension_4: state.enable_model_extension_4 ?? false,
+    model_extension_4_mode: state.model_extension_4_mode ?? "disabled",
+    tpv_recapture_config: state.tpv_recapture_config ?? null,
+    extension_4_catalog_versions: state.extension_4_catalog_versions ?? null,
   };
 
   const scenario_content = JSON.stringify(scenario, null, 2);
@@ -229,6 +235,14 @@ export function compileStateToPayloads(state, catalogs) {
     // Must carry preset_catalog_id, preset_entry_id, preset_version, overridden_fields per §16.3.
     extension_3b_preset_provenance: state.extension_3b_preset_provenance ?? [],
     extension_3b_result: null, // populated by runtime runner after dispatch
+    // ── Extension 4 run-packet fields — ext4-spec §19.4, §6.1 ────────────────
+    // Mirrors scenario gate and mode. tpv_recapture_config carries normalized config.
+    // extension_4_catalog_versions: pass-through provenance only; zero numeric authority. §6.2.
+    enable_model_extension_4: state.enable_model_extension_4 ?? false,
+    model_extension_4_mode: state.model_extension_4_mode ?? "disabled",
+    tpv_recapture_config: state.tpv_recapture_config ?? null,
+    extension_4_catalog_versions: state.extension_4_catalog_versions ?? null,
+    extension_4_result: null, // populated by runtime runner after dispatch
   };
 
   const run_packet_content = JSON.stringify(run_packet, null, 2);

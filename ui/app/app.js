@@ -208,6 +208,8 @@ function wireAllFields() {
   document.getElementById("enable_model_extension_3a")?.addEventListener("change", onExt3aEnableChange);
   // Extension 3B enable toggle and preset event wiring — 3B-spec §16
   wireExt3bEvents();
+  // Extension 4 enable toggle wiring — ext4-spec §19.1, §19.4
+  wireExt4Events();
   // Extension 2 mode change
   document.getElementById("model_extension_2_mode")?.addEventListener("change", updateExt2OutputSection);
   // Source spectral profile dropdown — spec §6, §14.2
@@ -774,6 +776,15 @@ function buildPacket() {
     extension_3b_catalog_versions: _compile3BCatalogVersions(),
     // preset provenance: collected from any 3B preset loads in this session
     extension_3b_preset_provenance: _ext3bPresetProvenance,
+    // ── Extension 4 fields — ext4-spec §19.2, §19.4, §3 rule 13 ─────────────
+    // All ext4 state compiles into canonical payload fields only. No hidden state.
+    // UI state-compilation follows the same no-hidden-state rule used by 3B. §19.4.
+    enable_model_extension_4: val("enable_model_extension_4") === "true",
+    model_extension_4_mode: val("model_extension_4_mode") || "disabled",
+    // tpv_recapture_config: compiled from individual UI controls; null when disabled
+    tpv_recapture_config: _compileExt4TpvConfig(),
+    // extension_4_catalog_versions: pass-through provenance only; no numeric authority
+    extension_4_catalog_versions: _compileExt4CatalogVersions(),
   };
 
   const { files, transform_trace, warnings } = compileStateToPayloads(state, CATALOGS);
@@ -2280,4 +2291,164 @@ function setVal(id, value) {
   if (!el) return;
   if (el.type === "checkbox") { el.checked = value === true || value === "true"; }
   else { el.value = value ?? ""; }
+}
+
+// =============================================================================
+// EXTENSION 4 — UI FUNCTIONS
+// Governing law: ext4-spec-v0.1.4 §19.1–§19.5
+// Blueprint: blueprint-v0.1.4 §Build-Agent-Responsibilities, §Controls-and-Gates Gate 7
+//
+// §19.1 — ext4 must be visible in UI and runtime output.
+// §19.2 — expose all editable scenario fields.
+// §19.3 — display all required read-only result fields.
+// §19.4 — state-compiler.js mirrors ext4 fields through canonical payload.
+// §19.5 — forbidden behaviors: treat ext4 as proven hardware, hide disabled
+//          state, hide worsening burden, silently infer export fraction,
+//          present 3C metadata as runtime authority.
+// =============================================================================
+
+/**
+ * _compileExt4TpvConfig
+ * Compile tpv_recapture_config from individual UI controls.
+ * Returns null when ext4 is disabled or no config fields are populated.
+ * ext4-spec §19.4, §5.3.
+ */
+function _compileExt4TpvConfig() {
+  if (val("enable_model_extension_4") !== "true") return null;
+  const modelId = val("tpv_model_id");
+  if (!modelId) return null;
+
+  const effMode = val("conversion_efficiency_mode") || "fixed";
+  const cfg = {
+    tpv_model_id: modelId,
+    coverage_fraction: parseFloat(val("tpv_coverage_fraction")) || 0.10,
+    radiator_view_factor_to_tpv: parseFloat(val("tpv_radiator_view_factor")) || 0.50,
+    spectral_capture_fraction: parseFloat(val("tpv_spectral_capture_fraction")) || 0.50,
+    coupling_derate_fraction: parseFloat(val("tpv_coupling_derate_fraction")) || 0.80,
+    conversion_efficiency_mode: effMode,
+    export_fraction: parseFloat(val("tpv_export_fraction")) || 0.00,
+    onboard_return_heat_fraction: parseFloat(val("tpv_onboard_return_heat_fraction")) || 1.00,
+    cell_cooling_mode: val("tpv_cell_cooling_mode") || "separate_cooling",
+    iteration_report_detail: val("tpv_iteration_report_detail") || "minimal",
+  };
+  // Efficiency-mode-conditional fields
+  if (effMode === "fixed") {
+    cfg.eta_tpv_fixed = parseFloat(val("tpv_eta_fixed")) || 0.15;
+  } else if (effMode === "carnot_bounded") {
+    cfg.eta_tpv_carnot_fraction = parseFloat(val("tpv_eta_carnot_fraction")) || null;
+    cfg.tpv_cold_side_temperature_k = parseFloat(val("tpv_cold_side_temperature_k")) || null;
+  }
+  return cfg;
+}
+
+/**
+ * _compileExt4CatalogVersions
+ * Returns extension_4_catalog_versions as pass-through provenance object.
+ * Zero numeric authority. ext4-spec §19.2, §6.2.
+ */
+function _compileExt4CatalogVersions() {
+  if (val("enable_model_extension_4") !== "true") return null;
+  const raw = val("extension_4_catalog_versions");
+  if (!raw) return null;
+  try { return JSON.parse(raw); } catch (_) { return null; }
+}
+
+/**
+ * onExt4EnableChange
+ * Handle ext4 enable toggle. Shows/hides ext4 config panel. §19.1, §19.5.
+ * Must NOT hide disabled state — disabled state is always declared. §19.5.
+ */
+function onExt4EnableChange() {
+  const enabled = val("enable_model_extension_4") === "true";
+  const panel = document.getElementById("ext4-config-panel");
+  if (panel) panel.style.display = enabled ? "block" : "none";
+  // §19.5 — disabled state must always be visible; show disabled indicator
+  const disabledNotice = document.getElementById("ext4-disabled-notice");
+  if (disabledNotice) disabledNotice.style.display = enabled ? "none" : "block";
+}
+
+/**
+ * renderExt4ResultPanel
+ * Render read-only Extension 4 result fields into the UI result panel.
+ * Required fields per §19.3. Must not hide worsening burden. §19.5.
+ *
+ * @param result  extension_4_result from the run-packet, or null.
+ */
+function renderExt4ResultPanel(result) {
+  const panel = document.getElementById("ext4-result-panel");
+  if (!panel) return;
+
+  if (!result) {
+    panel.innerHTML = "<p><em>Extension 4 result not available.</em></p>";
+    return;
+  }
+
+  // §19.5 — must not hide disabled state
+  if (!result.extension_4_enabled) {
+    panel.innerHTML = [
+      "<p><strong>Extension 4:</strong> <code>disabled</code> — zero numeric authority.</p>",
+      "<p><em>Baseline and prior extension results are unchanged.</em></p>",
+    ].join("");
+    return;
+  }
+
+  // §19.5 — must not hide worsening burden; sign always shown
+  const relief = result.q_relief_w;
+  const reliefStr = relief !== null
+    ? `${relief >= 0 ? "+" : ""}${relief.toFixed(2)} W ` +
+      `<span style="color:${relief >= 0 ? "green" : "red"}">${relief >= 0 ? "(relief)" : "⚠ burden worsened"}</span>`
+    : "—";
+
+  const fmt = (v, unit) => v !== null ? `${Number(v).toFixed(2)} ${unit}` : "—";
+  const fmtPct = (v) => v !== null ? `${(Number(v) * 100).toFixed(2)} %` : "—";
+
+  // §19.3 — required read-only result fields
+  const rows = [
+    ["Mode",                        `<code>${result.model_extension_4_mode}</code>`],
+    ["TPV model ID",                `<code>${result.tpv_model_id ?? "null"}</code>`],
+    ["Baseline radiator burden",    fmt(result.q_rad_baseline_w, "W")],
+    ["TPV intercepted power",       fmt(result.q_tpv_in_w, "W")],
+    ["TPV electrical output",       fmt(result.p_elec_w, "W")],
+    ["Exported power",              fmt(result.p_export_w, "W")],
+    ["Onboard return heat",         fmt(result.q_return_w, "W")],
+    ["TPV local loss heat",         fmt(result.q_tpv_loss_w, "W")],
+    ["Separate cooling load",       fmt(result.q_tpv_separate_cooling_load_w, "W")],
+    ["Net radiator burden",         `<strong>${fmt(result.q_rad_net_w, "W")}</strong>`],
+    ["Burden relief ΔQ",           reliefStr],
+    ["BOL area delta",              fmt(result.area_delta_bol_m2, "m²")],
+    ["EOL area delta",              fmt(result.area_delta_eol_m2, "m²")],
+    ["Convergence status",          `<code>${result.convergence_status}</code>`],
+    ["Iterations",                  String(result.convergence_iterations)],
+  ];
+
+  let html = "<table><tbody>";
+  for (const [label, val_] of rows) {
+    html += `<tr><td><strong>${label}</strong></td><td>${val_}</td></tr>`;
+  }
+  html += "</tbody></table>";
+
+  // §19.5 — warnings and errors must be visible
+  if (result.blocking_errors && result.blocking_errors.length > 0) {
+    html += "<p><strong>Blocking errors:</strong></p><ul>";
+    for (const e of result.blocking_errors) html += `<li><code>${e}</code></li>`;
+    html += "</ul>";
+  }
+  if (result.warnings && result.warnings.length > 0) {
+    html += "<p><strong>Warnings:</strong></p><ul>";
+    for (const w of result.warnings) html += `<li><code>${w}</code></li>`;
+    html += "</ul>";
+  }
+
+  // §2.3 — exploratory labeling must be preserved in UI
+  html += `<p><em>⚠ Exploratory model — not validated flight hardware. ext4-spec §2.3</em></p>`;
+
+  panel.innerHTML = html;
+}
+
+// Wire ext4 event listeners — called from initPage()
+function wireExt4Events() {
+  document.getElementById("enable_model_extension_4")
+    ?.addEventListener("change", onExt4EnableChange);
+  document.getElementById("model_extension_4_mode")
+    ?.addEventListener("change", onExt4EnableChange);
 }

@@ -138,3 +138,42 @@ export function emitStructuredResult(
 export function serializeResult(result: RuntimeResult): string {
   return JSON.stringify(result, null, 2);
 }
+
+// =============================================================================
+// Extension 4 JSON serialization path
+// Governing law: ext4-spec-v0.1.4 §18.1
+// Blueprint: blueprint-v0.1.4 §Phase-6-Output-and-Render
+//
+// Serialize ext4 through packet serialization only.
+// Do not flatten extension_4_result into unrelated top-level fields. §18.1.
+// =============================================================================
+
+import type { Extension4Result } from '../../types/extension-4.d';
+
+/**
+ * Attach extension_4_result to a run-packet JSON payload object.
+ * Called during packet serialization when ext4 was executed.
+ * Per §18.1: serialize through packet only — no top-level flattening.
+ *
+ * @param packet  Mutable packet object being assembled for serialization.
+ * @param result  Extension4Result from runExtension4.
+ */
+export function attachExt4ResultToPacket(
+  packet: Record<string, unknown>,
+  result: Extension4Result
+): void {
+  // §6.1 — attaches under extension_4_result only
+  packet['extension_4_result'] = result;
+  // Mirror scenario fields per §6.1 packet contract
+  packet['enable_model_extension_4'] = result.extension_4_enabled;
+  packet['model_extension_4_mode']   = result.model_extension_4_mode;
+}
+
+/**
+ * Serialize extension_4_result to a standalone JSON string.
+ * For use in run-packet bundle emission or debug output.
+ * §18.1 — no flattening into unrelated top-level fields.
+ */
+export function serializeExt4Result(result: Extension4Result): string {
+  return JSON.stringify(result, null, 2);
+}

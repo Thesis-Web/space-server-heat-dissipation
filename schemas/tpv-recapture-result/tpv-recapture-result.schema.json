@@ -1,0 +1,232 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "tpv-recapture-result.schema.json",
+  "title": "TpvRecaptureResult",
+  "description": "Extension 4 additive result object. Validates extension_4_result on the run-packet. Governing law: ext4-spec-v0.1.4 §7.2, §15.3, §16, §16.6. additionalProperties: false per §7.2.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "extension_4_enabled",
+    "model_extension_4_mode",
+    "spec_version",
+    "blueprint_version",
+    "convergence_attempted",
+    "convergence_iterations",
+    "convergence_status",
+    "nonconvergence_blocking_applied",
+    "tpv_model_id",
+    "intercept_fraction",
+    "q_rad_baseline_w",
+    "q_tpv_in_w",
+    "eta_tpv_effective",
+    "p_elec_w",
+    "p_export_w",
+    "p_onboard_w",
+    "q_return_w",
+    "q_tpv_loss_w",
+    "q_tpv_local_to_radiator_w",
+    "q_tpv_separate_cooling_load_w",
+    "q_rad_net_w",
+    "q_relief_w",
+    "area_equivalent_bol_m2",
+    "area_equivalent_eol_m2",
+    "area_delta_bol_m2",
+    "area_delta_eol_m2",
+    "baseline_sink_temperature_k",
+    "baseline_radiator_temperature_k",
+    "tpv_cold_side_temperature_k",
+    "defaults_applied",
+    "warnings",
+    "blocking_errors",
+    "transform_trace"
+  ],
+  "properties": {
+    "extension_4_enabled": {
+      "type": "boolean",
+      "description": "True when Extension 4 was enabled in the scenario. §16.2–§16.5."
+    },
+    "model_extension_4_mode": {
+      "type": "string",
+      "enum": ["disabled", "one_pass", "iterative"],
+      "description": "Effective Extension 4 mode. §15.3, §16.1."
+    },
+    "spec_version": {
+      "type": "string",
+      "enum": ["v0.1.4"],
+      "description": "Always 'v0.1.4'. §16.1."
+    },
+    "blueprint_version": {
+      "type": ["string", "null"],
+      "enum": ["v0.1.4", null],
+      "description": "'v0.1.4' when active; null when disabled. §16.1."
+    },
+    "convergence_attempted": {
+      "type": "boolean",
+      "description": "True only in iterative mode. §16.4–§16.5."
+    },
+    "convergence_iterations": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "0 when disabled/invalid, 1 for one-pass, ≥1 for iterative. §16.6."
+    },
+    "convergence_status": {
+      "type": "string",
+      "enum": ["not_required", "converged", "nonconverged", "runaway", "invalid"],
+      "description": "Convergence outcome per §12.10. §15.3."
+    },
+    "nonconvergence_blocking_applied": {
+      "type": "boolean",
+      "description": "Inherited from 3A blocking_on_nonconvergence. False when disabled/invalid/one-pass. §12.9, §16.6."
+    },
+    "tpv_model_id": {
+      "type": ["string", "null"],
+      "description": "null when disabled or invalid. §16.6."
+    },
+    "intercept_fraction": {
+      "type": ["number", "null"],
+      "description": "χ_int = coverage * view_factor * spectral_capture * coupling_derate. §9.3."
+    },
+    "q_rad_baseline_w": {
+      "type": ["number", "null"],
+      "description": "Baseline radiator-emitted thermal power. ε_rad * σ * A_rad * (T_rad^4 - T_space^4). §9.2."
+    },
+    "q_tpv_in_w": {
+      "type": ["number", "null"],
+      "description": "TPV-intercepted thermal power. Q_tpv_in = χ_int * Q_rad_baseline. §9.4."
+    },
+    "eta_tpv_effective": {
+      "type": ["number", "null"],
+      "description": "Effective TPV conversion efficiency. §9.5–§9.6."
+    },
+    "p_elec_w": {
+      "type": ["number", "null"],
+      "description": "TPV electrical output. P_elec = η_tpv * Q_tpv_in. §9.5."
+    },
+    "p_export_w": {
+      "type": ["number", "null"],
+      "description": "Exported electrical power. P_export = f_exp * P_elec. §9.8."
+    },
+    "p_onboard_w": {
+      "type": ["number", "null"],
+      "description": "Onboard-used electrical power. P_onboard = (1 - f_exp) * P_elec. §9.9."
+    },
+    "q_return_w": {
+      "type": ["number", "null"],
+      "description": "Returned onboard heat. Q_return = α_ret * P_onboard. §9.10."
+    },
+    "q_tpv_loss_w": {
+      "type": ["number", "null"],
+      "description": "TPV local inefficiency heat. Q_tpv_loss = Q_tpv_in - P_elec. §9.7."
+    },
+    "q_tpv_local_to_radiator_w": {
+      "type": ["number", "null"],
+      "description": "TPV loss returned to radiator burden. Q_tpv_loss when returns_to_radiator; else 0. §9.11."
+    },
+    "q_tpv_separate_cooling_load_w": {
+      "type": ["number", "null"],
+      "description": "TPV loss booked as separate cooling load. Q_tpv_loss when separate_cooling; else 0. §9.11."
+    },
+    "q_rad_net_w": {
+      "type": ["number", "null"],
+      "description": "Net radiator burden. Q_rad_net = Q_rad_baseline - P_export + Q_return + Q_tpv_local_to_radiator. §9.12."
+    },
+    "q_relief_w": {
+      "type": ["number", "null"],
+      "description": "Radiator burden relief. ΔQ_relief = Q_rad_baseline - Q_rad_net. Negative means burden worsened. §9.13."
+    },
+    "area_equivalent_bol_m2": {
+      "type": ["number", "null"],
+      "description": "Equivalent BOL area. null when 3A basis absent or Q_base_ref ≤ 0. §9.14."
+    },
+    "area_equivalent_eol_m2": {
+      "type": ["number", "null"],
+      "description": "Equivalent EOL area. null when 3A basis absent or Q_base_ref ≤ 0. §9.14."
+    },
+    "area_delta_bol_m2": {
+      "type": ["number", "null"],
+      "description": "BOL area delta vs 3A baseline. null when 3A basis absent or Q_base_ref ≤ 0. §9.14."
+    },
+    "area_delta_eol_m2": {
+      "type": ["number", "null"],
+      "description": "EOL area delta vs 3A baseline. null when 3A basis absent or Q_base_ref ≤ 0. §9.14."
+    },
+    "baseline_sink_temperature_k": {
+      "type": ["number", "null"],
+      "description": "Resolved sink temperature basis used for Q_rad_baseline. §10.2, §9.2."
+    },
+    "baseline_radiator_temperature_k": {
+      "type": ["number", "null"],
+      "description": "Resolved radiator hot-side temperature basis. target_surface_temp_k. §10.2."
+    },
+    "tpv_cold_side_temperature_k": {
+      "type": ["number", "null"],
+      "description": "TPV cell cold-side temperature used in carnot_bounded mode. §9.6."
+    },
+    "iteration_history": {
+      "type": "array",
+      "description": "Per-iteration state. Absent in minimal mode. Present only in full detail mode. Absent (not empty array) is canonical minimal form. §11.3, §16.5.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "iteration_index",
+          "q_rad_basis_w",
+          "q_tpv_in_w",
+          "eta_tpv_effective",
+          "p_elec_w",
+          "p_export_w",
+          "p_onboard_w",
+          "q_return_w",
+          "q_tpv_loss_w",
+          "q_tpv_local_to_radiator_w",
+          "q_tpv_separate_cooling_load_w",
+          "q_rad_net_w",
+          "abs_delta_w",
+          "rel_delta_fraction"
+        ],
+        "properties": {
+          "iteration_index": { "type": "integer", "minimum": 1 },
+          "q_rad_basis_w": { "type": "number" },
+          "q_tpv_in_w": { "type": "number" },
+          "eta_tpv_effective": { "type": "number" },
+          "p_elec_w": { "type": "number" },
+          "p_export_w": { "type": "number" },
+          "p_onboard_w": { "type": "number" },
+          "q_return_w": { "type": "number" },
+          "q_tpv_loss_w": { "type": "number" },
+          "q_tpv_local_to_radiator_w": { "type": "number" },
+          "q_tpv_separate_cooling_load_w": { "type": "number" },
+          "q_rad_net_w": { "type": "number" },
+          "abs_delta_w": {
+            "type": ["number", "null"],
+            "description": "null on first iteration (no prior basis). §15.3."
+          },
+          "rel_delta_fraction": {
+            "type": ["number", "null"],
+            "description": "null on first iteration. §15.3."
+          }
+        }
+      }
+    },
+    "defaults_applied": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Names of fields where defaults were applied per §13.2."
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Non-blocking warning codes. §13.4, §18.3."
+    },
+    "blocking_errors": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Blocking error codes. Non-empty when convergence_status='invalid'. §13.3, §18.3."
+    },
+    "transform_trace": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Runtime transform trace. Always populated. §10.2, §14.4."
+    }
+  }
+}

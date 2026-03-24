@@ -302,3 +302,66 @@ export function buildExtension3BPacketMetadata(params: {
     blueprint_version: params.blueprint_version ?? 'v0.1.1',
   };
 }
+
+// =============================================================================
+// Extension 4 packet metadata additions
+// Governing law: ext4-spec-v0.1.4 §18.4
+// Blueprint: blueprint-v0.1.4 §Phase-6-Output-and-Render
+//
+// Add ext4 enable gate, mode, config model ID, defaults applied,
+// executed_without_3a_authority trace token when applicable, and ext4 catalog
+// versions mirror. §18.4.
+// =============================================================================
+
+import type { Extension4Result } from '../../types/extension-4.d';
+
+export interface Extension4PacketMetadataAddition {
+  /** §18.4 — enable gate mirror */
+  enable_model_extension_4: boolean;
+  /** §18.4 — mode mirror */
+  model_extension_4_mode: string;
+  /** §18.4 — config model ID; null when disabled or invalid */
+  tpv_model_id: string | null;
+  /** §18.4 — defaults applied list */
+  defaults_applied: string[];
+  /**
+   * §18.4 / §8.4 — true when one-pass executed without 3A iterative authority.
+   * Emitted as trace token EXT4-INFO-ONEPASS-NO-3A on transform_trace.
+   */
+  executed_without_3a_authority: boolean;
+  /** §18.4 — ext4 catalog versions mirror; pass-through provenance only */
+  extension_4_catalog_versions: Record<string, unknown> | null;
+  spec_version: string;
+  blueprint_version: string | null;
+}
+
+/**
+ * buildExtension4PacketMetadata
+ * ext4-spec §18.4: emit ext4 enable gate, mode, config model ID, defaults
+ * applied, executed_without_3a_authority trace token, and catalog versions
+ * mirror through the canonical packet-metadata emitter path.
+ *
+ * @param result          Extension4Result from runExtension4.
+ * @param catalog_versions  Pass-through from scenario.extension_4_catalog_versions.
+ */
+export function buildExtension4PacketMetadata(
+  result: Extension4Result,
+  catalog_versions: Record<string, unknown> | null
+): Extension4PacketMetadataAddition {
+  // §8.4 — detect executed_without_3a_authority from transform_trace
+  const executed_without_3a_authority = result.transform_trace.some(
+    (t) => t.includes('executed_without_3a_authority=true')
+  );
+
+  return {
+    enable_model_extension_4:     result.extension_4_enabled,
+    model_extension_4_mode:       result.model_extension_4_mode,
+    tpv_model_id:                 result.tpv_model_id,
+    defaults_applied:             result.defaults_applied,
+    executed_without_3a_authority,
+    // §6.2 / §18.4 — mirror without mutation; zero numeric authority
+    extension_4_catalog_versions: catalog_versions ?? null,
+    spec_version:                 result.spec_version,
+    blueprint_version:            result.blueprint_version,
+  };
+}

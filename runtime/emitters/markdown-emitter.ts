@@ -224,3 +224,185 @@ export function emitFlagReport(run_id: string, scenario_id: string, flags: Flag[
 export function formatAssumption(a: Assumption): string {
   return `- **${a.field}**: ${a.value} _(${a.source})_${a.note ? ' — ' + a.note : ''}`;
 }
+
+// =============================================================================
+// Extension 4 — TPV Recapture markdown section
+// Governing law: ext4-spec-v0.1.4 §18.2
+// Blueprint: blueprint-v0.1.4 §Phase-6-Output-and-Render, §Design-Principles rule 9
+//
+// Append a dedicated Extension 4 section. Do not merge into unrelated sections.
+// Must surface all required fields per §18.2.
+// =============================================================================
+
+import type { Extension4Result } from '../../types/extension-4.d';
+
+/**
+ * emitExt4MarkdownSection
+ *
+ * Produces the Extension 4 — TPV Recapture section for inclusion in a
+ * run-packet markdown report. Called by report assemblers when
+ * extension_4_result is present on the packet.
+ *
+ * Required surface per §18.2:
+ *  - ext4 enabled state
+ *  - mode
+ *  - baseline radiator burden
+ *  - TPV intercepted power
+ *  - TPV electrical output
+ *  - exported power
+ *  - onboard return heat
+ *  - TPV local loss heat
+ *  - separate cooling load if applicable
+ *  - net radiator burden
+ *  - burden relief/worsening (sign always shown)
+ *  - equivalent area deltas if available
+ *  - convergence status and iteration count
+ *  - warnings/errors
+ */
+export function emitExt4MarkdownSection(result: Extension4Result): string {
+  const lines: string[] = [];
+
+  lines.push(`## Extension 4 — TPV Recapture`);
+  lines.push(``);
+  lines.push(`> **Exploratory option — not validated flight hardware.** ext4-spec-v0.1.4 §2.3`);
+  lines.push(``);
+
+  // Identity / version
+  lines.push(`| Field | Value |`);
+  lines.push(`|---|---|`);
+  lines.push(`| Enabled | \`${result.extension_4_enabled}\` |`);
+  lines.push(`| Mode | \`${result.model_extension_4_mode}\` |`);
+  lines.push(`| Spec version | \`${result.spec_version}\` |`);
+  lines.push(`| Blueprint version | \`${result.blueprint_version ?? 'null (disabled)'}\` |`);
+  lines.push(``);
+
+  // Disabled fast path — non-participation declared
+  if (!result.extension_4_enabled) {
+    lines.push(`_Extension 4 is disabled. Zero numeric authority. Baseline and prior extension results are unchanged._`);
+    lines.push(``);
+    lines.push(`---`);
+    return lines.join('\n');
+  }
+
+  // Invalid / blocked
+  if (result.convergence_status === 'invalid') {
+    lines.push(`**⛔ Extension 4 blocked — invalid configuration.**`);
+    lines.push(``);
+    if (result.blocking_errors.length > 0) {
+      lines.push(`**Blocking errors:**`);
+      lines.push(``);
+      for (const err of result.blocking_errors) {
+        lines.push(`- \`${err}\``);
+      }
+      lines.push(``);
+    }
+    lines.push(`---`);
+    return lines.join('\n');
+  }
+
+  // ── TPV model identity ──────────────────────────────────────────────────
+  if (result.tpv_model_id) {
+    lines.push(`**TPV Model:** \`${result.tpv_model_id}\``);
+    lines.push(``);
+  }
+
+  // ── Thermal accounting table §18.2 required fields ──────────────────────
+  const fmt = (v: number | null, unit: string): string =>
+    v !== null ? `${v.toFixed(2)} ${unit}` : `—`;
+  const fmtPct = (v: number | null): string =>
+    v !== null ? `${(v * 100).toFixed(2)} %` : `—`;
+
+  lines.push(`### Thermal Accounting`);
+  lines.push(``);
+  lines.push(`| Quantity | Value |`);
+  lines.push(`|---|---|`);
+  lines.push(`| Intercept fraction (χ_int) | ${fmtPct(result.intercept_fraction)} |`);
+  lines.push(`| **Baseline radiator burden (Q_rad_baseline)** | **${fmt(result.q_rad_baseline_w, 'W')}** |`);
+  lines.push(`| TPV intercepted power (Q_tpv_in) | ${fmt(result.q_tpv_in_w, 'W')} |`);
+  lines.push(`| Effective TPV efficiency (η_tpv) | ${fmtPct(result.eta_tpv_effective)} |`);
+  lines.push(`| **TPV electrical output (P_elec)** | **${fmt(result.p_elec_w, 'W')}** |`);
+  lines.push(`| Exported power (P_export) | ${fmt(result.p_export_w, 'W')} |`);
+  lines.push(`| Onboard-used power (P_onboard) | ${fmt(result.p_onboard_w, 'W')} |`);
+  lines.push(`| Onboard return heat (Q_return) | ${fmt(result.q_return_w, 'W')} |`);
+  lines.push(`| TPV local loss heat (Q_tpv_loss) | ${fmt(result.q_tpv_loss_w, 'W')} |`);
+  lines.push(`| TPV local loss → radiator (Q_tpv_local_to_radiator) | ${fmt(result.q_tpv_local_to_radiator_w, 'W')} |`);
+  lines.push(`| TPV separate cooling load (Q_tpv_separate_cooling) | ${fmt(result.q_tpv_separate_cooling_load_w, 'W')} |`);
+  lines.push(`| **Net radiator burden (Q_rad_net)** | **${fmt(result.q_rad_net_w, 'W')}** |`);
+
+  // Burden relief — sign always shown per §9.13 and §18.2
+  const relief = result.q_relief_w;
+  const reliefStr = relief !== null
+    ? `${relief >= 0 ? '+' : ''}${relief.toFixed(2)} W (${relief >= 0 ? 'relief' : '⚠ burden worsened'})`
+    : '—';
+  lines.push(`| **Burden relief ΔQ (positive = relief)** | **${reliefStr}** |`);
+  lines.push(``);
+
+  // ── Equivalent area metrics §18.2 ───────────────────────────────────────
+  lines.push(`### Equivalent Radiator Area Metrics`);
+  lines.push(``);
+  if (
+    result.area_equivalent_bol_m2 !== null ||
+    result.area_equivalent_eol_m2 !== null
+  ) {
+    lines.push(`| Metric | Value |`);
+    lines.push(`|---|---|`);
+    lines.push(`| Equiv. BOL area | ${fmt(result.area_equivalent_bol_m2, 'm²')} |`);
+    lines.push(`| Equiv. EOL area | ${fmt(result.area_equivalent_eol_m2, 'm²')} |`);
+    lines.push(`| BOL area delta (vs 3A baseline) | ${fmt(result.area_delta_bol_m2, 'm²')} |`);
+    lines.push(`| EOL area delta (vs 3A baseline) | ${fmt(result.area_delta_eol_m2, 'm²')} |`);
+    lines.push(``);
+  } else {
+    lines.push(`_Equivalent area metrics unavailable — 3A area basis absent or Q_base_ref ≤ 0. §9.14_`);
+    lines.push(``);
+  }
+
+  // ── Temperature basis §18.2 ─────────────────────────────────────────────
+  lines.push(`### Resolved Temperature Basis`);
+  lines.push(``);
+  lines.push(`| Field | Value |`);
+  lines.push(`|---|---|`);
+  lines.push(`| Radiator hot-side (T_rad) | ${fmt(result.baseline_radiator_temperature_k, 'K')} |`);
+  lines.push(`| Sink temperature (T_space) | ${fmt(result.baseline_sink_temperature_k, 'K')} |`);
+  lines.push(`| TPV cold-side (T_cold) | ${fmt(result.tpv_cold_side_temperature_k, 'K')} |`);
+  lines.push(``);
+
+  // ── Convergence status §18.2 ────────────────────────────────────────────
+  lines.push(`### Convergence`);
+  lines.push(``);
+  lines.push(`| Field | Value |`);
+  lines.push(`|---|---|`);
+  lines.push(`| Status | \`${result.convergence_status}\` |`);
+  lines.push(`| Attempted | \`${result.convergence_attempted}\` |`);
+  lines.push(`| Iterations | \`${result.convergence_iterations}\` |`);
+  lines.push(`| Nonconvergence blocking applied | \`${result.nonconvergence_blocking_applied}\` |`);
+  lines.push(``);
+
+  // ── Warnings §18.2 ──────────────────────────────────────────────────────
+  if (result.warnings.length > 0) {
+    lines.push(`### Warnings`);
+    lines.push(``);
+    for (const w of result.warnings) {
+      lines.push(`- ⚠️ \`${w}\``);
+    }
+    lines.push(``);
+  }
+
+  // ── Blocking errors §18.2 ───────────────────────────────────────────────
+  if (result.blocking_errors.length > 0) {
+    lines.push(`### Blocking Errors`);
+    lines.push(``);
+    for (const e of result.blocking_errors) {
+      lines.push(`- ⛔ \`${e}\``);
+    }
+    lines.push(``);
+  }
+
+  // ── Defaults applied ────────────────────────────────────────────────────
+  if (result.defaults_applied.length > 0) {
+    lines.push(`_Defaults applied: ${result.defaults_applied.join(', ')}_`);
+    lines.push(``);
+  }
+
+  lines.push(`---`);
+  return lines.join('\n');
+}

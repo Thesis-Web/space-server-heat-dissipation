@@ -18,6 +18,9 @@ import { runExtension3A, type Extension3AInput, type Extension3AResult } from ".
 import { buildExtension3APacketMetadata, type Extension3APacketMetadataAddition } from "../emitters/packet-metadata-emitter";
 // ── Extension 3B dispatch — additive per 3B-spec §15.3 ──────────────────────
 import { runExtension3B, type Extension3BInput, type Extension3BResult } from "./run-extension-3b";
+// ── Extension 4 dispatch — additive per ext4-spec §17.4 ─────────────────────
+import { runExtension4, type Extension4Input as Ext4RunnerInput } from "./run-extension-4";
+import type { Extension4Result } from "../../types/extension-4.d";
 
 export interface BranchInput {
   branch_id: string;
@@ -51,6 +54,11 @@ export interface RunPacketInput {
   // Present only when enable_model_extension_3b=true on the scenario.
   // Dispatcher order: baseline → 3A → 3B. Result attaches as extension_3b_result.
   extension_3b_input?: Extension3BInput;
+  // ── Extension 4 — additive optional dispatch input, ext4-spec §17.4 ────────
+  // Present only when enable_model_extension_4=true on the scenario.
+  // Dispatcher order: baseline → 3A → 3B → ext4.
+  // ext4 reads 3A result if present; reads nothing from 3B for numeric authority.
+  extension_4_input?: Ext4RunnerInput;
 }
 
 export interface RunPacketOutput {
@@ -75,6 +83,10 @@ export interface RunPacketOutput {
   // Present only when extension_3b_input was supplied and runExtension3B ran.
   // Must not contain copies of baseline_result or extension_3a_result.
   extension_3b_result?: Extension3BResult;
+  // ── Extension 4 result — additive optional, ext4-spec §17.4, §6.1 ────────
+  // Present only when extension_4_input was supplied and runExtension4 ran.
+  // Contains only Extension 4 results. Prior extension result trees not copied.
+  extension_4_result?: Extension4Result;
 }
 
 /**
@@ -217,6 +229,29 @@ export function executeRunPacket(input: RunPacketInput): RunPacketOutput {
     );
   }
 
+  // ── Extension 4 dispatch — ext4-spec §17.4 ───────────────────────────────
+  // Dispatcher order step 5: baseline → ext2 → ext3A → ext3B → ext4.
+  // Purely additive. Baseline and 3A/3B paths above are untouched.
+  // Runs only when caller supplies extension_4_input.
+  // ext4 reads 3A result if present; reads nothing from 3B for numeric authority
+  // (ext4-spec §8.5). Result attaches under extension_4_result only.
+  let extension_4_result: Extension4Result | undefined;
+  if (input.extension_4_input !== undefined) {
+    // Wire 3A result into ext4 input per §8.2
+    const ext4Input: Ext4RunnerInput = {
+      ...input.extension_4_input,
+      extension_3a_result: (extension_3a_result ?? null) as Ext4RunnerInput['extension_3a_result'],
+    };
+    extension_4_result = runExtension4(ext4Input);
+    transform_trace.push(
+      `extension-4: enabled=${extension_4_result.extension_4_enabled}` +
+      ` mode=${extension_4_result.model_extension_4_mode}` +
+      ` convergence_status=${extension_4_result.convergence_status}` +
+      ` blocking_errors=${extension_4_result.blocking_errors.length}` +
+      ` q_rad_net_w=${extension_4_result.q_rad_net_w}`
+    );
+  }
+
   return {
     packet_id: input.packet_id,
     scenario_id: input.scenario_id,
@@ -230,5 +265,6 @@ export function executeRunPacket(input: RunPacketInput): RunPacketOutput {
     ...(extension_3a_result !== undefined ? { extension_3a_result } : {}),
     ...(extension_3a_packet_metadata !== undefined ? { extension_3a_packet_metadata } : {}),
     ...(extension_3b_result !== undefined ? { extension_3b_result } : {}),
+    ...(extension_4_result !== undefined ? { extension_4_result } : {}),
   };
 }

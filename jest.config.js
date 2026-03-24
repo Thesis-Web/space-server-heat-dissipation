@@ -1,6 +1,5 @@
 /** @type {import('jest').Config} */
 module.exports = {
-  preset: 'ts-jest',
   testEnvironment: 'node',
   roots: ['<rootDir>/reference'],
   testMatch: ['**/*.test.ts'],
@@ -11,6 +10,10 @@ module.exports = {
         noUnusedLocals: false,
         noUnusedParameters: false
       }
+    }],
+    '^.+\\.js$': ['ts-jest', {
+      tsconfig: 'tsconfig.jest-js.json',
+      isolatedModules: true
     }]
   },
   collectCoverageFrom: [

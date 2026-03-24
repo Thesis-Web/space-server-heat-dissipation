@@ -198,3 +198,126 @@ export function renderTopologyReportMarkdown(report: TopologyReport): string {
 
   return lines.join('\n');
 }
+
+// =============================================================================
+// Extension 4 — TPV Recapture topology/report section
+// Governing law: ext4-spec-v0.1.4 §18.5
+// Blueprint: blueprint-v0.1.4 §Phase-6-Output-and-Render
+//
+// Append a dedicated Extension 4 — TPV Recapture section.
+// Do not merge into unrelated sections. §18.5.
+// =============================================================================
+
+import type { Extension4Result } from '../../types/extension-4.d';
+
+export interface Ext4TopologySection {
+  section_title: 'Extension 4 — TPV Recapture';
+  enabled: boolean;
+  mode: string;
+  spec_version: string;
+  convergence_status: string;
+  convergence_iterations: number;
+  tpv_model_id: string | null;
+  q_rad_baseline_w: number | null;
+  q_rad_net_w: number | null;
+  q_relief_w: number | null;
+  intercept_fraction: number | null;
+  p_elec_w: number | null;
+  p_export_w: number | null;
+  q_return_w: number | null;
+  q_tpv_separate_cooling_load_w: number | null;
+  area_delta_bol_m2: number | null;
+  area_delta_eol_m2: number | null;
+  warnings: string[];
+  blocking_errors: string[];
+}
+
+/**
+ * buildExt4TopologySection
+ * Constructs the structured Extension 4 section for inclusion in topology
+ * and run-packet reports. ext4-spec §18.5.
+ *
+ * Dedicated section — callers must not merge this into pre-existing sections.
+ */
+export function buildExt4TopologySection(result: Extension4Result): Ext4TopologySection {
+  return {
+    section_title: 'Extension 4 — TPV Recapture',
+    enabled:                        result.extension_4_enabled,
+    mode:                           result.model_extension_4_mode,
+    spec_version:                   result.spec_version,
+    convergence_status:             result.convergence_status,
+    convergence_iterations:         result.convergence_iterations,
+    tpv_model_id:                   result.tpv_model_id,
+    q_rad_baseline_w:               result.q_rad_baseline_w,
+    q_rad_net_w:                    result.q_rad_net_w,
+    q_relief_w:                     result.q_relief_w,
+    intercept_fraction:             result.intercept_fraction,
+    p_elec_w:                       result.p_elec_w,
+    p_export_w:                     result.p_export_w,
+    q_return_w:                     result.q_return_w,
+    q_tpv_separate_cooling_load_w:  result.q_tpv_separate_cooling_load_w,
+    area_delta_bol_m2:              result.area_delta_bol_m2,
+    area_delta_eol_m2:              result.area_delta_eol_m2,
+    warnings:                       result.warnings,
+    blocking_errors:                result.blocking_errors,
+  };
+}
+
+/**
+ * renderExt4TopologySectionMarkdown
+ * Renders the Extension 4 topology section as a markdown string.
+ * Called by topology report assemblers. §18.5.
+ */
+export function renderExt4TopologySectionMarkdown(section: Ext4TopologySection): string {
+  const lines: string[] = [];
+  const fmt = (v: number | null, unit: string): string =>
+    v !== null ? `${v.toFixed(2)} ${unit}` : '—';
+
+  lines.push(`# Extension 4 — TPV Recapture`);
+  lines.push(``);
+  lines.push(`> Exploratory option only. ext4-spec-v0.1.4 §2.3`);
+  lines.push(``);
+  lines.push(`- **Enabled:** \`${section.enabled}\``);
+  lines.push(`- **Mode:** \`${section.mode}\``);
+  lines.push(`- **Spec version:** \`${section.spec_version}\``);
+  lines.push(`- **TPV model ID:** \`${section.tpv_model_id ?? 'null'}\``);
+  lines.push(``);
+
+  if (!section.enabled) {
+    lines.push(`_Extension 4 disabled — zero numeric authority._`);
+    lines.push(``);
+    return lines.join('\n');
+  }
+
+  lines.push(`**Thermal summary:**`);
+  lines.push(``);
+  lines.push(`| | Value |`);
+  lines.push(`|---|---|`);
+  lines.push(`| Q_rad_baseline | ${fmt(section.q_rad_baseline_w, 'W')} |`);
+  lines.push(`| Q_rad_net      | ${fmt(section.q_rad_net_w, 'W')} |`);
+  const relief = section.q_relief_w;
+  const sign = relief !== null ? (relief >= 0 ? '+' : '') : '';
+  lines.push(`| ΔQ_relief       | ${relief !== null ? sign + relief.toFixed(2) + ' W' : '—'} |`);
+  lines.push(`| P_elec          | ${fmt(section.p_elec_w, 'W')} |`);
+  lines.push(`| P_export        | ${fmt(section.p_export_w, 'W')} |`);
+  lines.push(`| Q_return        | ${fmt(section.q_return_w, 'W')} |`);
+  lines.push(`| Q_separate_cool | ${fmt(section.q_tpv_separate_cooling_load_w, 'W')} |`);
+  lines.push(`| Area delta BOL   | ${fmt(section.area_delta_bol_m2, 'm²')} |`);
+  lines.push(`| Area delta EOL   | ${fmt(section.area_delta_eol_m2, 'm²')} |`);
+  lines.push(``);
+  lines.push(`**Convergence:** \`${section.convergence_status}\` after ${section.convergence_iterations} iteration(s)`);
+  lines.push(``);
+
+  if (section.blocking_errors.length > 0) {
+    lines.push(`**Blocking errors:**`);
+    for (const e of section.blocking_errors) lines.push(`- ⛔ \`${e}\``);
+    lines.push(``);
+  }
+  if (section.warnings.length > 0) {
+    lines.push(`**Warnings:**`);
+    for (const w of section.warnings) lines.push(`- ⚠️ \`${w}\``);
+    lines.push(``);
+  }
+
+  return lines.join('\n');
+}

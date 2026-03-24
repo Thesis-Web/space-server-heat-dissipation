@@ -401,6 +401,47 @@
       "default": null,
       "description": "Additive 3B structured result. Must not contain baseline or extension_3a_result copies. 3B-spec \u00a79, \u00a714.",
       "additionalProperties": true
+    },
+    "enable_model_extension_4": {
+      "type": "boolean",
+      "default": false,
+      "description": "Mirrored scenario ext4 enable gate. ext4-spec-v0.1.4 \u00a76.1."
+    },
+    "model_extension_4_mode": {
+      "type": "string",
+      "enum": [
+        "disabled",
+        "one_pass",
+        "iterative"
+      ],
+      "default": "disabled",
+      "description": "Mirrored scenario ext4 mode. ext4-spec-v0.1.4 \u00a76.1."
+    },
+    "tpv_recapture_config": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "default": null,
+      "description": "Normalized effective ext4 config. Mirrors scenario tpv_recapture_config with defaults applied. ext4-spec-v0.1.4 \u00a76.1."
+    },
+    "extension_4_catalog_versions": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "default": null,
+      "description": "Pass-through provenance mirror. Mirrored without mutation. SHALL NOT affect numeric runtime behavior. ext4-spec-v0.1.4 \u00a76.1, \u00a76.2.",
+      "additionalProperties": true
+    },
+    "extension_4_result": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "default": null,
+      "description": "Additive Extension 4 structured result. Contains only Extension 4 results. Prior extension result trees are not copied into this object. Shape validated by schemas/tpv-recapture-result/tpv-recapture-result.schema.json. ext4-spec-v0.1.4 \u00a76.1, \u00a76.2, \u00a715.3.",
+      "additionalProperties": true
     }
   }
 }

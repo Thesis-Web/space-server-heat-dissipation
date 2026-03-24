@@ -1,0 +1,115 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "tpv-recapture-config.schema.json",
+  "title": "TpvRecaptureConfig",
+  "description": "Extension 4 TPV recapture configuration object. Governing law: ext4-spec-v0.1.4 §7.1, §5.3, §12.1, §13.1–§13.3.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tpv_model_id",
+    "coverage_fraction",
+    "radiator_view_factor_to_tpv",
+    "spectral_capture_fraction",
+    "coupling_derate_fraction",
+    "conversion_efficiency_mode",
+    "export_fraction",
+    "onboard_return_heat_fraction",
+    "cell_cooling_mode"
+  ],
+  "properties": {
+    "tpv_model_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable identifier for this TPV model entry. §5.3."
+    },
+    "coverage_fraction": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Fraction of radiator surface covered by TPV cells. [0, 1]. §9.3, §12.1."
+    },
+    "radiator_view_factor_to_tpv": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Radiator-to-TPV view factor. [0, 1]. §9.3, §12.1."
+    },
+    "spectral_capture_fraction": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Fraction of incident spectrum usable by TPV cells. [0, 1]. §9.3, §12.1."
+    },
+    "coupling_derate_fraction": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Coupling derate factor for practical losses. [0, 1]. §9.3, §12.1."
+    },
+    "conversion_efficiency_mode": {
+      "type": "string",
+      "enum": ["fixed", "carnot_bounded"],
+      "description": "Efficiency computation mode. 'fixed' requires eta_tpv_fixed. 'carnot_bounded' requires eta_tpv_carnot_fraction and tpv_cold_side_temperature_k. §9.5–§9.6, §7.1."
+    },
+    "eta_tpv_fixed": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 1,
+      "default": null,
+      "description": "Fixed TPV conversion efficiency. Required when conversion_efficiency_mode='fixed'. [0, 1]. §9.5, §12.1."
+    },
+    "eta_tpv_carnot_fraction": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 1,
+      "default": null,
+      "description": "Fraction of Carnot efficiency used as TPV efficiency ceiling. Required when conversion_efficiency_mode='carnot_bounded'. [0, 1]. §9.6, §12.1."
+    },
+    "tpv_cold_side_temperature_k": {
+      "type": ["number", "null"],
+      "exclusiveMinimum": 0,
+      "default": null,
+      "description": "TPV cell cold-side temperature in Kelvin. Required when conversion_efficiency_mode='carnot_bounded'. Must be > 0. §9.6, §12.1."
+    },
+    "export_fraction": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Fraction of P_elec exported beyond the modeled thermal boundary. [0, 1]. §9.8, §12.1."
+    },
+    "onboard_return_heat_fraction": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Fraction of onboard-used electrical power returned as heat. α_ret. [0, 1]. §9.10, §12.1."
+    },
+    "cell_cooling_mode": {
+      "type": "string",
+      "enum": ["separate_cooling", "returns_to_radiator"],
+      "description": "TPV local loss heat booking mode. 'separate_cooling': Q_tpv_loss booked as separate load. 'returns_to_radiator': Q_tpv_loss added back to radiator burden. §9.11."
+    },
+    "iteration_report_detail": {
+      "type": "string",
+      "enum": ["minimal", "full"],
+      "default": "minimal",
+      "description": "Detail level for iteration_history in result. 'minimal': history absent. 'full': history present with all entries. §11.3, §16.4–§16.5."
+    },
+    "notes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": [],
+      "description": "Operator notes. Optional."
+    }
+  },
+  "if": {
+    "properties": {
+      "conversion_efficiency_mode": { "const": "carnot_bounded" }
+    }
+  },
+  "then": {
+    "required": ["eta_tpv_carnot_fraction", "tpv_cold_side_temperature_k"]
+  },
+  "else": {
+    "required": ["eta_tpv_fixed"]
+  }
+}
