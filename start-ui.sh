@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # start-ui.sh — Orbital Thermal Trade System UI Launcher
-# Serves ui/app/ on localhost:8080 and opens the browser.
+# Works in: Linux, macOS, WSL (Windows Subsystem for Linux)
 set -euo pipefail
 
 PORT="${PORT:-8080}"
@@ -27,16 +27,20 @@ echo ""
 
 open_browser() {
   local url="$1"
-  if command -v xdg-open &>/dev/null; then
-    xdg-open "$url" &>/dev/null &
-  elif command -v open &>/dev/null; then
-    open "$url"
-  else
-    echo "  Auto-open not available — navigate to: $url"
+  # WSL — use Windows browser via cmd.exe
+  if grep -qi microsoft /proc/version 2>/dev/null; then
+    cmd.exe /c start "$url" 2>/dev/null && return
   fi
+  if command -v xdg-open &>/dev/null; then
+    xdg-open "$url" &>/dev/null & return
+  fi
+  if command -v open &>/dev/null; then
+    open "$url" && return
+  fi
+  echo "  Auto-open not available — navigate to: $url"
 }
 
-(sleep 1.2 && open_browser "http://localhost:$PORT") &
+(sleep 1.5 && open_browser "http://localhost:$PORT") &
 
 cd "$UI_DIR"
 exec python3 -m http.server "$PORT"

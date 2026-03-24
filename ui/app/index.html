@@ -106,6 +106,8 @@
 </style>
   .ext2-badge { display: inline-block; font-size: 10px; padding: 2px 6px; border-radius: 3px; font-weight: 600; background: #1a1040; color: #a070ff; border: 1px solid #4a20a0; text-transform: uppercase; letter-spacing: .04em; }
   .ext3a-badge { display: inline-block; font-size: 10px; padding: 2px 6px; border-radius: 3px; font-weight: 600; background: #0a1a10; color: #40c070; border: 1px solid #207040; text-transform: uppercase; letter-spacing: .04em; }
+  .ext3b-badge { display: inline-block; font-size: 10px; padding: 2px 6px; border-radius: 3px; font-weight: 600; background: #0a1520; color: #40a0e0; border: 1px solid #205080; text-transform: uppercase; letter-spacing: .04em; }
+  .ext4-badge  { display: inline-block; font-size: 10px; padding: 2px 6px; border-radius: 3px; font-weight: 600; background: #1a0a20; color: #c060ff; border: 1px solid #601090; text-transform: uppercase; letter-spacing: .04em; }
   .zone-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 10px; }
   .zone-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-weight: 600; font-size: 13px; }
   .zone-validity { font-size: 11px; padding: 2px 8px; border-radius: 3px; margin-left: auto; }
@@ -297,6 +299,142 @@
       <div class="note">Runaway multiplier must be ≥ 2.0 per spec §5.4. Scenario blocks if convergence is declared but does not converge.</div>
     </div>
   </div>
+
+  <!-- ── Extension 3B — Scenario Enable  3B-spec §16.1 ── -->
+  <div class="section">
+    <div class="section-title">Model Extension 3B — Eclipse &amp; Operating State <span class="ext3b-badge">3B</span></div>
+    <div class="note">Enables eclipse/sunlit state modelling, vault gas environment, and transport implementation presets. All 3B outputs are runtime-authoritative per 3B-spec §3.1.</div>
+    <div class="field-row"><label>Enable Extension 3B</label>
+      <select id="enable_model_extension_3b">
+        <option value="false">Disabled</option>
+        <option value="true">Enabled</option>
+      </select>
+    </div>
+    <div id="ext3b-scenario-fields" style="display:none;">
+      <div class="field-row"><label>Eclipse State Preset</label>
+        <select id="ext3b_eclipse_state_preset_select">
+          <option value="">— Loading… —</option>
+        </select>
+      </div>
+      <div class="field-row"><label>Current State</label>
+        <select id="ext3b_current_state">
+          <option value="sunlit">sunlit</option>
+          <option value="eclipse">eclipse</option>
+          <option value="penumbra">penumbra</option>
+        </select>
+      </div>
+      <div class="field-row"><label>State Resolution Mode</label>
+        <select id="ext3b_state_resolution_mode">
+          <option value="explicit">explicit — state declared directly</option>
+          <option value="preset">preset — loaded from catalog</option>
+          <option value="orbit_derived">orbit_derived — derived from orbit params</option>
+        </select>
+      </div>
+      <div class="field-row"><label>Preset ID</label>
+        <input id="ext3b_operating_state_preset_id" type="text" placeholder="— preset id if applicable —" />
+      </div>
+      <div class="field-row"><label>Preset Version</label>
+        <input id="ext3b_operating_state_preset_version" type="text" placeholder="— preset version —" />
+      </div>
+      <div class="field-row"><label>Storage Support Enabled</label>
+        <select id="ext3b_storage_support_enabled">
+          <option value="false">No</option>
+          <option value="true">Yes</option>
+        </select>
+      </div>
+      <div class="field-row"><label>Storage Ref</label>
+        <input id="ext3b_storage_ref" type="text" placeholder="— storage artifact ref —" />
+      </div>
+      <div class="field-row"><label>Compute Derate Fraction</label>
+        <input id="ext3b_compute_derate_fraction" type="number" min="0" max="1" step="0.01" value="0" />
+      </div>
+      <div class="field-row"><label>Notes</label>
+        <input id="ext3b_operating_state_notes" type="text" placeholder="— operating state notes —" />
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Extension 4 — TPV Recapture  ext4-spec §5.1, §19.4 ── -->
+  <div class="section">
+    <div class="section-title">Model Extension 4 — TPV Recapture <span class="ext4-badge">EXT4</span></div>
+    <div class="note">Enables exploratory TPV (thermophotovoltaic) radiator recapture modelling. All Extension 4 outputs carry zero flight authority per ext4-spec §2.3. Not proven hardware performance.</div>
+    <div class="field-row"><label>Enable Extension 4</label>
+      <select id="enable_model_extension_4">
+        <option value="false">Disabled</option>
+        <option value="true">Enabled — exploratory</option>
+      </select>
+    </div>
+    <div class="field-row"><label>Extension 4 Mode</label>
+      <select id="model_extension_4_mode">
+        <option value="disabled">disabled</option>
+        <option value="one_pass">one_pass — single-pass TPV estimate</option>
+        <option value="iterative">iterative — iterate until convergence</option>
+      </select>
+    </div>
+    <div id="ext4-disabled-notice" class="note warn-note">
+      Extension 4 disabled — zero numeric authority. Baseline results unchanged.
+    </div>
+    <div id="ext4-config-panel" style="display:none;">
+      <div class="note warn-note">⚠ EXPLORATORY — TPV recapture is not validated flight hardware. All Extension 4 values are non-authoritative per ext4-spec §2.3.</div>
+      <div class="field-row"><label>TPV Model ID</label>
+        <input id="tpv_model_id" type="text" placeholder="e.g. tpv-geo-v0" />
+      </div>
+      <div class="field-row"><label>Coverage Fraction</label>
+        <input id="tpv_coverage_fraction" type="number" min="0" max="1" step="0.01" value="0.10" />
+        <span class="note-inline">fraction of radiator surface covered by TPV cells</span>
+      </div>
+      <div class="field-row"><label>Radiator→TPV View Factor</label>
+        <input id="tpv_radiator_view_factor" type="number" min="0" max="1" step="0.01" value="0.50" />
+      </div>
+      <div class="field-row"><label>Spectral Capture Fraction</label>
+        <input id="tpv_spectral_capture_fraction" type="number" min="0" max="1" step="0.01" value="0.50" />
+      </div>
+      <div class="field-row"><label>Coupling Derate Fraction</label>
+        <input id="tpv_coupling_derate_fraction" type="number" min="0" max="1" step="0.01" value="0.80" />
+      </div>
+      <div class="field-row"><label>Conversion Efficiency Mode</label>
+        <select id="conversion_efficiency_mode">
+          <option value="fixed">fixed — fixed eta value</option>
+          <option value="carnot_bounded">carnot_bounded — Carnot fraction</option>
+        </select>
+      </div>
+      <div class="field-row"><label>η_tpv Fixed</label>
+        <input id="tpv_eta_fixed" type="number" min="0" max="1" step="0.001" value="0.15" />
+        <span class="note-inline">used when mode=fixed</span>
+      </div>
+      <div class="field-row"><label>η_tpv Carnot Fraction</label>
+        <input id="tpv_eta_carnot_fraction" type="number" min="0" max="1" step="0.001" placeholder="— carnot_bounded only —" />
+      </div>
+      <div class="field-row"><label>TPV Cold Side Temp (K)</label>
+        <input id="tpv_cold_side_temperature_k" type="number" min="0" placeholder="— carnot_bounded only —" />
+      </div>
+      <div class="field-row"><label>Export Fraction</label>
+        <input id="tpv_export_fraction" type="number" min="0" max="1" step="0.01" value="0.00" />
+        <span class="note-inline">fraction of P_elec exported off-module</span>
+      </div>
+      <div class="field-row"><label>Onboard Return Heat Fraction</label>
+        <input id="tpv_onboard_return_heat_fraction" type="number" min="0" max="1" step="0.01" value="1.00" />
+        <span class="note-inline">fraction of retained P_elec returning as heat</span>
+      </div>
+      <div class="field-row"><label>Cell Cooling Mode</label>
+        <select id="tpv_cell_cooling_mode">
+          <option value="separate_cooling">separate_cooling — cells have independent cooling</option>
+          <option value="radiator_coupled">radiator_coupled — cells coupled to radiator</option>
+        </select>
+      </div>
+      <div class="field-row"><label>Iteration Report Detail</label>
+        <select id="tpv_iteration_report_detail">
+          <option value="minimal">minimal</option>
+          <option value="full">full</option>
+        </select>
+      </div>
+      <div class="field-row"><label>Catalog Versions (JSON)</label>
+        <input id="extension_4_catalog_versions" type="text" placeholder='{"tpv_model_catalog_version":"v1.0.0"}' />
+        <span class="note-inline">pass-through provenance only — zero numeric authority</span>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <!-- ════════════════════════════════════════════════════════════
@@ -831,6 +969,13 @@
       <div class="section-title" style="font-size:11px;margin-bottom:6px;">Catalog IDs &amp; Versions</div>
       <div id="ext3a-catalog-report" class="note"></div>
     </div>
+  </div>
+
+  <!-- ── Extension 4 TPV result — ext4-spec §19.3, §19.5 ── -->
+  <div class="section" id="ext4-output-section" style="display:none;">
+    <div class="section-title">Extension 4 — TPV Recapture Result <span class="ext4-badge">EXT4</span></div>
+    <div class="note warn-note" style="margin-bottom:12px;">⚠ EXPLORATORY — Not validated flight hardware. All Extension 4 values are non-authoritative per ext4-spec §2.3.</div>
+    <div id="ext4-result-panel"><p><em>Extension 4 result not available. Enable Extension 4 and build report.</em></p></div>
   </div>
 
   <!-- ── Extension 2 exploratory output — spec §14.5 ── -->
