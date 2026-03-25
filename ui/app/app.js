@@ -132,6 +132,14 @@ function applyDevicePreset(preset_id) {
     if (entry[f] !== undefined) setValue(f, entry[f]);
   });
   setValue("pickup_geometry_compute", entry.pickup_geometry ?? "");
+  // Prefill module overhead defaults from catalog — session 6
+  if (entry.suggested_device_count !== undefined)            { const el=document.getElementById("device_count"); if(el) el.value=entry.suggested_device_count; }
+  if (entry.suggested_memory_power_w !== undefined)          { const el=document.getElementById("w_dot_memory_w"); if(el) el.value=entry.suggested_memory_power_w; }
+  if (entry.suggested_storage_power_w !== undefined)         { const el=document.getElementById("w_dot_storage_w"); if(el) el.value=entry.suggested_storage_power_w; }
+  if (entry.suggested_network_power_w !== undefined)         { const el=document.getElementById("w_dot_network_w"); if(el) el.value=entry.suggested_network_power_w; }
+  if (entry.suggested_power_conversion_overhead_w !== undefined) { const el=document.getElementById("w_dot_power_conversion_w"); if(el) el.value=entry.suggested_power_conversion_overhead_w; }
+  if (entry.suggested_control_overhead_w !== undefined)      { const el=document.getElementById("w_dot_control_w"); if(el) el.value=entry.suggested_control_overhead_w; }
+  updateComputePreview();
   setValue("compute_device_preset_id", preset_id);
   panel.style.display = "block";
   const mc = entry.maturity_class ?? "experimental";
@@ -1687,6 +1695,9 @@ function addZoneBlock(data = {}) {
       r_loop_to_sink_k_per_w:               data.resistance_chain?.r_loop_to_sink_k_per_w               ?? null,
     },
     r_bridge_k_per_w: data.r_bridge_k_per_w ?? null,
+    zone_type:          data.zone_type         || 'standard',
+    hot_island_role:    data.hot_island_role   || 'none',
+    target_temp_k:      data.target_temp_k     ?? null,
   };
   zoneBlocks.push(block);
   renderZoneBlocks();
@@ -1744,6 +1755,9 @@ function syncZoneBlock(idx) {
   b.pickup_geometry_ref= document.getElementById(`z${idx}_pickup_geometry_ref`)?.value|| null;
   b.convergence_enabled= document.getElementById(`z${idx}_convergence_enabled`)?.value === "true";
   b.r_bridge_k_per_w   = parseFloat(document.getElementById(`z${idx}_r_bridge`)?.value) || null;
+  b.zone_type          = document.getElementById(`z${idx}_zone_type`)?.value        || b.zone_type;
+  b.hot_island_role    = document.getElementById(`z${idx}_hot_island_role`)?.value  || b.hot_island_role;
+  b.target_temp_k      = parseFloat(document.getElementById(`z${idx}_target_temp_k`)?.value) || null;
   const chain = b.resistance_chain;
   chain.r_junction_to_case_k_per_w           = parseFloat(document.getElementById(`z${idx}_r_jc`)?.value)  || null;
   chain.r_case_to_spreader_k_per_w           = parseFloat(document.getElementById(`z${idx}_r_cs`)?.value)  || null;
@@ -1770,6 +1784,9 @@ function compileZoneBlock(b) {
     convergence_enabled:   b.convergence_enabled,
     resistance_chain:      b.resistance_chain,
     r_bridge_k_per_w:      b.r_bridge_k_per_w   ?? null,
+    zone_type:             b.zone_type          || 'standard',
+    hot_island_role:       b.hot_island_role    || 'none',
+    target_temp_k:         b.target_temp_k      ?? null,
   };
 }
 
@@ -1819,6 +1836,31 @@ function renderZoneBlocks() {
           <option value="transport"${b.zone_role==="transport"?" selected":""}>transport</option>
           <option value="custom"${b.zone_role==="custom"?" selected":""}>custom</option>
         </select>
+      </div>
+      <div class="field-row"><label>Zone Type</label>
+        <select id="z${idx}_zone_type" onchange="syncZoneBlock(${idx})">
+          <option value="standard"${b.zone_type==="standard"?" selected":""}>standard</option>
+          <option value="compute_vault"${b.zone_type==="compute_vault"?" selected":""}>compute_vault</option>
+          <option value="hx_boundary"${b.zone_type==="hx_boundary"?" selected":""}>hx_boundary</option>
+          <option value="high_temp_backbone"${b.zone_type==="high_temp_backbone"?" selected":""}>high_temp_backbone</option>
+          <option value="radiator_emitter"${b.zone_type==="radiator_emitter"?" selected":""}>radiator_emitter</option>
+          <option value="custom"${b.zone_type==="custom"?" selected":""}>custom</option>
+        </select>
+      </div>
+      <div class="field-row"><label>Hot Island Role</label>
+        <select id="z${idx}_hot_island_role" onchange="syncZoneBlock(${idx})">
+          <option value="none"${b.hot_island_role==="none"?" selected":""}>none</option>
+          <option value="hot_island_a"${b.hot_island_role==="hot_island_a"?" selected":""}>hot_island_a</option>
+          <option value="hot_island_b"${b.hot_island_role==="hot_island_b"?" selected":""}>hot_island_b</option>
+          <option value="exchange_hub"${b.hot_island_role==="exchange_hub"?" selected":""}>exchange_hub</option>
+          <option value="cold_loop"${b.hot_island_role==="cold_loop"?" selected":""}>cold_loop</option>
+          <option value="custom"${b.hot_island_role==="custom"?" selected":""}>custom</option>
+        </select>
+      </div>
+      <div class="field-row"><label>Target Temp (K)</label>
+        <input id="z${idx}_target_temp_k" type="number" min="0" step="1"
+          value="${b.target_temp_k??""}" placeholder="e.g. 330"
+          oninput="syncZoneBlock(${idx})" />
       </div>
       <div class="field-row"><label>Isolation Boundary</label>
         <select id="z${idx}_isolation_boundary" onchange="syncZoneBlock(${idx})">

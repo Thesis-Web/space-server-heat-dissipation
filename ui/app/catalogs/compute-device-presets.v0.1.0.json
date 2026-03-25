@@ -1,7 +1,7 @@
 {
   "catalog_id": "compute-device-presets",
-  "catalog_version": "v0.1.2",
-  "catalog_notes": "Updated session 6. Added 8 sourced device entries. Retained existing preset_ids for backward compat. All temp/flux/mass values marked research_required=true; sourced from published datasheets where available, estimated elsewhere. Constraint-validated against spec \u00a716.2. v0.1.2 session 6: NVIDIA cp_max updated to 318K (sourced OEM). OAM mass updated to 2.0kg (OCP spec). HOLE-CAT-001 closed.",
+  "catalog_version": "v0.1.3",
+  "catalog_notes": "Updated session 6. Added 8 sourced device entries. Retained existing preset_ids for backward compat. All temp/flux/mass values marked research_required=true; sourced from published datasheets where available, estimated elsewhere. Constraint-validated against spec \u00a716.2. v0.1.2 session 6: NVIDIA cp_max updated to 318K (sourced OEM). OAM mass updated to 2.0kg (OCP spec). HOLE-CAT-001 closed. v0.1.3 session 6: suggested module overhead defaults added to all entries.",
   "entries": [
     {
       "preset_id": "gpu_h200_class",
@@ -29,7 +29,13 @@
       "performance_basis_note": "Based on NVIDIA H200 SXM5 published TDP and form factor. Partial-load power, temps, and mass are research estimates. Not a qualified space part.",
       "thermal_basis_note": "Junction Tj_max ~95C (368K) from NVIDIA Hopper thermal guidance. Cold-plate inlet max 45\u00b0C (318K) per OEM HGX liquid-cooling docs (Lenovo SR780a V3, Gigabyte G363-ZR0, Aivres KR6288V2). HOLE-CAT-001 closed. from package to coolant. TIM resistance included in package-temp budget.",
       "packaging_notes": "SXM5 module on HGX baseboard. Custom carrier required for spacecraft integration. Updated from v0.1.0 with session-6 research data.",
-      "research_required": true
+      "research_required": true,
+      "suggested_memory_power_w": 3200,
+      "suggested_storage_power_w": 400,
+      "suggested_network_power_w": 800,
+      "suggested_power_conversion_overhead_w": 1200,
+      "suggested_control_overhead_w": 200,
+      "suggested_device_count": 8
     },
     {
       "preset_id": "gpu_h100_sxm5",
@@ -57,7 +63,13 @@
       "performance_basis_note": "TDP and form factor from NVIDIA H100 product page. GH100 die ~814mm2 (Hopper architecture material). Partial-load powers, temps, and mass estimated from SXM5 thermal guidance.",
       "thermal_basis_note": "Tj_max ~95C (368K) per NVIDIA Hopper thermal docs. Cold-plate inlet max 45\u00b0C (318K) per OEM HGX liquid-cooling docs. HOLE-CAT-001 closed.. Same thermal class as H200 SXM5; HBM3 vs HBM3e is the primary hardware distinction.",
       "packaging_notes": "SXM5 module. 80GB HBM3, 3.35 TB/s bandwidth. HGX H100 baseboard integration. Not space-qualified.",
-      "research_required": true
+      "research_required": true,
+      "suggested_memory_power_w": 3200,
+      "suggested_storage_power_w": 400,
+      "suggested_network_power_w": 800,
+      "suggested_power_conversion_overhead_w": 1200,
+      "suggested_control_overhead_w": 200,
+      "suggested_device_count": 8
     },
     {
       "preset_id": "gpu_a100_sxm4_80gb",
@@ -85,7 +97,13 @@
       "performance_basis_note": "TDP 400W from NVIDIA A100 datasheet (SXM4 variant). GA100 die ~826mm2 from Ampere architecture whitepaper; heat flux derived from die area. Partial loads and mass estimated.",
       "thermal_basis_note": "Tj_max ~85C (358K). Heat flux 48 W/cm2 is die-level estimate from published GA100 die size. Cold-plate delta-T budget 20K. Lower heat flux vs H100/H200 due to larger die.",
       "packaging_notes": "SXM4 module. 80GB HBM2e, 2.039 TB/s bandwidth. Reference class for legacy fleet comparison. Not space-qualified.",
-      "research_required": true
+      "research_required": true,
+      "suggested_memory_power_w": 2400,
+      "suggested_storage_power_w": 300,
+      "suggested_network_power_w": 600,
+      "suggested_power_conversion_overhead_w": 900,
+      "suggested_control_overhead_w": 150,
+      "suggested_device_count": 8
     },
     {
       "preset_id": "gpu_amd_mi300x",
@@ -113,7 +131,13 @@
       "performance_basis_note": "Maximum TBP 750W from AMD MI300X datasheet. Multi-chip package with 8 XCDs. OAM form factor. Heat flux is estimated; AMD does not publish chiplet-level flux in open datasheets. heat_flux_w_per_cm2 not published by vendor; value is die-area scaling estimate. DIFF-CAT-003.",
       "thermal_basis_note": "Junction slowdown threshold ~100C (373K) per AMD SMI monitoring data. Package temp (358K) derived from OAM thermal budget. Cold-plate delta-T budget 20K. Mass is average of S1/S2 research estimates.",
       "packaging_notes": "OAM module. 192GB HBM3, 5.3 TB/s bandwidth. Multi-die package requires OAM carrier. Not space-qualified. Mass 2.0kg per OCP OAM spec upper bound (OAM+heatsink); bare module mass not publicly stated. DIFF-CAT-004 updated.",
-      "research_required": true
+      "research_required": true,
+      "suggested_memory_power_w": 3600,
+      "suggested_storage_power_w": 400,
+      "suggested_network_power_w": 800,
+      "suggested_power_conversion_overhead_w": 1300,
+      "suggested_control_overhead_w": 200,
+      "suggested_device_count": 8
     },
     {
       "preset_id": "gpu_amd_mi250x",
@@ -141,7 +165,13 @@
       "performance_basis_note": "Nominal TDP 500W typical / 560W peak per AMD MI250X product page. Dual-die CDNA2 OAM package. Heat flux estimated from prior-gen die scaling. Partial loads averaged from two research sources. heat_flux_w_per_cm2 not published by vendor; value is die-area scaling estimate. DIFF-CAT-003.",
       "thermal_basis_note": "Junction slowdown ~100C (373K) from AMD SMI. nominal 500W chosen as design-point load; 560W peak for burst. power_full_w set to nominal to avoid overstate in steady-state trade. Not space-qualified.",
       "packaging_notes": "OAM module. 128GB HBM2e, 3.2 TB/s bandwidth. CDNA2 dual-die package. Not space-qualified. Mass 2.0kg per OCP OAM spec upper bound (OAM+heatsink); bare module mass not publicly stated. DIFF-CAT-004 updated.",
-      "research_required": true
+      "research_required": true,
+      "suggested_memory_power_w": 2800,
+      "suggested_storage_power_w": 350,
+      "suggested_network_power_w": 700,
+      "suggested_power_conversion_overhead_w": 1100,
+      "suggested_control_overhead_w": 180,
+      "suggested_device_count": 8
     },
     {
       "preset_id": "gpu_intel_gaudi3",
@@ -169,7 +199,13 @@
       "performance_basis_note": "TDP 900W and OAM 2.0 form factor from Intel Gaudi 3 OAM product brief and technical paper. Heat flux estimated from 5nm die scaling. Partial loads averaged from two research sources. heat_flux_w_per_cm2 not published by vendor; value is die-area scaling estimate. DIFF-CAT-003.",
       "thermal_basis_note": "Tj_max ~95C (368K) by analogy to Intel data center thermal guidance. OAM 2.0 cold-plate budget 20K. Highest TDP in catalog; radiator burden dominant device for 50kW class trade.",
       "packaging_notes": "OCP OAM 2.0 mezzanine card. 128GB HBM2E, 3.7 TB/s. Two compute dies. Less flight-heritage analog than NVIDIA SXM class; marked experimental. Not space-qualified. Mass 2.0kg per OCP OAM spec upper bound (OAM+heatsink); bare module mass not publicly stated. DIFF-CAT-004 updated.",
-      "research_required": true
+      "research_required": true,
+      "suggested_memory_power_w": 3200,
+      "suggested_storage_power_w": 400,
+      "suggested_network_power_w": 900,
+      "suggested_power_conversion_overhead_w": 1400,
+      "suggested_control_overhead_w": 200,
+      "suggested_device_count": 8
     },
     {
       "preset_id": "gpu_intel_gaudi2",
@@ -197,7 +233,13 @@
       "performance_basis_note": "600W TDP from Intel Gaudi 3 comparative product-spec deck. Memory and bandwidth from Intel Gaudi2 technical article and fact sheet. Heat flux estimated. Partial loads averaged from two research sources. heat_flux_w_per_cm2 not published by vendor; value is die-area scaling estimate. DIFF-CAT-003.",
       "thermal_basis_note": "Tj_max ~95C (368K) by analogy to Intel thermal guidance. OAM 1.1 cold-plate delta-T budget 20K. Lower TDP than Gaudi3; useful for conservative 50kW trade path.",
       "packaging_notes": "OAM-class 1.1 mezzanine. 96GB HBM2e, 2.45 TB/s. Not space-qualified. Mass 2.0kg per OCP OAM spec upper bound (OAM+heatsink); bare module mass not publicly stated. DIFF-CAT-004 updated.",
-      "research_required": true
+      "research_required": true,
+      "suggested_memory_power_w": 2800,
+      "suggested_storage_power_w": 350,
+      "suggested_network_power_w": 800,
+      "suggested_power_conversion_overhead_w": 1200,
+      "suggested_control_overhead_w": 180,
+      "suggested_device_count": 8
     },
     {
       "preset_id": "asic_rad750_class",
@@ -225,7 +267,13 @@
       "performance_basis_note": "Representative of BAE Systems RAD750 class rad-hard processor. Power from BAE RAD750 datasheet and NASA spec sheets. Not a high-power compute device; useful as spacecraft flight computer reference in non-compute load model.",
       "thermal_basis_note": "Tj_max 125C (398K) from RAD750 datasheet. Hermetic ceramic package; conduction-cooled to spacecraft structure. Wide coldplate range reflects space environment extremes (-70C to +85C).",
       "packaging_notes": "360-pin ceramic CGA space-qualified package. Mass 0.05kg estimated for ceramic package body. Primary use: flight computer or control system load reference, not primary compute payload.",
-      "research_required": false
+      "research_required": false,
+      "suggested_memory_power_w": 0,
+      "suggested_storage_power_w": 0,
+      "suggested_network_power_w": 20,
+      "suggested_power_conversion_overhead_w": 5,
+      "suggested_control_overhead_w": 5,
+      "suggested_device_count": 1
     },
     {
       "preset_id": "power_module_sic_class",
@@ -253,7 +301,13 @@
       "performance_basis_note": "Vendor-agnostic SiC/GaN power module class representative. Values from Wolfspeed, Infineon, and other open SiC datasheets. Tj_max 200C (473K) is standard SiC high-temp class limit. Use for power conversion stage thermal budget, not primary compute payload.",
       "thermal_basis_note": "Tj_max 200C (473K) per SiC process class. Package/baseplate max 150C (423K). High-temp capability makes this relevant to Zone C backbone thermal modeling. Cold plate max 120C (393K) is aggressive; verify against system coolant design.",
       "packaging_notes": "Standard power-module package class (half-bridge or full-bridge variants). TO-247, HiPak, or custom. Mass 0.2kg estimated for module body. Primary use: power conversion stage in thermal architecture model.",
-      "research_required": true
+      "research_required": true,
+      "suggested_memory_power_w": 0,
+      "suggested_storage_power_w": 0,
+      "suggested_network_power_w": 0,
+      "suggested_power_conversion_overhead_w": 0,
+      "suggested_control_overhead_w": 10,
+      "suggested_device_count": 1
     },
     {
       "preset_id": "gpu_nextgen_placeholder",
@@ -281,7 +335,13 @@
       "performance_basis_note": "Placeholder extrapolation from roadmap projections. No confirmed product. Research required before use in any engineering trade.",
       "thermal_basis_note": "Double-sided cold plate assumed; actual thermal resistance unknown. All values are research-required estimates.",
       "packaging_notes": "Form factor and pinout not defined. Custom integration assumed.",
-      "research_required": true
+      "research_required": true,
+      "suggested_memory_power_w": 4000,
+      "suggested_storage_power_w": 500,
+      "suggested_network_power_w": 1000,
+      "suggested_power_conversion_overhead_w": 1500,
+      "suggested_control_overhead_w": 250,
+      "suggested_device_count": 8
     },
     {
       "preset_id": "asic_high_heat_class",
@@ -309,7 +369,13 @@
       "performance_basis_note": "Representative of radiation-hardened ASIC class used in defense/space programs. Values are qualified estimates from open literature; specific parts vary.",
       "thermal_basis_note": "Cold-plate pickup assumed. Junction-to-case resistance from JEDEC-style characterization; case-to-cold-plate varies with TIM selection.",
       "packaging_notes": "Hermetic ceramic or plastic flatpack variants. Mass estimate for ceramic package.",
-      "research_required": false
+      "research_required": false,
+      "suggested_memory_power_w": 200,
+      "suggested_storage_power_w": 50,
+      "suggested_network_power_w": 100,
+      "suggested_power_conversion_overhead_w": 150,
+      "suggested_control_overhead_w": 50,
+      "suggested_device_count": 4
     },
     {
       "preset_id": "custom",
@@ -337,7 +403,13 @@
       "performance_basis_note": "All values must be specified by operator.",
       "thermal_basis_note": "All values must be specified by operator.",
       "packaging_notes": "Custom.",
-      "research_required": true
+      "research_required": true,
+      "suggested_memory_power_w": 0,
+      "suggested_storage_power_w": 0,
+      "suggested_network_power_w": 0,
+      "suggested_power_conversion_overhead_w": 0,
+      "suggested_control_overhead_w": 0,
+      "suggested_device_count": 1
     }
   ]
 }

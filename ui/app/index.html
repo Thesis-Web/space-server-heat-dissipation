@@ -566,98 +566,11 @@
      TAB 4 — THERMAL ARCHITECTURE  (spec §7.4, §17.4)
 ═══════════════════════════════════════════════════════════════ -->
 <div id="pane-thermal" class="pane">
-  <div class="section">
-    <div class="section-title">Thermal Zone Configuration</div>
-    <div class="note">Zone type family is canonical and preserved. Richer semantics are expressed through zone_subtype per spec §10.</div>
-    <div class="field-row"><label>Zone Type</label>
-      <select id="zone_type">
-        <option value="compute_vault">compute_vault</option>
-        <option value="hx_boundary">hx_boundary</option>
-        <option value="high_temp_backbone">high_temp_backbone</option>
-        <option value="radiator_emitter">radiator_emitter</option>
-        <option value="custom">custom</option>
-      </select>
-    </div>
-    <div class="field-row"><label>Zone Subtype</label>
-      <select id="zone_subtype">
-        <option value="">— none —</option>
-        <option value="controlled_compute_vault">controlled_compute_vault</option>
-        <option value="chipset_pickup_stage1">chipset_pickup_stage1</option>
-        <option value="low_gradient_loop">low_gradient_loop</option>
-        <option value="eutectic_exchange_hub">eutectic_exchange_hub</option>
-        <option value="regen_hot_island">regen_hot_island</option>
-        <option value="active_hot_island">active_hot_island</option>
-        <option value="radiator_service_domain">radiator_service_domain</option>
-        <option value="payload_emitter_zone">payload_emitter_zone</option>
-        <option value="branch_sink_zone">branch_sink_zone</option>
-        <option value="custom">custom</option>
-      </select>
-    </div>
-    <div class="field-row"><label>Service Role</label>
-      <select id="service_role">
-        <option value="pickup">pickup</option>
-        <option value="transport">transport</option>
-        <option value="exchange">exchange</option>
-        <option value="storage">storage</option>
-        <option value="rejection">rejection</option>
-        <option value="payload">payload</option>
-        <option value="branch_sink">branch_sink</option>
-        <option value="custom">custom</option>
-      </select>
-    </div>
-    <div class="field-row"><label>Pickup Geometry</label>
-      <select id="pickup_geometry_zone">
-        <option value="">— n/a —</option>
-        <option value="single_sided_cold_plate">single_sided_cold_plate</option>
-        <option value="double_sided_cold_plate">double_sided_cold_plate</option>
-        <option value="vertical_stack_cube_slot">vertical_stack_cube_slot</option>
-        <option value="custom">custom</option>
-      </select>
-    </div>
-    <div class="field-row"><label>Target Temp (K)</label><input id="zone_target_temp_k" type="number" min="0" placeholder="e.g. 330" /></div>
-    <div class="field-row"><label>Material Family Ref</label>
-      <select id="zone_material_family_ref">
-        <option value="">Loading…</option>
-      </select>
-    </div>
-    <div class="field-row"><label>Research Required</label>
-      <select id="zone_research_required">
-        <option value="false">No</option>
-        <option value="true">Yes — flag for review</option>
-      </select>
-    </div>
-  </div>
-  <div class="section">
-    <div class="section-title">Two-Hot-Island / Exchange-Hub / Solar-Polish Topology</div>
-    <div class="note warn-note">These architecture families are representational and accounting-aware. They are not endorsements of flight-readiness. Declaring sources is required for hot-island configurations per spec §4.3, §12.</div>
-    <div class="field-row"><label>Two-Hot-Island Topology</label>
-      <select id="topology_type">
-        <option value="single_backbone">single_backbone</option>
-        <option value="dual_hot_island">dual_hot_island</option>
-        <option value="dual_hot_island_with_exchange_hub">dual_hot_island_with_exchange_hub</option>
-        <option value="dual_hot_island_with_solar_polish">dual_hot_island_with_solar_polish</option>
-        <option value="custom">custom</option>
-      </select>
-    </div>
-    <div class="field-row"><label>Exchange Hub Present</label>
-      <select id="exchange_hub_present">
-        <option value="false">No</option>
-        <option value="true">Yes</option>
-      </select>
-    </div>
-    <div class="field-row"><label>Solar Thermal Polishing Source</label>
-      <select id="solar_polish_enabled">
-        <option value="false">No</option>
-        <option value="true">Yes — source characterisation required</option>
-      </select>
-    </div>
-    <div id="solar-polish-warning" class="note warn-note" style="display:none;">
-      ⚠ Solar-polish architecture selected. Source characterisation is required; this will surface as a warning in validation.
-    </div>
-  </div>
+  <!-- Thermal Zone Configuration section removed session 6 — folded into zone blocks -->
+  <!-- Two-Hot-Island section removed session 6 — topology expressed via zone block upstream/downstream refs -->
 
   <!-- ── Extension 3A — Thermal Zone Blocks  blueprint §11.1 ── -->
-  <div class="section" id="ext3a-thermal-section" style="display:none;">
+  <div class="section" id="ext3a-thermal-section">
     <div class="section-title">Thermal Zone Blocks <span class="ext3a-badge">3A</span></div>
     <div class="note">Each zone block compiles into a canonical <code>thermal_zones[]</code> entry in the run packet. Zones are directed — declare upstream/downstream refs to form the topology graph. The runtime validates the graph and rejects cycles. Per blueprint §11.1, spec §6.</div>
     <div id="zone-block-list" class="block-list"></div>
