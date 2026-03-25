@@ -696,6 +696,7 @@ function renderValidationPanel() {
 
 // ── Build packet ───────────────────────────────────────────────────────────────
 let _lastBundleFiles = null;
+let _lastRuntimeResult = null; // runtime result from /api/run-packet — session 6
 
 async function buildPacket() {
   const state = {
@@ -888,6 +889,7 @@ async function buildPacket() {
       });
       const data = await resp.json();
       if (data.ok) {
+        _lastRuntimeResult = data.result || null; // store for formatted report — session 6
         renderExt4ResultPanel(data.result && data.result.extension_4_result ? data.result.extension_4_result : null);
         const rSec = document.getElementById("ext3a-output-section");
         if (rSec) rSec.dataset.runtimeResult = JSON.stringify(data.result);
@@ -971,6 +973,7 @@ function openPacketOutput() {
   var nowStr = esc(new Date().toISOString());
   var packetId = esc(packet.packet_id || "—");
   var filesJson = JSON.stringify(_lastBundleFiles);
+  var runtimeJson = JSON.stringify(_lastRuntimeResult); // session 6
   var bundleName = "runbundle-" + (scenario.scenario_id || "packet") + "-" +
     new Date().toISOString().slice(0,10) + ".zip";
 
@@ -1043,9 +1046,29 @@ function openPacketOutput() {
     "<div class='sec'><div class='st'>Bundle Manifest<\/div>",
     "<table><tr><th>File<\/th><th>Size<\/th><\/tr>"+manifRows+"<\/table><\/div>",
     "<div class='sec'><div class='st'>Transform Trace<\/div><ul>"+traceItems+"<\/ul><\/div>",
+    "<div class='sec'><div class='st'>Runtime Result<\/div>",
+    "<div id='rt-section'>",
+    "<p style='font-size:13px;color:#8b949e;padding:4px 0;'>",
+    "Runtime result not yet available — press Build Report to execute server-side runtime.",
+    "<\/p><\/div><\/div>",
     "<div class='foot'>\u00a9 2026 Exnulla, a division of Lake Area LLC. All Rights Reserved. &nbsp;|&nbsp; Preview surface only \u2014 runtime-authoritative execution required.<\/div>",
     "<script>",
     "var _ef="+filesJson+";",
+  "var _rt="+runtimeJson+";",
+  "(function(){",
+  "  var el=document.getElementById('rt-section');",
+  "  if(!el)return;",
+  "  if(!_rt){el.innerHTML='<p style=\"font-size:13px;color:#8b949e;\">Runtime result not yet available.</p>';return;}",
+  "  var rows='';",
+  "  var flat=function(obj,prefix){Object.entries(obj||{}).forEach(function(kv){",
+  "    var k=prefix?prefix+'.'+kv[0]:kv[0],v=kv[1];",
+  "    if(v!==null&&typeof v==='object'&&!Array.isArray(v)){flat(v,k);}",
+  "    else{rows+='<tr><td>'+k+'</td><td>'+String(v)+'</td></tr>';}",
+  "  });};",
+  "  flat(_rt,'');",
+  "  el.innerHTML='<table><tr><th>Field</th><th>Value (runtime)</th></tr>'+rows+'</table>';",
+  "})();",
+
     "var _bn="+JSON.stringify(bundleName)+";",
     "async function dlBundle(){",
     "  if(typeof JSZip!=='undefined'){",
