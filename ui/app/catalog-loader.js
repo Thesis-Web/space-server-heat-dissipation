@@ -28,6 +28,7 @@ const CATALOG_PATHS = {
   "vault-gas-environment-presets":    "catalogs/vault-gas-environment-presets.v0.1.0.json",
   "transport-implementation-presets": "catalogs/transport-implementation-presets.v0.1.0.json",
   "eclipse-state-presets":            "catalogs/eclipse-state-presets.v0.1.0.json",
+  "storage-presets":                  "catalogs/storage-presets.v0.1.0.json",
 };
 
 export async function loadAllCatalogs(base_url = ".") {

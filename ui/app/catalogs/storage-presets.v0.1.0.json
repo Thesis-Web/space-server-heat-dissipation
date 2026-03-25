@@ -1,0 +1,52 @@
+{
+  "catalog_id": "storage-presets",
+  "catalog_version": "v0.1.0",
+  "catalog_notes": "Session 6. Storage preset defaults for UI prefill. All capacity/power values are best-solve estimates (BEST-SOLVE-001). Research required before use in engineering trade. Spec §21, schema/storage/storage.schema.json.",
+  "entries": [
+    {
+      "preset_id": "pcm_eutectic_store",
+      "label": "PCM Eutectic Store (Hot-Island Buffer)",
+      "storage_class": "eutectic_metal",
+      "storage_capacity_j": 30000000,
+      "charge_power_limit_w": 5000,
+      "discharge_power_limit_w": 10000,
+      "topology_role": "active_hot_island_buffer",
+      "research_required": true,
+      "basis_note": "Representative of Al-12%Si eutectic class (melting ~850K). 50kg assumed: latent ~28MJ + sensible ~2MJ. Charge/discharge limits estimated from thermal coupling class. All values BEST-SOLVE — see BEST-SOLVE-001.",
+      "temp_min_k": 800,
+      "temp_max_k": 950,
+      "cp_basis_j_per_kgk": 900,
+      "latent_heat_j_per_kg": 560000
+    },
+    {
+      "preset_id": "sensible_refractory_store",
+      "label": "Sensible Refractory Store (High-Temp Buffer)",
+      "storage_class": "sensible_solid",
+      "storage_capacity_j": 22500000,
+      "charge_power_limit_w": 8000,
+      "discharge_power_limit_w": 8000,
+      "topology_role": "regen_hot_island_buffer",
+      "research_required": true,
+      "basis_note": "Representative of SiC class at 800-1600K. 100kg at cp~750 J/kgK, ΔT~300K = 22.5MJ. Charge/discharge symmetric for sensible store. All values BEST-SOLVE — see BEST-SOLVE-001.",
+      "temp_min_k": 800,
+      "temp_max_k": 1600,
+      "cp_basis_j_per_kgk": 750,
+      "latent_heat_j_per_kg": 0
+    },
+    {
+      "preset_id": "custom",
+      "label": "Custom (Operator-Specified)",
+      "storage_class": "custom",
+      "storage_capacity_j": 0,
+      "charge_power_limit_w": 0,
+      "discharge_power_limit_w": 0,
+      "topology_role": "",
+      "research_required": true,
+      "basis_note": "All values must be specified by operator.",
+      "temp_min_k": 0,
+      "temp_max_k": 0,
+      "cp_basis_j_per_kgk": 0,
+      "latent_heat_j_per_kg": 0
+    }
+  ]
+}

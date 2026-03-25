@@ -141,6 +141,25 @@ function applyDevicePreset(preset_id) {
   updateComputePreview();
 }
 
+function applyStoragePreset(preset_id) {
+  const cat = CATALOGS['storage-presets'];
+  const entry = cat?.entries?.find((e) => e.preset_id === preset_id);
+  if (entry.storage_class)                      setValue('storage_class', entry.storage_class);
+  const cap  = document.getElementById('storage_capacity_j');    if (cap)  cap.value  = entry.storage_capacity_j  ?? 0;
+  const chg  = document.getElementById('storage_charge_w');      if (chg)  chg.value  = entry.charge_power_limit_w ?? 0;
+  const dis  = document.getElementById('storage_discharge_w');   if (dis)  dis.value  = entry.discharge_power_limit_w ?? 0;
+  if (entry.topology_role !== undefined)        setValue('storage_topology_role', entry.topology_role);
+  setValue('storage_research_required', entry.research_required ? 'true' : 'false');
+  const note = document.getElementById('storage-preset-note');
+  if (note) {
+    note.style.display = entry.basis_note ? 'block' : 'none';
+    note.innerHTML = entry.basis_note
+      ? '<em>' + entry.label + ':</em> ' + entry.basis_note +
+        (entry.research_required ? ' <span style="color:var(--warn)">⚠ research_required</span>' : '')
+      : '';
+  }
+}
+
 function populateMaterialFamilyDropdowns() {
   const cat = CATALOGS["material-families"];
   ["zone_material_family_ref", "radiator_material_family_ref"].forEach((sel_id) => {
@@ -163,6 +182,8 @@ function populateMaterialFamilyDropdowns() {
     note.innerHTML = `<strong>${entry.label}</strong> | ε≈${entry.default_emissivity} | T max: ${entry.nominal_temp_max_k} K | ` +
       `Areal density: ${entry.estimated_areal_density_kg_per_m2} kg/m² | <span class="maturity-tag maturity-${entry.maturity_class}">${entry.maturity_class}</span>` +
       (entry.research_required ? ` <span style="color:var(--warn)">⚠ research_required</span>` : "");
+    if (entry.default_emissivity !== undefined) { setValue('emissivity', entry.default_emissivity); updateRadiatorPreview(); }
+    if (entry.nominal_temp_max_k !== undefined) { setValue('material_limit_temp_k', entry.nominal_temp_max_k); }
   });
 }
 
@@ -1557,7 +1578,7 @@ function workingFluidOptions(selectedVal) {
   let html = `<option value="">— select fluid —</option>`;
   for (const e of (cat.entries || [])) {
     const id = e.working_fluid_id || e.fluid_id || "";
-    const label = e.display_name || e.fluid_class || id;
+    const label = e.label || e.fluid_class || id;
     const sel = id === selectedVal ? " selected" : "";
     html += `<option value="${id}"${sel}>${label}</option>`;
   }
@@ -1796,6 +1817,7 @@ function renderZoneBlocks() {
           ${workingFluidOptions(b.working_fluid_ref||"")}
         </select>
       </div>
+      <div id="z${idx}_fluid_note" class="note" style="display:none;"></div>
       <div class="field-row"><label>Pickup Geometry</label>
         <select id="z${idx}_pickup_geometry_ref" onchange="syncZoneBlock(${idx})">
           ${pickupGeometryOptions(b.pickup_geometry_ref||"")}
