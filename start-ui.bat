@@ -17,18 +17,22 @@ echo ERROR: node not found. Install from nodejs.org and re-run.
 pause
 goto :eof
 :use_node
-if not exist "%SCRIPT_DIR%node_modules\" (
-  echo   node_modules\ not found -- running npm install first...
-  cd /d "%SCRIPT_DIR%"
-  npm install
+cd /d "%SCRIPT_DIR%"
+echo   Running npm install...
+npm install
+if %errorlevel% neq 0 (
+  echo ERROR: npm install failed. Check Node.js install.
+  pause
+  goto :eof
 )
-if not exist "%SCRIPT_DIR%dist\runtime\runner\run-packet.js" (
-  echo   dist\ not found -- running npm run build first...
-  cd /d "%SCRIPT_DIR%"
-  npm run build
+echo   Running npm run build...
+npm run build
+if %errorlevel% neq 0 (
+  echo ERROR: npm run build failed. See output above.
+  pause
+  goto :eof
 )
 start "" "http://localhost:8080"
-cd /d "%SCRIPT_DIR%"
 node server.js
 goto :eof
 :use_wsl
