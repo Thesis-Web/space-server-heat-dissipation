@@ -17,6 +17,11 @@ echo ERROR: node not found. Install from nodejs.org and re-run.
 pause
 goto :eof
 :use_node
+if not exist "%SCRIPT_DIR%node_modules\" (
+  echo   node_modules\ not found -- running npm install first...
+  cd /d "%SCRIPT_DIR%"
+  npm install
+)
 if not exist "%SCRIPT_DIR%dist\runtime\runner\run-packet.js" (
   echo   dist\ not found -- running npm run build first...
   cd /d "%SCRIPT_DIR%"

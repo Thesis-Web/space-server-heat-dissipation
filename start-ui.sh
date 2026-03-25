@@ -13,6 +13,10 @@ if ! command -v node &>/dev/null; then
   echo "ERROR: node not found. Install Node.js and re-run." >&2
   exit 1
 fi
+if [ ! -d "$SCRIPT_DIR/node_modules" ]; then
+  echo "  node_modules/ not found — running npm install first..."
+  cd "$SCRIPT_DIR" && npm install
+fi
 if [ ! -f "$SCRIPT_DIR/dist/runtime/runner/run-packet.js" ]; then
   echo "  dist/ not found — running npm run build first..."
   cd "$SCRIPT_DIR" && npm run build
