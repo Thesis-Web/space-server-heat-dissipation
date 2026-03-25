@@ -15,7 +15,7 @@ import { RUNTIME_VERSIONS } from "../constants/constants";
 // ── Extension 3A dispatch — additive per spec §14.1, DIFF-3A-EXT2-COHABIT-001 ─
 import { runExtension3A, type Extension3AInput, type Extension3AResult } from "./run-extension-3a";
 // ── Extension 3A packet metadata builder — 3A-spec §10.1–§10.2 (WIRE-3A-METADATA-001) ─
-import { buildExtension3APacketMetadata, type Extension3APacketMetadataAddition } from "../emitters/packet-metadata-emitter";
+import { buildExtension3APacketMetadata, type Extension3APacketMetadataAddition, type RiskSummary } from "../emitters/packet-metadata-emitter";
 // ── Extension 3B dispatch — additive per 3B-spec §15.3 ──────────────────────
 import { runExtension3B, type Extension3BInput, type Extension3BResult } from "./run-extension-3b";
 // ── Extension 4 dispatch — additive per ext4-spec §17.4 ─────────────────────
@@ -32,6 +32,18 @@ export interface BranchInput {
   work_input_w: number;
   external_heat_input_w: number;
   storage_drawdown_w: number;
+  research_required: boolean;
+}
+
+export interface MaterialResolved {
+  material_family_id: string;
+  label: string;
+  maturity_class: string;
+  nominal_temp_max_k: number | null;
+  corrosion_sensitivity: string;
+  contamination_sensitivity: string;
+  vibration_sensitivity: string;
+  estimated_areal_density_kg_per_m2: number | null;
   research_required: boolean;
 }
 
@@ -59,6 +71,10 @@ export interface RunPacketInput {
   // Dispatcher order: baseline → 3A → 3B → ext4.
   // ext4 reads 3A result if present; reads nothing from 3B for numeric authority.
   extension_4_input?: Ext4RunnerInput;
+  // ── Resolved material fields — embedded by state-compiler for risk_summary computation ──
+  // spec §22: risk_summary must be runtime-authoritative. Material catalog resolved at
+  // compile time by UI, passed through for server-side risk derivation.
+  material_resolved?: MaterialResolved | null;
 }
 
 export interface RunPacketOutput {
@@ -87,6 +103,79 @@ export interface RunPacketOutput {
   // Present only when extension_4_input was supplied and runExtension4 ran.
   // Contains only Extension 4 results. Prior extension result trees not copied.
   extension_4_result?: Extension4Result;
+  // ── Risk summary — spec §22 — runtime-authoritative ──────────────────────
+  // Computed server-side from resolved material fields + validation + research items.
+  // BEST-SOLVE-RISK-001: ttl_class, thermal_cycling_risk, packaging_stress,
+  // compactness_stress derived from catalog fields. Approved derivation — see diff log.
+  risk_summary: RiskSummary;
+}
+
+/**
+ * Derive risk_summary from resolved material fields + research items.
+ * spec §22: risk fields are runtime-authoritative.
+ * BEST-SOLVE-RISK-001: ttl_class, thermal_cycling_risk, packaging_stress,
+ * compactness_stress derived from catalog fields — no direct catalog source.
+ * Pinned: spec §22, blueprint §23.
+ */
+function computeRiskSummary(
+  material: MaterialResolved | null | undefined,
+  research_required_items: string[]
+): RiskSummary {
+  const maturity_class = material?.maturity_class ?? "no_material_selected";
+
+  // ttl_class — BEST-SOLVE-RISK-001: derived from maturity_class mapping
+  const ttl_map: Record<string, string> = {
+    flight_proven:        "high",
+    flight_proven_analog: "medium_high",
+    trl_7_8:              "medium",
+    trl_5_6:              "medium_low",
+    experimental:         "low",
+    unknown:              "unknown",
+  };
+  const ttl_class = ttl_map[maturity_class] ?? "unknown";
+
+  // thermal_cycling_risk — BEST-SOLVE-RISK-001: derived from maturity + temp ceiling
+  const temp_max = material?.nominal_temp_max_k ?? 0;
+  let thermal_cycling_risk = "unknown";
+  if (material) {
+    if (maturity_class === "flight_proven" || maturity_class === "flight_proven_analog") {
+      thermal_cycling_risk = temp_max > 1500 ? "medium" : "low";
+    } else if (maturity_class === "experimental") {
+      thermal_cycling_risk = "high";
+    } else {
+      thermal_cycling_risk = "medium";
+    }
+  }
+
+  // corrosion, contamination, vibration — direct from catalog sensitivity fields
+  const corrosion_risk     = material?.corrosion_sensitivity     ?? "unknown";
+  const contamination_risk = material?.contamination_sensitivity ?? "unknown";
+  const vibration_risk     = material?.vibration_sensitivity     ?? "unknown";
+
+  // packaging_stress — BEST-SOLVE-RISK-001: derived from areal density
+  const density = material?.estimated_areal_density_kg_per_m2 ?? null;
+  const packaging_stress = density === null ? "unknown"
+    : density < 4   ? "low"
+    : density <= 10 ? "medium"
+    : "high";
+
+  // compactness_stress — BEST-SOLVE-RISK-001: derived from areal density
+  const compactness_stress = density === null ? "unknown"
+    : density < 4  ? "low"
+    : density <= 8 ? "medium"
+    : "high";
+
+  return {
+    maturity_class,
+    ttl_class,
+    thermal_cycling_risk,
+    corrosion_risk,
+    contamination_risk,
+    vibration_risk,
+    packaging_stress,
+    compactness_stress,
+    research_required_items,
+  };
 }
 
 /**
@@ -252,6 +341,9 @@ export function executeRunPacket(input: RunPacketInput): RunPacketOutput {
     );
   }
 
+  // Compute risk_summary — spec §22, BEST-SOLVE-RISK-001
+  const risk_summary = computeRiskSummary(input.material_resolved, input.research_required_items);
+
   return {
     packet_id: input.packet_id,
     scenario_id: input.scenario_id,
@@ -262,6 +354,7 @@ export function executeRunPacket(input: RunPacketInput): RunPacketOutput {
     transform_trace,
     runtime_authority_declaration: "runtime",
     versions: RUNTIME_VERSIONS,
+    risk_summary,
     ...(extension_3a_result !== undefined ? { extension_3a_result } : {}),
     ...(extension_3a_packet_metadata !== undefined ? { extension_3a_packet_metadata } : {}),
     ...(extension_3b_result !== undefined ? { extension_3b_result } : {}),

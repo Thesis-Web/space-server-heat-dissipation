@@ -664,6 +664,81 @@ window.toggleJsonPanel = () => {
   if (lbl) lbl.textContent = show ? "▼ hide" : "▶ show";
 };
 
+window.toggleRuntimeJsonPanel = () => {
+  const wrap = document.getElementById("runtime-json-wrap");
+  const lbl  = document.getElementById("runtime-json-toggle-label");
+  if (!wrap) return;
+  const show = wrap.style.display === "none";
+  wrap.style.display = show ? "block" : "none";
+  if (lbl) lbl.textContent = show ? "▼ hide" : "▶ show";
+};
+
+/**
+ * Populate Tab 7 thermal + radiator cards with runtime-authoritative values.
+ * Replaces browser-math previews. spec §4.1, §22.
+ */
+function populateRuntimeCards(result) {
+  // Flip "preview" labels to "runtime ✓"
+  const thermalNote = document.getElementById("out-thermal-title-note");
+  if (thermalNote) thermalNote.textContent = "runtime ✓";
+  const radNote = document.getElementById("out-radiator-title-note");
+  if (radNote) radNote.textContent = "runtime ✓";
+
+  const agg = result.aggregation_result;
+  if (agg) {
+    _setEl("out-device-power",         `${(agg.w_dot_device_at_state_w  || 0).toFixed(1)} W`);
+    _setEl("out-compute-device-total", `${(agg.w_dot_devices_total_w    || 0).toFixed(1)} W`);
+    _setEl("out-overhead",             `${((agg.w_dot_compute_module_w  || 0) - (agg.w_dot_devices_total_w || 0)).toFixed(1)} W`);
+    _setEl("sum-compute-total",        `${(agg.w_dot_compute_module_w   || 0).toFixed(1)} W`);
+    _setEl("out-total-reject",         `${(agg.q_dot_total_reject_w     || 0).toFixed(1)} W`);
+    const nc = (agg.q_dot_total_reject_w || 0) - (agg.w_dot_compute_module_w || 0);
+    _setEl("sum-noncompute-total",     `${Math.max(0, nc).toFixed(1)} W`);
+  }
+  const rad = result.radiator_result;
+  if (rad) {
+    _setEl("sum-radiator-area",   `${(rad.a_radiator_effective_m2    || 0).toFixed(4)} m²`);
+    _setEl("sum-radiator-margin", `${(rad.a_radiator_with_margin_m2  || 0).toFixed(4)} m²`);
+  }
+}
+
+/**
+ * Render the risk summary card from runtime result. spec §22.
+ * BEST-SOLVE-RISK-001: ttl_class, thermal_cycling_risk, packaging_stress,
+ * compactness_stress are derived fields — approved derivation per diff/hole log.
+ */
+function populateRiskSummaryCard(result) {
+  const rs = result && result.risk_summary;
+  if (!rs) return;
+  const card = document.getElementById("output-risk-card");
+  if (!card) return;
+  card.style.display = "block";
+
+  const riskRow = (label, value) => {
+    const cls = value && value !== "unknown" && value !== "no_material_selected" ? `maturity-${value}` : "";
+    return `<div class="out-kv"><span class="out-label">${label}</span>` +
+           `<span class="out-value"><span class="maturity-tag ${cls}">${value || "—"}</span></span></div>`;
+  };
+  const items = rs.research_required_items && rs.research_required_items.length
+    ? rs.research_required_items.map(r => `<div style="padding:2px 0">⚠ ${r}</div>`).join("")
+    : `<span style="color:var(--ok)">✓ None declared</span>`;
+
+  const body = document.getElementById("out-risk-body");
+  if (body) body.innerHTML =
+    `<div class="out-grid">
+      ${riskRow("Maturity Class",       rs.maturity_class)}
+      ${riskRow("TTL Class",            rs.ttl_class)}
+      ${riskRow("Thermal Cycling Risk", rs.thermal_cycling_risk)}
+      ${riskRow("Corrosion Risk",       rs.corrosion_risk)}
+      ${riskRow("Contamination Risk",   rs.contamination_risk)}
+      ${riskRow("Vibration Risk",       rs.vibration_risk)}
+      ${riskRow("Packaging Stress",     rs.packaging_stress)}
+      ${riskRow("Compactness Stress",   rs.compactness_stress)}
+    </div>
+    <div style="margin-top:10px;"><strong style="font-size:11px;">Research Required Items</strong>
+      <div style="margin-top:4px;font-size:11px;">${items}</div>
+    </div>`;
+}
+
 function renderValidationPanel() {
   const panel = document.getElementById("validation-panel");
   const issues = [];
@@ -953,7 +1028,26 @@ async function buildPacket() {
       });
       const data = await resp.json();
       if (data.ok) {
-        _lastRuntimeResult = data.result || null; // store for formatted report — session 6
+        _lastRuntimeResult = data.result || null;
+        // Wire runtime-authoritative values to Tab 7 — spec §22, §4.1
+        if (data.result) {
+          populateRuntimeCards(data.result);
+          populateRiskSummaryCard(data.result);
+          // Push runtime-output.json into bundle for download + history
+          const rtJson = JSON.stringify(data.result, null, 2);
+          if (_lastBundleFiles) {
+            const existing = _lastBundleFiles.findIndex(f => f.name === "runtime-output.json");
+            if (existing >= 0) _lastBundleFiles[existing].content = rtJson;
+            else _lastBundleFiles.push({ name: "runtime-output.json", content: rtJson });
+            document.getElementById("manifest-preview").innerHTML =
+              _lastBundleFiles.map((f) => `<span style="color:var(--accent);">${f.name}</span> — ${new TextEncoder().encode(f.content).length} B`).join("<br>");
+          }
+          // Show runtime-output JSON panel
+          const rtCard = document.getElementById("output-runtime-json-card");
+          if (rtCard) rtCard.style.display = "block";
+          const rtPre = document.getElementById("runtime-output-preview");
+          if (rtPre) rtPre.textContent = rtJson;
+        }
         renderExt4ResultPanel(data.result && data.result.extension_4_result ? data.result.extension_4_result : null);
         const rSec = document.getElementById("ext3a-output-section");
         if (rSec) rSec.dataset.runtimeResult = JSON.stringify(data.result);

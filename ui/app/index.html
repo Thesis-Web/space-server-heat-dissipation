@@ -204,6 +204,16 @@
         <option value="custom">custom</option>
       </select>
     </div>
+    <div class="field-row" id="solar-polish-row" style="display:none;">
+      <label>Solar Polish Enabled</label>
+      <select id="solar_polish_enabled">
+        <option value="false">false</option>
+        <option value="true">true</option>
+      </select>
+    </div>
+    <div id="solar-polish-warning" class="note warn-note" style="display:none;">
+      &#9888; Solar-polish architecture selected &#8212; source characterisation required before packet export.
+    </div>
     <div class="field-row"><label>Orbit Class</label>
       <select id="orbit_class">
         <option value="GEO">GEO — supported (v0.1.0)</option>
@@ -808,7 +818,7 @@
 
   <!-- ── Thermal load summary card ── -->
   <div class="section" id="output-thermal-card" style="display:none;">
-    <div class="section-title">Thermal Load Summary <span class="note-inline">preview — not authoritative</span></div>
+    <div class="section-title">Thermal Load Summary <span class="note-inline" id="out-thermal-title-note">preview — not authoritative</span></div>
     <div class="out-grid">
       <div class="out-kv"><span class="out-label">Device Count</span><span class="out-value" id="out-device-count">—</span></div>
       <div class="out-kv"><span class="out-label">Load State</span><span class="out-value" id="out-load-state">—</span></div>
@@ -823,7 +833,7 @@
 
   <!-- ── Radiator sizing card ── -->
   <div class="section" id="output-radiator-card" style="display:none;">
-    <div class="section-title">Radiator Sizing <span class="note-inline">preview — not authoritative</span></div>
+    <div class="section-title">Radiator Sizing <span class="note-inline" id="out-radiator-title-note">preview — not authoritative</span></div>
     <div class="out-grid">
       <div class="out-kv"><span class="out-label">Target Surface Temp</span><span class="out-value" id="out-rad-temp">—</span></div>
       <div class="out-kv"><span class="out-label">Sink Temp</span><span class="out-value" id="out-sink-temp">—</span></div>
@@ -841,6 +851,13 @@
   <div class="section" id="output-branches-card" style="display:none;">
     <div class="section-title">Optional Branches</div>
     <div id="out-branches-list" class="note"></div>
+  </div>
+
+  <!-- ── Risk summary card — spec §22 — runtime-authoritative ── -->
+  <div class="section" id="output-risk-card" style="display:none;">
+    <div class="section-title">Risk Summary <span class="note-inline" style="color:var(--ok);">runtime ✓</span></div>
+    <div class="note" style="margin-bottom:8px;">Runtime-authoritative risk assessment derived from resolved material catalog entry. BEST-SOLVE-RISK-001: ttl_class, thermal_cycling_risk, packaging_stress, compactness_stress derived from catalog fields per approved derivation.</div>
+    <div id="out-risk-body"></div>
   </div>
 
   <!-- ── Extension 3A output — blueprint §11.4 ── -->
@@ -978,6 +995,16 @@
     </div>
     <div id="json-preview-wrap" style="display:none;">
       <pre id="output-preview" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;font:12px/1.6 'Fira Mono','Consolas',monospace;white-space:pre-wrap;word-break:break-all;color:var(--text);max-height:320px;overflow:auto;"></pre>
+    </div>
+  </div>
+
+  <!-- ── Runtime output JSON panel (collapsed) ── -->
+  <div class="section" id="output-runtime-json-card" style="display:none;">
+    <div class="section-title" style="cursor:pointer;" onclick="toggleRuntimeJsonPanel()">
+      Runtime Output (raw) <span id="runtime-json-toggle-label" style="font-size:11px;font-weight:400;color:var(--accent);">▶ show</span>
+    </div>
+    <div id="runtime-json-wrap" style="display:none;">
+      <pre id="runtime-output-preview" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;font:12px/1.6 'Fira Mono','Consolas',monospace;white-space:pre-wrap;word-break:break-all;color:var(--text);max-height:320px;overflow:auto;"></pre>
     </div>
   </div>
 

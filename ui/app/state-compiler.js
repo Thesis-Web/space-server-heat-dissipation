@@ -130,6 +130,26 @@ export function compileStateToPayloads(state, catalogs) {
   extra_files.push({ name: "compute-module-01.json", content: compute_module_content });
   transform_trace.push("emitted-canonical-file: compute-module-01.json");
 
+  // Resolve material catalog entry — embedded into run_packet for runtime risk_summary
+  // spec §22: risk fields must be runtime-authoritative, derived from resolved material.
+  // BEST-SOLVE-RISK-001: ttl_class, thermal_cycling_risk, packaging_stress, compactness_stress
+  // derived from available catalog fields — no direct catalog source. See diff/hole log.
+  const _matCat = catalogs && catalogs["material-families"];
+  const _matEntry = (_matCat && Array.isArray(_matCat.entries))
+    ? _matCat.entries.find(e => e.material_family_id === (state.radiator_material_family_ref || ""))
+    : null;
+  const _matResolved = _matEntry ? {
+    material_family_id:                _matEntry.material_family_id,
+    label:                             _matEntry.label,
+    maturity_class:                    _matEntry.maturity_class || "unknown",
+    nominal_temp_max_k:                _matEntry.nominal_temp_max_k ?? null,
+    corrosion_sensitivity:             _matEntry.corrosion_sensitivity || "unknown",
+    contamination_sensitivity:         _matEntry.contamination_sensitivity || "unknown",
+    vibration_sensitivity:             _matEntry.vibration_sensitivity || "unknown",
+    estimated_areal_density_kg_per_m2: _matEntry.estimated_areal_density_kg_per_m2 ?? null,
+    research_required:                 _matEntry.research_required ?? false,
+  } : null;
+
   const radiator_obj = {
     radiator_id: "radiator-01",
     schema_version: "v0.1.5",
@@ -306,6 +326,7 @@ export function compileStateToPayloads(state, catalogs) {
     has_speculative_material:              false,
     has_solar_polish_without_source:       state.solar_polish_enabled === "true" || state.solar_polish_enabled === true,
     has_per_subsystem_duty_simplification: false,
+    material_resolved: _matResolved,
     ...((state.enable_model_extension_4) ? { extension_4_input: {
       scenario:    scenario,
       run_packet:  { packet_id: pkt_id, schema_version: "v0.1.5",
