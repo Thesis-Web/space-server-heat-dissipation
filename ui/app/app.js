@@ -216,6 +216,7 @@ function wireAllFields() {
   ["emissivity","view_factor","target_surface_temp_k","sink_temp_k","reserve_margin_fraction"].forEach((id) => {
     document.getElementById(id)?.addEventListener("input", updateRadiatorPreview);
   });
+  document.getElementById("storage_preset_id")?.addEventListener("change", (e) => applyStoragePreset(e.target.value));
   document.getElementById("add-payload-block").addEventListener("click", addPayloadBlock);
   document.getElementById("add-branch-block").addEventListener("click", addBranchBlock);
   document.getElementById("add-stage-block")?.addEventListener("click", () => addStageBlock());
