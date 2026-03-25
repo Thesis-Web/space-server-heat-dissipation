@@ -657,6 +657,43 @@ function renderValidationPanel() {
 
   if (!val("scenario_id_display")) issues.push({ s: "blocking", m: "scenario_id missing" });
   if (numVal("device_count", 0) < 1) issues.push({ s: "blocking", m: "device_count must be ≥ 1" });
+
+  // Device power validation — operator must set at least full-load power
+  if (numVal("power_full_w", 0) <= 0) issues.push({ s: "blocking", m: "power_full_w must be > 0 — select a device preset or enter device power" });
+  // Monotonic load-state power check
+  const pI=numVal("power_idle_w",0), pL=numVal("power_light_w",0), pM=numVal("power_medium_w",0), pF=numVal("power_full_w",0);
+  if (pF > 0 && !(pI <= pL && pL <= pM && pM <= pF)) issues.push({ s: "warning", m: `Load-state powers not monotonic: idle=${pI} light=${pL} medium=${pM} full=${pF} — spec §16.2` });
+
+  // Zone topology warning — only when 3A enabled
+  if (val("enable_model_extension_3a") === "true" && zoneBlocks.length === 0) {
+    issues.push({ s: "warning", m: "Extension 3A enabled but no thermal zone blocks defined" });
+  }
+  if (val("enable_model_extension_3a") === "true") {
+    const noTopology = zoneBlocks.filter(z => !z.upstream_zone_ref && !z.downstream_zone_ref);
+    if (noTopology.length > 0 && zoneBlocks.length > 1) {
+      issues.push({ s: "warning", m: `${noTopology.length} zone(s) have no topology refs — connect upstream/downstream to form the graph` });
+    }
+    // chain_id cross-chain warnings
+    const chainsPresent = new Set(zoneBlocks.map(z => z.chain_id).filter(Boolean));
+    if (chainsPresent.size > 1) {
+      const crossEdges = zoneBlocks.filter(z => {
+        if (!z.downstream_zone_ref || !z.chain_id) return false;
+        const down = zoneBlocks.find(b => b.zone_id === z.downstream_zone_ref);
+        return down && down.chain_id && down.chain_id !== z.chain_id &&
+               z.zone_role !== 'convergence_exchange' && !z.convergence_enabled &&
+               down.zone_role !== 'convergence_exchange' && !down.convergence_enabled;
+      });
+      if (crossEdges.length > 0) {
+        issues.push({ s: "blocking", m: `ZC-001: ${crossEdges.length} cross-chain connection(s) without HX boundary — add convergence_exchange zone between chains` });
+      }
+    }
+  }
+
+  // research_required device warning
+  if (val("compute_device_preset_id") && val("compute_device_preset_id") !== "custom") {
+    const devEntry = (CATALOGS["compute-device-presets"]?.entries||[]).find(e => e.preset_id === val("compute_device_preset_id"));
+    if (devEntry?.research_required) issues.push({ s: "warning", m: `Device preset '${devEntry.label}' is research_required — values are estimates` });
+  }
   if (T <= 0) issues.push({ s: "blocking", m: "radiator target temperature must be > 0 K" });
   if (eps <= 0 || eps > 1) issues.push({ s: "blocking", m: "emissivity must be in (0, 1]" });
   if (F <= 0 || F > 1) issues.push({ s: "blocking", m: "view_factor must be in (0, 1]" });
@@ -1705,6 +1742,7 @@ function addZoneBlock(data = {}) {
   zoneBlocks.push(block);
   renderZoneBlocks();
   updateTopologyStatus();
+  renderValidationPanel();
 }
 
 /**
