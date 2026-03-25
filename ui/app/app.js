@@ -428,6 +428,7 @@ function addBranchBlock(data = {}) {
     requires_carnot_check: data.requires_carnot_check ?? false,
     maturity_class: data.maturity_class || "experimental",
     t_hot_source_k: data.t_hot_source_k ?? 0,
+    output_class:   data.output_class || 'heat_lift',
     t_cold_sink_k: data.t_cold_sink_k ?? 0,
     research_required: data.research_required ?? true,
     risk_notes: data.risk_notes || [],
