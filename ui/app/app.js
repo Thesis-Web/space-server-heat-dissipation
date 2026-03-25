@@ -170,17 +170,21 @@ function applyStoragePreset(preset_id) {
 
 function populateMaterialFamilyDropdowns() {
   const cat = CATALOGS["material-families"];
-  ["zone_material_family_ref", "radiator_material_family_ref"].forEach((sel_id) => {
-    const sel = document.getElementById(sel_id);
-    sel.innerHTML = '<option value="">— none —</option>';
-    if (!cat || cat.load_error) return;
-    for (const e of cat.entries) {
-      const opt = document.createElement("option");
-      opt.value = e.material_family_id;
-      opt.textContent = e.label;
-      sel.appendChild(opt);
+  // Zone card material_family_ref dropdowns are populated at render time
+  // via materialFamilyOptions() in renderZoneBlocks — not here.
+  // Only the static radiator dropdown is populated at init.
+  const radSel = document.getElementById("radiator_material_family_ref");
+  if (radSel) {
+    radSel.innerHTML = '<option value="">— none —</option>';
+    if (cat && !cat.load_error) {
+      for (const e of cat.entries) {
+        const opt = document.createElement("option");
+        opt.value = e.material_family_id;
+        opt.textContent = e.label;
+        radSel.appendChild(opt);
+      }
     }
-  });
+  }
   document.getElementById("radiator_material_family_ref").addEventListener("change", (e) => {
     const cat2 = CATALOGS["material-families"];
     const entry = lookupEntry(cat2, "material_family_id", e.target.value);
@@ -229,6 +233,15 @@ function wireAllFields() {
   document.getElementById("add-branch-block").addEventListener("click", addBranchBlock);
   document.getElementById("add-stage-block")?.addEventListener("click", () => addStageBlock());
   document.getElementById("build-packet-btn").addEventListener("click", buildPacket);
+  document.getElementById("architecture_class")?.addEventListener("change", (e) => {
+    const isSolar = e.target.value === "cold_loop_plus_dual_hot_island_plus_solar_polish";
+    const row = document.getElementById("solar-polish-row");
+    const warn = document.getElementById("solar-polish-warning");
+    const sel = document.getElementById("solar_polish_enabled");
+    if (row) row.style.display = isSolar ? "flex" : "none";
+    if (!isSolar && sel) sel.value = "false";
+    if (warn) warn.style.display = "none";
+  });
   document.getElementById("solar_polish_enabled")?.addEventListener("change", (e) => {
     document.getElementById("solar-polish-warning").style.display = e.target.value === "true" ? "block" : "none";
   });
@@ -511,6 +524,11 @@ function updateOutputTab() {
   const ext3aOutSec = document.getElementById("ext3a-output-section");
   if (ext3aOutSec) ext3aOutSec.style.display = ext3aEnabled ? "block" : "none";
   if (ext3aEnabled) updateExt3aOutputSection();
+
+  // Extension 4 output section visibility — ext4-spec §19.1, §19.3
+  const ext4Enabled = val("enable_model_extension_4") === "true";
+  const ext4OutSec = document.getElementById("ext4-output-section");
+  if (ext4OutSec) ext4OutSec.style.display = ext4Enabled ? "block" : "none";
 
   // Recompute for compat spans (used by openPacketOutput)
   const dc = numVal("device_count", 1);
@@ -1672,6 +1690,24 @@ function pickupGeometryOptions(selectedVal) {
   return html;
 }
 
+/**
+ * Build <option> HTML for material-family catalog entries.
+ * Used by zone card template at render time. Pattern: workingFluidOptions.
+ * Zone chain spec §2.1; ui-expansion-spec §10.2.
+ */
+function materialFamilyOptions(selectedVal) {
+  const cat = CATALOGS["material-families"];
+  if (!cat || cat.load_error) return `<option value="">— catalog unavailable —</option>`;
+  let html = `<option value="">— select material —</option>`;
+  for (const e of (cat.entries || [])) {
+    const id = e.material_family_id || "";
+    const label = e.label || id;
+    const sel = id === selectedVal ? " selected" : "";
+    html += `<option value="${id}"${sel}>${label}</option>`;
+  }
+  return html;
+}
+
 // ── Enable toggle ─────────────────────────────────────────────────────────────
 
 /**
@@ -1738,6 +1774,7 @@ function addZoneBlock(data = {}) {
     target_temp_k:      data.target_temp_k     ?? null,
     chain_id:           data.chain_id          || null,
     loop_role:          data.loop_role         || null,
+    material_family_ref: data.material_family_ref || null,
   };
   zoneBlocks.push(block);
   renderZoneBlocks();
@@ -1801,6 +1838,7 @@ function syncZoneBlock(idx) {
   b.target_temp_k      = parseFloat(document.getElementById(`z${idx}_target_temp_k`)?.value) || null;
   b.chain_id           = document.getElementById(`z${idx}_chain_id`)?.value?.trim() || null;
   b.loop_role          = document.getElementById(`z${idx}_loop_role`)?.value || null;
+  b.material_family_ref= document.getElementById(`z${idx}_material_family_ref`)?.value || null;
   const chain = b.resistance_chain;
   chain.r_junction_to_case_k_per_w           = parseFloat(document.getElementById(`z${idx}_r_jc`)?.value)  || null;
   chain.r_case_to_spreader_k_per_w           = parseFloat(document.getElementById(`z${idx}_r_cs`)?.value)  || null;
@@ -1832,6 +1870,7 @@ function compileZoneBlock(b) {
     target_temp_k:         b.target_temp_k      ?? null,
     chain_id:              b.chain_id           ?? null,
     loop_role:             b.loop_role          ?? null,
+    material_family_ref:   b.material_family_ref || null,
   };
 }
 
@@ -1922,6 +1961,11 @@ function renderZoneBlocks() {
           <option value="radiator_loop"${b.loop_role==="radiator_loop"?" selected":""}>radiator_loop</option>
           <option value="safety_loop"${b.loop_role==="safety_loop"?" selected":""}>safety_loop</option>
           <option value="custom"${b.loop_role==="custom"?" selected":""}>custom</option>
+        </select>
+      </div>
+      <div class="field-row"><label>Material Family</label>
+        <select id="z${idx}_material_family_ref" onchange="syncZoneBlock(${idx})">
+          ${materialFamilyOptions(b.material_family_ref||"")}
         </select>
       </div>
       <div class="field-row"><label>Isolation Boundary</label>
