@@ -397,6 +397,8 @@ function addBranchBlock(data = {}) {
     storage_drawdown_w: data.storage_drawdown_w ?? 0,
     requires_carnot_check: data.requires_carnot_check ?? false,
     maturity_class: data.maturity_class || "experimental",
+    t_hot_source_k: data.t_hot_source_k ?? 0,
+    t_cold_sink_k: data.t_cold_sink_k ?? 0,
     research_required: data.research_required ?? true,
     risk_notes: data.risk_notes || [],
   };
@@ -426,6 +428,8 @@ function renderBranchBlocks() {
         <div class="block-field"><label>Work Input (W)</label><input type="number" min="0" value="${b.work_input_w}" oninput="branchBlockChange(${idx},'work_input_w',+this.value)" /></div>
         <div class="block-field"><label>External Heat Input (W)</label><input type="number" min="0" value="${b.external_heat_input_w}" oninput="branchBlockChange(${idx},'external_heat_input_w',+this.value)" /></div>
         <div class="block-field"><label>Storage Drawdown (W)</label><input type="number" min="0" value="${b.storage_drawdown_w}" oninput="branchBlockChange(${idx},'storage_drawdown_w',+this.value)" /></div>
+        <div class="block-field"><label>T Hot Source (K)</label><input type="number" min="0" step="1" value="${b.t_hot_source_k}" oninput="branchBlockChange(${idx},'t_hot_source_k',+this.value)" /></div>
+        <div class="block-field"><label>T Cold Sink (K)</label><input type="number" min="0" step="1" value="${b.t_cold_sink_k}" oninput="branchBlockChange(${idx},'t_cold_sink_k',+this.value)" /></div>
         <div class="block-field"><label>Source Zone Ref</label><input type="text" value="${b.source_zone_ref}" oninput="branchBlockChange(${idx},'source_zone_ref',this.value)" /></div>
         <div class="block-field"><label>Sink Zone Ref</label><input type="text" value="${b.sink_zone_ref}" oninput="branchBlockChange(${idx},'sink_zone_ref',this.value)" /></div>
       </div>
@@ -671,7 +675,7 @@ function renderValidationPanel() {
 // ── Build packet ───────────────────────────────────────────────────────────────
 let _lastBundleFiles = null;
 
-function buildPacket() {
+async function buildPacket() {
   const state = {
     scenario_preset_id: val("scenario_preset_id"),
     label: val("label") || val("scenario_id_display"),
@@ -852,6 +856,26 @@ function buildPacket() {
   document.getElementById("run-packet-btn").onclick = openPacketOutput;
 
   updateOutputTab();
+  if (rp) {
+    try {
+      const rpObj = JSON.parse(rp.content);
+      const resp = await fetch("/api/run-packet", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(rpObj)
+      });
+      const data = await resp.json();
+      if (data.ok) {
+        renderExt4ResultPanel(data.result && data.result.extension_4_result ? data.result.extension_4_result : null);
+        const rSec = document.getElementById("ext3a-output-section");
+        if (rSec) rSec.dataset.runtimeResult = JSON.stringify(data.result);
+      } else {
+        console.warn("Runtime server error:", data.error);
+      }
+    } catch (e) {
+      console.warn("Runtime server not available:", e.message);
+    }
+  }
 }
 
 async function downloadBundle() {

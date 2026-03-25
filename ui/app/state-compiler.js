@@ -245,6 +245,76 @@ export function compileStateToPayloads(state, catalogs) {
     extension_4_result: null, // populated by runtime runner after dispatch
   };
 
+  // ── Runtime execution fields for executeRunPacket (spec §26.5, §27) ──────────
+  const _ls  = state.target_load_state || "full";
+  const _dc  = state.device_count || 1;
+  const _dpf = { idle: state.power_idle_w ?? 0, light: state.power_light_w ?? 0,
+                 medium: state.power_medium_w ?? 0, full: state.power_full_w ?? 0 };
+  const _dpv = _dpf[_ls] !== undefined ? _dpf[_ls] : (_dpf.full || 0);
+  const _mem = state.memory_power_w ?? 0;
+  const _sto = state.storage_power_w ?? 0;
+  const _net = state.network_power_w ?? 0;
+  const _pco = state.power_conversion_overhead_w ?? 0;
+  const _ctl = state.control_overhead_w ?? 0;
+  const _ncw = (state.non_compute_payload_blocks || []).reduce((sum, b) => {
+    const duty = b.duty_mode === "continuous" ? 1.0 : (parseFloat(b.duty_fraction) || 0);
+    return sum + ((parseFloat(b.rf_comms_power_w)||0) + (parseFloat(b.telemetry_power_w)||0)
+      + (parseFloat(b.radar_power_w)||0) + (parseFloat(b.optical_crosslink_power_w)||0)) * duty;
+  }, 0);
+  const _qt  = _dc * _dpv + _mem + _sto + _net + _pco + _ctl + _ncw;
+  Object.assign(run_packet, {
+    scenario_id,
+    aggregation: {
+      device_powers: { power_idle_w: _dpf.idle, power_light_w: _dpf.light,
+                       power_medium_w: _dpf.medium, power_full_w: _dpf.full },
+      device_count:               _dc,
+      target_load_state:          _ls,
+      w_dot_memory_w:             _mem,
+      w_dot_storage_w:            _sto,
+      w_dot_network_w:            _net,
+      w_dot_power_conversion_w:   _pco,
+      w_dot_control_w:            _ctl,
+      w_dot_non_compute_total_w:  _ncw,
+      w_dot_conversion_losses_w:  0,
+      w_dot_control_losses_w:     0,
+      q_dot_external_w:           0,
+      q_dot_branch_losses_w:      0,
+      w_dot_exported_equivalent_w: 0,
+    },
+    radiator: {
+      q_dot_w:                 _qt,
+      emissivity:              state.emissivity ?? 0.9,
+      view_factor:             state.view_factor ?? 1.0,
+      t_radiator_target_k:     state.target_surface_temp_k ?? 0,
+      t_sink_k:                state.sink_temp_k ?? 0,
+      reserve_margin_fraction: state.reserve_margin_fraction ?? 0.15,
+    },
+    branches: (state.branch_blocks || []).map((b) => ({
+      branch_id:             b.branch_block_id,
+      mode_label:            b.mode_label || "scavenging",
+      t_hot_source_k:        b.t_hot_source_k ?? 0,
+      t_cold_sink_k:         b.t_cold_sink_k ?? 0,
+      efficiency_or_cop:     b.efficiency_or_cop ?? 0,
+      requires_carnot_check: b.requires_carnot_check ?? false,
+      work_input_w:          b.work_input_w ?? 0,
+      external_heat_input_w: b.external_heat_input_w ?? 0,
+      storage_drawdown_w:    b.storage_drawdown_w ?? 0,
+      research_required:     b.research_required ?? true,
+    })),
+    has_speculative_device:                false,
+    has_speculative_material:              false,
+    has_solar_polish_without_source:       state.solar_polish_enabled === "true" || state.solar_polish_enabled === true,
+    has_per_subsystem_duty_simplification: false,
+    ...((state.enable_model_extension_4) ? { extension_4_input: {
+      scenario:    scenario,
+      run_packet:  { packet_id: pkt_id, schema_version: "v0.1.5",
+                     model_extension_4_mode: state.model_extension_4_mode || "disabled",
+                     tpv_recapture_config: state.tpv_recapture_config ?? null },
+      radiators:   [radiator_obj],
+      baseline_result: null,
+      extension_3a_result: null,
+    } } : {}),
+  });
   const run_packet_content = JSON.stringify(run_packet, null, 2);
 
   const files = [
