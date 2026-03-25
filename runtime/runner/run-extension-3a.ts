@@ -306,7 +306,6 @@ export function runExtension3A(input: Extension3AInput): Extension3AResult {
     .map(e => String(e.pickup_geometry_id ?? ''));
   const wfRefViolations = validateWorkingFluidRefs(norm.normalized_zones, availableFluidIds);
   const chainViolations = validateChainBoundaries(norm.normalized_zones);
-  const chainWarnings = chainViolations.filter(v => v.message.startsWith('[WARNING-ZC-003]'));
   const pgRefViolations = validatePickupGeometryRefs(norm.normalized_zones, availableGeomIds);
 
   const allCrossRefViolations = [...zoneRefViolations, ...wfRefViolations, ...pgRefViolations];
