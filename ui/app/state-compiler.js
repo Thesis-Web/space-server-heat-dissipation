@@ -300,6 +300,7 @@ export function compileStateToPayloads(state, catalogs) {
       external_heat_input_w: b.external_heat_input_w ?? 0,
       storage_drawdown_w:    b.storage_drawdown_w ?? 0,
       research_required:     b.research_required ?? true,
+      output_class:          b.output_class || 'heat_lift',
     })),
     has_speculative_device:                false,
     has_speculative_material:              false,
