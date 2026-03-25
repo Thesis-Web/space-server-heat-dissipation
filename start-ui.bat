@@ -34,6 +34,7 @@ if %errorlevel% neq 0 (
 )
 start "" "http://localhost:8080"
 node server.js
+if %errorlevel% neq 0 pause
 goto :eof
 :use_wsl
 start "" "http://localhost:8080"
