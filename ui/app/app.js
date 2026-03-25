@@ -1699,6 +1699,8 @@ function addZoneBlock(data = {}) {
     zone_type:          data.zone_type         || 'standard',
     hot_island_role:    data.hot_island_role   || 'none',
     target_temp_k:      data.target_temp_k     ?? null,
+    chain_id:           data.chain_id          || null,
+    loop_role:          data.loop_role         || null,
   };
   zoneBlocks.push(block);
   renderZoneBlocks();
@@ -1759,6 +1761,8 @@ function syncZoneBlock(idx) {
   b.zone_type          = document.getElementById(`z${idx}_zone_type`)?.value        || b.zone_type;
   b.hot_island_role    = document.getElementById(`z${idx}_hot_island_role`)?.value  || b.hot_island_role;
   b.target_temp_k      = parseFloat(document.getElementById(`z${idx}_target_temp_k`)?.value) || null;
+  b.chain_id           = document.getElementById(`z${idx}_chain_id`)?.value?.trim() || null;
+  b.loop_role          = document.getElementById(`z${idx}_loop_role`)?.value || null;
   const chain = b.resistance_chain;
   chain.r_junction_to_case_k_per_w           = parseFloat(document.getElementById(`z${idx}_r_jc`)?.value)  || null;
   chain.r_case_to_spreader_k_per_w           = parseFloat(document.getElementById(`z${idx}_r_cs`)?.value)  || null;
@@ -1788,6 +1792,8 @@ function compileZoneBlock(b) {
     zone_type:             b.zone_type          || 'standard',
     hot_island_role:       b.hot_island_role    || 'none',
     target_temp_k:         b.target_temp_k      ?? null,
+    chain_id:              b.chain_id           ?? null,
+    loop_role:             b.loop_role          ?? null,
   };
 }
 
@@ -1862,6 +1868,23 @@ function renderZoneBlocks() {
         <input id="z${idx}_target_temp_k" type="number" min="0" step="1"
           value="${b.target_temp_k??""}" placeholder="e.g. 330"
           oninput="syncZoneBlock(${idx})" />
+      </div>
+      <div class="field-row"><label>Chain ID</label>
+        <input id="z${idx}_chain_id" type="text"
+          value="${b.chain_id||''}" placeholder="e.g. cold_loop_hexe"
+          oninput="syncZoneBlock(${idx})" />
+      </div>
+      <div class="field-row"><label>Loop Role</label>
+        <select id="z${idx}_loop_role" onchange="syncZoneBlock(${idx})">
+          <option value=""${!b.loop_role?' selected':''}>— none —</option>
+          <option value="cold_loop"${b.loop_role==="cold_loop"?" selected":""}>cold_loop</option>
+          <option value="hot_island"${b.loop_role==="hot_island"?" selected":""}>hot_island</option>
+          <option value="hot_backbone"${b.loop_role==="hot_backbone"?" selected":""}>hot_backbone</option>
+          <option value="regen_loop"${b.loop_role==="regen_loop"?" selected":""}>regen_loop</option>
+          <option value="radiator_loop"${b.loop_role==="radiator_loop"?" selected":""}>radiator_loop</option>
+          <option value="safety_loop"${b.loop_role==="safety_loop"?" selected":""}>safety_loop</option>
+          <option value="custom"${b.loop_role==="custom"?" selected":""}>custom</option>
+        </select>
       </div>
       <div class="field-row"><label>Isolation Boundary</label>
         <select id="z${idx}_isolation_boundary" onchange="syncZoneBlock(${idx})">
