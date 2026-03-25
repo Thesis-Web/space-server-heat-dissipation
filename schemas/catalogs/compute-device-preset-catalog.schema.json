@@ -139,10 +139,31 @@
           },
           "research_required": {
             "type": "boolean"
+          },
+          "suggested_device_count": {
+            "type": "number"
+          },
+          "suggested_memory_power_w": {
+            "type": "number"
+          },
+          "suggested_storage_power_w": {
+            "type": "number"
+          },
+          "suggested_network_power_w": {
+            "type": "number"
+          },
+          "suggested_power_conversion_overhead_w": {
+            "type": "number"
+          },
+          "suggested_control_overhead_w": {
+            "type": "number"
           }
         },
         "additionalProperties": false
       }
+    },
+    "catalog_notes": {
+      "type": "string"
     }
   },
   "additionalProperties": false
