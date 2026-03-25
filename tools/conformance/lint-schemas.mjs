@@ -22,7 +22,7 @@ import { readFileSync, readdirSync, statSync } from "fs";
 import { join, resolve, relative } from "path";
 import { createRequire } from "module";
 
-const require = createRequire(import.meta.url);
+const require = createRequire(new URL("../../package.json", import.meta.url));
 const Ajv = require("ajv");
 // ajv-formats is optional per HOLE-001 — require() itself wrapped in try/catch
 // so MODULE_NOT_FOUND does not crash the process before graceful fallback.
