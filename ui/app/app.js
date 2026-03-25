@@ -697,7 +697,7 @@ function populateRuntimeCards(result) {
   const rad = result.radiator_result;
   if (rad) {
     _setEl("sum-radiator-area",   `${(rad.a_radiator_effective_m2    || 0).toFixed(4)} m²`);
-    _setEl("sum-radiator-margin", `${(rad.a_radiator_with_margin_m2  || 0).toFixed(4)} m²`);
+    _setEl("sum-radiator-margin", `${(rad.a_with_margin_m2  || 0).toFixed(4)} m²`);
   }
 }
 
