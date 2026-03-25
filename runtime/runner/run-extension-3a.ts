@@ -23,6 +23,7 @@ import {
   validateZoneTopologyRefs,
   validateWorkingFluidRefs,
   validatePickupGeometryRefs,
+  validateChainBoundaries,
 } from '../validators/cross-reference';
 import { validateTopology } from '../validators/topology';
 import { validateConvergenceControl, validateRadiator3ABounds, validateResistanceChain } from '../validators/extension-3a-bounds';
@@ -304,6 +305,9 @@ export function runExtension3A(input: Extension3AInput): Extension3AResult {
   const availableGeomIds = (input.catalogs.pickup_geometry_catalog.entries as Array<Record<string, unknown>>)
     .map(e => String(e.pickup_geometry_id ?? ''));
   const wfRefViolations = validateWorkingFluidRefs(norm.normalized_zones, availableFluidIds);
+  const chainViolations = validateChainBoundaries(norm.normalized_zones);
+  const chainBlocking = chainViolations.filter(v => !v.message.startsWith('[WARNING-ZC-003]'));
+  const chainWarnings = chainViolations.filter(v => v.message.startsWith('[WARNING-ZC-003]'));
   const pgRefViolations = validatePickupGeometryRefs(norm.normalized_zones, availableGeomIds);
 
   const allCrossRefViolations = [...zoneRefViolations, ...wfRefViolations, ...pgRefViolations];

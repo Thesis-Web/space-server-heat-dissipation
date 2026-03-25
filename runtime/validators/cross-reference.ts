@@ -335,3 +335,74 @@ export function validateStorageRef3B(
   }
   return [];
 }
+
+/**
+ * Validate zone chain boundary rules ZC-001, ZC-002, ZC-003.
+ * Zone chain spec addition v0.1.2 §3.
+ */
+export function validateChainBoundaries(
+  zones: Array<{
+    zone_id: string;
+    chain_id?: string | null;
+    zone_role?: string | null;
+    convergence_enabled?: boolean;
+    downstream_zone_ref?: string | null;
+    upstream_zone_ref?: string | null;
+  }>
+): CrossRefViolation[] {
+  const violations: CrossRefViolation[] = [];
+  const zoneMap = new Map(zones.map(z => [z.zone_id, z]));
+
+  // ZC-001: cross-chain adjacency requires HX boundary
+  for (const zone of zones) {
+    if (!zone.downstream_zone_ref) continue;
+    const downstream = zoneMap.get(zone.downstream_zone_ref);
+    if (!downstream) continue;
+    const aChain = zone.chain_id ?? null;
+    const bChain = downstream.chain_id ?? null;
+    if (!aChain || !bChain || aChain === bChain) continue;
+    const aIsHx = zone.zone_role === 'convergence_exchange' || zone.convergence_enabled === true;
+    const bIsHx = downstream.zone_role === 'convergence_exchange' || downstream.convergence_enabled === true;
+    if (!aIsHx && !bIsHx) {
+      violations.push({
+        field: `thermal_zones[${zone.zone_id}].downstream_zone_ref`,
+        ref_value: zone.downstream_zone_ref,
+        message: `cross_chain_handoff_without_hx_declared: Zone '${zone.zone_id}' (chain: ${aChain}) connects to '${downstream.zone_id}' (chain: ${bChain}) without convergence_exchange or convergence_enabled. Zone chain spec §3 ZC-001.`,
+      });
+    }
+  }
+
+  // ZC-003: zones sharing chain_id must form connected subgraph (warning)
+  const chainGroups = new Map<string, string[]>();
+  for (const zone of zones) {
+    if (!zone.chain_id) continue;
+    if (!chainGroups.has(zone.chain_id)) chainGroups.set(zone.chain_id, []);
+    chainGroups.get(zone.chain_id)!.push(zone.zone_id);
+  }
+  for (const [chainId, members] of chainGroups) {
+    if (members.length < 2) continue;
+    const memberSet = new Set(members);
+    const connected = new Set<string>();
+    const queue = [members[0]];
+    connected.add(members[0]);
+    while (queue.length > 0) {
+      const current = queue.shift()!;
+      const z = zoneMap.get(current);
+      if (!z) continue;
+      for (const nb of [z.upstream_zone_ref, z.downstream_zone_ref]) {
+        if (nb && memberSet.has(nb) && !connected.has(nb)) {
+          connected.add(nb); queue.push(nb);
+        }
+      }
+    }
+    const disconnected = members.filter(id => !connected.has(id));
+    if (disconnected.length > 0) {
+      violations.push({
+        field: `thermal_zones.chain_id[${chainId}]`,
+        ref_value: chainId,
+        message: `[WARNING-ZC-003] chain_id '${chainId}' has disconnected members: [${disconnected.join(', ')}]. Zone chain spec §3 ZC-003.`,
+      });
+    }
+  }
+  return violations;
+}
