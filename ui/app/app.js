@@ -872,6 +872,7 @@ async function buildPacket() {
     sink_temp_k: numVal("sink_temp_k", 0),
     reserve_margin_fraction: numVal("reserve_margin_fraction", 0.15),
     storage_class: val("storage_class"),
+    radiator_material_family_ref: val("radiator_material_family_ref"),
     storage_capacity_j: numVal("storage_capacity_j", 0),
     comms_load_ref: "",
     selected_branches: branchBlocks.map((b) => b.branch_type),
@@ -1127,7 +1128,22 @@ function openPacketOutput() {
   var branchText = (Array.isArray(scenario.selected_branches) && scenario.selected_branches.length)
     ? scenario.selected_branches.map(esc).join(", ") : "none";
 
-  var pv = " <span class='pv'>(preview)</span>";
+  var hasRuntime = !!(_lastRuntimeResult && _lastRuntimeResult.runtime_authority_declaration);
+  var rt   = _lastRuntimeResult || {};
+  var agg  = rt.aggregation_result || {};
+  var radr = rt.radiator_result   || {};
+  var rs   = rt.risk_summary      || {};
+  var pv = hasRuntime ? " <span style='color:#3fb950;font-size:11px;'>&#10003; runtime</span>" : " <span class='pv'>(preview)</span>";
+  // Override browser math with runtime-authoritative values when available
+  if (hasRuntime) {
+    deviceW     = agg.w_dot_device_at_state_w  || deviceW;
+    moduleTotal = agg.w_dot_compute_module_w   || moduleTotal;
+    overheads   = moduleTotal - (agg.w_dot_devices_total_w || 0);
+    Aeff        = radr.a_radiator_effective_m2 || 0;
+    Amargin     = radr.a_with_margin_m2        || 0;
+  }
+  var ncTotal    = hasRuntime ? Math.max(0,(agg.q_dot_total_reject_w||0) - moduleTotal) : 0;
+  var totalReject= hasRuntime ? (agg.q_dot_total_reject_w||0) : moduleTotal;
   var nowStr = esc(new Date().toISOString());
   var packetId = esc(packet.packet_id || "—");
   var filesJson = JSON.stringify(_lastBundleFiles);
@@ -1160,7 +1176,9 @@ function openPacketOutput() {
     "<\/style><\/head><body>",
     "<h1>Orbital Thermal Trade System \u2014 Run Packet Output<\/h1>",
     "<div class='sub'>Generated: "+nowStr+" &nbsp;|&nbsp; Runtime authority: server-side execution required<\/div>",
-    "<div class='warn'>&#9888; All numeric values are browser-side previews only. Authoritative outputs require server-side runtime execution per governing spec \u00a74.1 and \u00a714.<\/div>",
+    hasRuntime
+      ? "<div style='background:#0d2818;border:1px solid #3fb950;color:#3fb950;border-radius:6px;padding:10px 16px;margin-bottom:18px;font-size:13px;'>&#10003; Runtime-authoritative output. Values produced by server-side runtime engine per spec §4.1.<\/div>"
+      : "<div class='warn'>&#9888; Runtime not yet available — values are browser-side previews.<\/div>",
     "<button class='dl' onclick='dlBundle()'>&#8595; Download Bundle (.zip)<\/button>",
     "<div class='sec'><div class='st'>Packet Identity<\/div>",
     "<table><tr><th>Field<\/th><th>Value<\/th><\/tr>",
@@ -1188,6 +1206,8 @@ function openPacketOutput() {
     "<tr><td>Device Subtotal<\/td><td>"+(dc*deviceW).toFixed(1)+" W"+pv+"<\/td><\/tr>",
     "<tr><td>Overheads (mem+stor+net+pdu+ctrl)<\/td><td>"+overheads.toFixed(1)+" W"+pv+"<\/td><\/tr>",
     "<tr><td><strong>Compute Module Total<\/strong><\/td><td><strong>"+moduleTotal.toFixed(1)+" W"+pv+"<\/strong><\/td><\/tr>",
+    "<tr><td>Non-Compute Total<\/td><td>"+ncTotal.toFixed(1)+" W"+pv+"<\/td><\/tr>",
+    "<tr><td><strong>Total Reject Load<\/strong><\/td><td><strong>"+totalReject.toFixed(1)+" W"+pv+"<\/strong><\/td><\/tr>",
     "<\/table><\/div>",
     "<div class='sec'><div class='st'>Radiator Configuration<\/div>",
     "<table><tr><th>Field<\/th><th>Value<\/th><\/tr>",
@@ -1204,11 +1224,20 @@ function openPacketOutput() {
     "<div class='sec'><div class='st'>Bundle Manifest<\/div>",
     "<table><tr><th>File<\/th><th>Size<\/th><\/tr>"+manifRows+"<\/table><\/div>",
     "<div class='sec'><div class='st'>Transform Trace<\/div><ul>"+traceItems+"<\/ul><\/div>",
-    "<div class='sec'><div class='st'>Runtime Result<\/div>",
-    "<div id='rt-section'>",
-    "<p style='font-size:13px;color:#8b949e;padding:4px 0;'>",
-    "Runtime result not yet available — press Build Report to execute server-side runtime.",
-    "<\/p><\/div><\/div>",
+    "<div class='sec'><div class='st'>Risk Summary"+( hasRuntime ? " <span style='color:#3fb950;font-size:10px;'>&#10003; runtime</span>" : "" )+"<\/div>",
+    "<table><tr><th>Field<\/th><th>Value<\/th><\/tr>",
+    "<tr><td>Maturity Class<\/td><td>"+esc(rs.maturity_class||'—')+"<\/td><\/tr>",
+    "<tr><td>TTL Class<\/td><td>"+esc(rs.ttl_class||'—')+"<\/td><\/tr>",
+    "<tr><td>Thermal Cycling Risk<\/td><td>"+esc(rs.thermal_cycling_risk||'—')+"<\/td><\/tr>",
+    "<tr><td>Corrosion Risk<\/td><td>"+esc(rs.corrosion_risk||'—')+"<\/td><\/tr>",
+    "<tr><td>Contamination Risk<\/td><td>"+esc(rs.contamination_risk||'—')+"<\/td><\/tr>",
+    "<tr><td>Vibration Risk<\/td><td>"+esc(rs.vibration_risk||'—')+"<\/td><\/tr>",
+    "<tr><td>Packaging Stress<\/td><td>"+esc(rs.packaging_stress||'—')+"<\/td><\/tr>",
+    "<tr><td>Compactness Stress<\/td><td>"+esc(rs.compactness_stress||'—')+"<\/td><\/tr>",
+    "<\/table><\/div>",
+    "<div class='sec'><div class='st' style='cursor:pointer' onclick=\"this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'\">Runtime Output (raw) &#9654;<\/div><div style='display:none'><div id='rt-section'>",
+    "<p style='font-size:13px;color:#8b949e;padding:4px 0;'>Runtime result not yet available.<\/p>",
+    "<\/div><\/div><\/div>",
     "<div class='foot'>\u00a9 2026 Exnulla, a division of Lake Area LLC. All Rights Reserved. &nbsp;|&nbsp; Preview surface only \u2014 runtime-authoritative execution required.<\/div>",
     "<script>",
     "var _ef="+filesJson+";",
