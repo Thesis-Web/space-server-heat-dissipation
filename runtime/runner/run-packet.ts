@@ -45,6 +45,11 @@ export interface MaterialResolved {
   vibration_sensitivity: string;
   estimated_areal_density_kg_per_m2: number | null;
   research_required: boolean;
+  // Option 2 catalog fields — spec §22, added in catalog v0.1.1
+  ttl_class: string;
+  thermal_cycling_risk: string;
+  packaging_stress: string;
+  compactness_stress: string;
 }
 
 export interface RunPacketInput {
@@ -121,49 +126,19 @@ function computeRiskSummary(
   material: MaterialResolved | null | undefined,
   research_required_items: string[]
 ): RiskSummary {
-  const maturity_class = material?.maturity_class ?? "no_material_selected";
+  // Option 2 — all 4 formerly-derived fields now read directly from catalog.
+  // spec §22, catalog v0.1.1. No derivation fallback permitted for catalog entries.
+  // unknown is the correct value when no material is selected or catalog is absent.
+  const maturity_class     = material?.maturity_class        ?? "no_material_selected";
+  const ttl_class          = material?.ttl_class             ?? "unknown";
+  const thermal_cycling_risk = material?.thermal_cycling_risk ?? "unknown";
+  const packaging_stress   = material?.packaging_stress      ?? "unknown";
+  const compactness_stress = material?.compactness_stress    ?? "unknown";
 
-  // ttl_class — BEST-SOLVE-RISK-001: derived from maturity_class mapping
-  const ttl_map: Record<string, string> = {
-    flight_proven:        "high",
-    flight_proven_analog: "medium_high",
-    trl_7_8:              "medium",
-    trl_5_6:              "medium_low",
-    experimental:         "low",
-    unknown:              "unknown",
-  };
-  const ttl_class = ttl_map[maturity_class] ?? "unknown";
-
-  // thermal_cycling_risk — BEST-SOLVE-RISK-001: derived from maturity + temp ceiling
-  const temp_max = material?.nominal_temp_max_k ?? 0;
-  let thermal_cycling_risk = "unknown";
-  if (material) {
-    if (maturity_class === "flight_proven" || maturity_class === "flight_proven_analog") {
-      thermal_cycling_risk = temp_max > 1500 ? "medium" : "low";
-    } else if (maturity_class === "experimental") {
-      thermal_cycling_risk = "high";
-    } else {
-      thermal_cycling_risk = "medium";
-    }
-  }
-
-  // corrosion, contamination, vibration — direct from catalog sensitivity fields
+  // corrosion, contamination, vibration — direct catalog sensitivity fields (unchanged)
   const corrosion_risk     = material?.corrosion_sensitivity     ?? "unknown";
   const contamination_risk = material?.contamination_sensitivity ?? "unknown";
   const vibration_risk     = material?.vibration_sensitivity     ?? "unknown";
-
-  // packaging_stress — BEST-SOLVE-RISK-001: derived from areal density
-  const density = material?.estimated_areal_density_kg_per_m2 ?? null;
-  const packaging_stress = density === null ? "unknown"
-    : density < 4   ? "low"
-    : density <= 10 ? "medium"
-    : "high";
-
-  // compactness_stress — BEST-SOLVE-RISK-001: derived from areal density
-  const compactness_stress = density === null ? "unknown"
-    : density < 4  ? "low"
-    : density <= 8 ? "medium"
-    : "high";
 
   return {
     maturity_class,

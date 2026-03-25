@@ -14,7 +14,7 @@ const CATALOG_PATHS = {
   "scenario-presets":       "catalogs/scenario-presets.v0.1.0.json",
   "compute-device-presets": "catalogs/compute-device-presets.v0.1.0.json",
   "payload-archetypes":     "catalogs/payload-archetypes.v0.1.0.json",
-  "material-families":      "catalogs/material-families.v0.1.0.json",
+  "material-families":      "catalogs/material-families.v0.1.1.json",
   "branch-presets":         "catalogs/branch-presets.v0.1.0.json",
   "branding":               "catalogs/branding.v0.1.0.json",
   "working-fluids":         "catalogs/working-fluids.v0.1.0.json",

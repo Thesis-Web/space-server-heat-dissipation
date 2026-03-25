@@ -148,6 +148,11 @@ export function compileStateToPayloads(state, catalogs) {
     vibration_sensitivity:             _matEntry.vibration_sensitivity || "unknown",
     estimated_areal_density_kg_per_m2: _matEntry.estimated_areal_density_kg_per_m2 ?? null,
     research_required:                 _matEntry.research_required ?? false,
+    // Option 2 catalog fields — spec §22, catalog v0.1.1
+    ttl_class:             _matEntry.ttl_class             || "unknown",
+    thermal_cycling_risk:  _matEntry.thermal_cycling_risk  || "unknown",
+    packaging_stress:      _matEntry.packaging_stress      || "unknown",
+    compactness_stress:    _matEntry.compactness_stress    || "unknown",
   } : null;
 
   const radiator_obj = {

@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://space-server-heat-dissipation/schemas/catalogs/material-family-catalog.schema.json",
   "schema_id": "material-family-catalog",
-  "schema_version": "v0.1.0",
+  "schema_version": "v0.1.1",
   "title": "MaterialFamilyCatalog",
   "type": "object",
   "required": [
@@ -34,7 +34,11 @@
           "vibration_sensitivity",
           "maturity_class",
           "notes",
-          "research_required"
+          "research_required",
+          "ttl_class",
+          "thermal_cycling_risk",
+          "packaging_stress",
+          "compactness_stress"
         ],
         "properties": {
           "material_family_id": {
@@ -80,6 +84,48 @@
           },
           "research_required": {
             "type": "boolean"
+          },
+          "ttl_class": {
+            "type": "string",
+            "enum": [
+              "high",
+              "medium_high",
+              "medium",
+              "medium_low",
+              "low",
+              "unknown"
+            ],
+            "description": "Thermal lifetime class \u2014 operational lifespan confidence tier. Catalog field per spec \u00a722."
+          },
+          "thermal_cycling_risk": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "unknown"
+            ],
+            "description": "Risk of failure or degradation under repeated thermal cycling. Catalog field per spec \u00a722."
+          },
+          "packaging_stress": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "unknown"
+            ],
+            "description": "Structural and handling stress during stow/deploy operations. Catalog field per spec \u00a722."
+          },
+          "compactness_stress": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "unknown"
+            ],
+            "description": "Difficulty of achieving compact stowed configuration. Catalog field per spec \u00a722."
           }
         },
         "additionalProperties": false
