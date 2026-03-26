@@ -2448,6 +2448,9 @@ function renderZoneBlocks() {
         </div>
       </div>`;
     list.appendChild(card);
+    // Force-set loop_role select value post-render — selected attr unreliable in optgroups
+    const lrSel = document.getElementById(`z${idx}_loop_role`);
+    if (lrSel && b.loop_role) lrSel.value = b.loop_role;
   });
 
   // Wire the add-zone-block button (idempotent)
