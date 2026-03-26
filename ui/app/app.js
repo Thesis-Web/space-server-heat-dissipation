@@ -2270,6 +2270,16 @@ function compileZoneBlock(b) {
   };
 }
 
+const ZONE_TYPE_MATERIAL_SUGGEST = {
+  compute_vault:  { id: "carbon_composite", note: "C/C suggested for cold-plate interface — low density, flight-proven-analog" },
+  hot_backbone:   { id: "carbon_composite", note: "C/C or SiC suggested for high-temp backbone radiator surface" },
+  hot_island:     { id: "sic",              note: "SiC suggested for hot island — stable at 1700K, high emissivity" },
+  storage_buffer: { id: "eutectic_metal_compatible", note: "Eutectic metal suggested for PCM storage buffer — verify containment" },
+  radiator_zone:  { id: "carbon_composite", note: "C/C suggested for radiator panel — lightweight, deployable" },
+  brayton_loop:   { id: "refractory_metal_generic", note: "Refractory metal suggested for Brayton high-temp loop" },
+  hx_boundary:    { id: "carbon_composite", note: "C/C or SiC suggested for HX boundary thermal interface" },
+};
+
 /**
  * Render all zone cards into #zone-block-list.
  * Blueprint §11.1 — additive block editor.
