@@ -2456,9 +2456,17 @@ function renderZoneBlocks() {
         </div>
       </div>`;
     list.appendChild(card);
-    // Force-set loop_role select value post-render — selected attr unreliable in optgroups
-    const lrSel = document.getElementById(`z${idx}_loop_role`);
-    if (lrSel && b.loop_role) lrSel.value = b.loop_role;
+    // Force-set all selects post-render — selected attr in template literals unreliable
+    const _zr = document.getElementById(`z${idx}_zone_role`);
+    if (_zr && b.zone_role) _zr.value = b.zone_role;
+    const _zt = document.getElementById(`z${idx}_zone_type`);
+    if (_zt && b.zone_type) _zt.value = b.zone_type;
+    const _hi = document.getElementById(`z${idx}_hot_island_role`);
+    if (_hi && b.hot_island_role) _hi.value = b.hot_island_role;
+    const _lr = document.getElementById(`z${idx}_loop_role`);
+    if (_lr && b.loop_role) _lr.value = b.loop_role;
+    const _wf = document.getElementById(`z${idx}_working_fluid_ref`);
+    if (_wf && b.working_fluid_ref) _wf.value = b.working_fluid_ref;
   });
 
   // Wire the add-zone-block button (idempotent)
