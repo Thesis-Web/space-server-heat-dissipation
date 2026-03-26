@@ -380,6 +380,10 @@ function renderPayloadBlocks() {
           </select>
         </div>
         <div class="block-field"><label>Duty Fraction</label><input type="number" min="0" max="1" step="0.01" value="${b.duty_fraction}" oninput="payloadBlockChange(${idx},'duty_fraction',+this.value)" /></div>
+        <div class="block-field"><label>Thermal Coupling Zone</label>
+          <select onchange="payloadBlockChange(${idx},'thermal_coupling_zone_ref',this.value)">
+            ${zoneRefOptions(b.thermal_coupling_zone_ref||'')}
+          </select></div>
         <div class="block-field"><label>Notes</label><input type="text" value="${b.notes}" oninput="payloadBlockChange(${idx},'notes',this.value)" /></div>
       </div>`;
     // re-select archetype
@@ -474,8 +478,14 @@ function renderBranchBlocks() {
         <div class="block-field"><label>Storage Drawdown (W)</label><input type="number" min="0" value="${b.storage_drawdown_w}" oninput="branchBlockChange(${idx},'storage_drawdown_w',+this.value)" /></div>
         <div class="block-field"><label>T Hot Source (K)</label><input type="number" min="0" step="1" value="${b.t_hot_source_k}" oninput="branchBlockChange(${idx},'t_hot_source_k',+this.value)" /></div>
         <div class="block-field"><label>T Cold Sink (K)</label><input type="number" min="0" step="1" value="${b.t_cold_sink_k}" oninput="branchBlockChange(${idx},'t_cold_sink_k',+this.value)" /></div>
-        <div class="block-field"><label>Source Zone Ref</label><input type="text" value="${b.source_zone_ref}" oninput="branchBlockChange(${idx},'source_zone_ref',this.value)" /></div>
-        <div class="block-field"><label>Sink Zone Ref</label><input type="text" value="${b.sink_zone_ref}" oninput="branchBlockChange(${idx},'sink_zone_ref',this.value)" /></div>
+        <div class="block-field"><label>Source Zone Ref</label>
+          <select onchange="branchBlockChange(${idx},'source_zone_ref',this.value)">
+            ${zoneRefOptions(b.source_zone_ref)}
+          </select></div>
+        <div class="block-field"><label>Sink Zone Ref</label>
+          <select onchange="branchBlockChange(${idx},'sink_zone_ref',this.value)">
+            ${zoneRefOptions(b.sink_zone_ref)}
+          </select></div>
       </div>
       ${b.risk_notes.length ? `<div class="note warn-note" style="margin-top:8px">⚠ ${b.risk_notes.join(" · ")}</div>` : ""}`;
     const presetSel = card.querySelector("select");
@@ -1489,9 +1499,13 @@ function renderStageBlocks() {
             <option value="false" ${!b.enabled?"selected":""}>No</option>
           </select></div>
         <div class="block-field"><label>Source Zone Ref</label>
-          <input type="text" value="${b.source_zone_ref}" oninput="stageBlockChange(${idx},'source_zone_ref',this.value)" /></div>
+          <select onchange="stageBlockChange(${idx},'source_zone_ref',this.value)">
+            ${zoneRefOptions(b.source_zone_ref)}
+          </select></div>
         <div class="block-field"><label>Target Zone Ref</label>
-          <input type="text" value="${b.target_zone_ref}" oninput="stageBlockChange(${idx},'target_zone_ref',this.value)" /></div>
+          <select onchange="stageBlockChange(${idx},'target_zone_ref',this.value)">
+            ${zoneRefOptions(b.target_zone_ref||'')}
+          </select></div>
         <div class="block-field"><label>Source Spectral Profile</label>
           <select onchange="stageBlockChange(${idx},'source_spectral_profile_ref',this.value)">${sspDropdownOpts(b.source_spectral_profile_ref)}</select></div>
         <div class="block-field"><label>Absorber Family</label>
@@ -1831,6 +1845,28 @@ function materialFamilyOptions(selectedVal) {
   return html;
 }
 
+/**
+ * Build <option> HTML for zone ref selects — populated from live zoneBlocks[].
+ * Used by upstream/downstream zone ref fields in zone cards,
+ * source/sink zone ref fields in branch blocks, and source/target in stage blocks.
+ * excludeIdx: omit this zone (self-reference guard). Pass -1 to include all.
+ * Blueprint §11.1, spec §6.
+ */
+function zoneRefOptions(selectedVal, excludeIdx = -1) {
+  let html = `<option value="">— none —</option>`;
+  zoneBlocks.forEach((z, i) => {
+    if (i === excludeIdx) return; // no self-reference in zone cards
+    const id    = z.zone_id || "";
+    const label = z.label  || z.zone_id || `Zone ${i + 1}`;
+    const sel   = id === selectedVal ? " selected" : "";
+    html += `<option value="${id}"${sel}>${label} (${id})</option>`;
+  });
+  if (zoneBlocks.length === 0) {
+    html = `<option value="">— no zones declared —</option>`;
+  }
+  return html;
+}
+
 // ── Enable toggle ─────────────────────────────────────────────────────────────
 
 /**
@@ -2002,6 +2038,13 @@ function compileZoneBlock(b) {
  * Blueprint §11.1 — additive block editor.
  */
 function renderZoneBlocks() {
+  // After re-rendering zone cards, also refresh branch + stage selects
+  // so their zone ref dropdowns reflect the current zone list.
+  // Deferred via setTimeout to avoid re-entrancy during the current render.
+  setTimeout(() => {
+    if (typeof renderBranchBlocks === "function") renderBranchBlocks();
+    if (typeof renderStageBlocks  === "function") renderStageBlocks();
+  }, 0);
   const list = document.getElementById("zone-block-list");
   if (!list) return;
   list.innerHTML = "";
@@ -2098,14 +2141,14 @@ function renderZoneBlocks() {
         </select>
       </div>
       <div class="field-row"><label>Upstream Zone Ref</label>
-        <input id="z${idx}_upstream_zone_ref" type="text" value="${b.upstream_zone_ref||""}"
-          placeholder="zone_id of upstream zone or blank"
-          oninput="syncZoneBlock(${idx})" />
+        <select id="z${idx}_upstream_zone_ref" onchange="syncZoneBlock(${idx})">
+          ${zoneRefOptions(b.upstream_zone_ref||"", idx)}
+        </select>
       </div>
       <div class="field-row"><label>Downstream Zone Ref</label>
-        <input id="z${idx}_downstream_zone_ref" type="text" value="${b.downstream_zone_ref||""}"
-          placeholder="zone_id of downstream zone or blank"
-          oninput="syncZoneBlock(${idx})" />
+        <select id="z${idx}_downstream_zone_ref" onchange="syncZoneBlock(${idx})">
+          ${zoneRefOptions(b.downstream_zone_ref||"", idx)}
+        </select>
       </div>
       <div class="field-row"><label>Working Fluid</label>
         <select id="z${idx}_working_fluid_ref" onchange="syncZoneBlock(${idx})">
