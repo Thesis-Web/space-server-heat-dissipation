@@ -96,6 +96,14 @@ function applyScenarioPreset(preset_id) {
     if (rd.sink_temp_k !== undefined) setValue("sink_temp_k", rd.sink_temp_k);
     if (rd.view_factor !== undefined) setValue("view_factor", rd.view_factor);
     if (rd.reserve_margin_fraction !== undefined) setValue("reserve_margin_fraction", rd.reserve_margin_fraction);
+    // Seed radiator material family — deferred 150ms so catalog options are in DOM
+    if (rd.material_family_ref) {
+      const _matRef = rd.material_family_ref;
+      setTimeout(() => {
+        const _sel = document.getElementById("radiator_material_family_ref");
+        if (_sel) { _sel.value = _matRef; _sel.dispatchEvent(new Event("change")); }
+      }, 150);
+    }
   }
   panel.style.display = "block";
   panel.innerHTML = `<strong>Preset:</strong> ${entry.label} | Node: ${entry.node_class} | Mode: ${entry.mission_mode_default}<br>` +
