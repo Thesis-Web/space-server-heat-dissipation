@@ -579,6 +579,34 @@
   <!-- Thermal Zone Configuration section removed session 6 — folded into zone blocks -->
   <!-- Two-Hot-Island section removed session 6 — topology expressed via zone block upstream/downstream refs -->
 
+  <!-- ── Topology Template Selector — TOPO-TEMPLATE-001 ── -->
+  <div class="section" id="topology-template-section">
+    <div class="section-title">Topology Template</div>
+    <div class="note">Select a template to spawn a pre-wired zone graph. Tier 1 templates use flight-proximate catalog entries. Tier 2 (Exploratory) use research-required entries and auto-enable relevant extensions. All spawned zones are fully editable. Select <strong>Custom</strong> to build from scratch.</div>
+    <div class="field-row">
+      <label>Template</label>
+      <select id="topology-template-select" onchange="applyTopologyTemplate(this.value)">
+        <option value="">— select template or build manually —</option>
+        <optgroup label="Tier 1 — Flight Proximate">
+          <option value="simple_backbone">Simple Backbone — cold plate → hot backbone → radiator (1 loop)</option>
+          <option value="cold_hot_island">Cold Loop + Hot Island — cold loop exchanges to hot island via HX (2 loops)</option>
+          <option value="cold_dual_hot_island">Cold Loop + Dual Hot Island — two hot islands, HX boundary (2+1)</option>
+          <option value="cold_hot_storage">Cold Loop + Storage Buffer — hot island with PCM transient buffer (2+storage)</option>
+        </optgroup>
+        <optgroup label="Tier 2 — Exploratory">
+          <option value="hexe_brayton_cold">He/Xe Brayton + Cold Loop Exchange — gas-phase primary, cold-plate secondary, HX boundary</option>
+          <option value="hexe_eutectic_cold_pump">He/Xe + Eutectic Emitter + Cold Pump Return — 3-loop chain with return temperature polish</option>
+          <option value="full_regen_brayton_export">Full Regen Dual Island + Brayton Export — max complexity, storage, TPV recapture</option>
+          <option value="cold_tpv_recapture">Cold Loop + TPV Recapture — standard cold loop with Extension 4 radiator recapture</option>
+        </optgroup>
+        <optgroup label="Custom">
+          <option value="custom">Custom — blank zones, build from scratch</option>
+        </optgroup>
+      </select>
+    </div>
+    <div id="topology-template-note" class="note" style="display:none;margin-top:6px;"></div>
+  </div>
+
   <!-- ── Extension 3A — Thermal Zone Blocks  blueprint §11.1 ── -->
   <div class="section" id="ext3a-thermal-section">
     <div class="section-title">Thermal Zone Blocks <span class="ext3a-badge">3A</span></div>

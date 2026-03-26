@@ -1910,6 +1910,190 @@ function zoneBlockId(idx) {
   return `zone-${String(idx).padStart(3, "0")}`;
 }
 
+// ── Topology Template Engine — TOPO-TEMPLATE-001 ──────────────────────────────
+// Static template table. Each template declares a set of zone descriptors
+// with pre-wired refs. Zone IDs are stable slugs within the template so
+// upstream/downstream refs resolve correctly when all zones are spawned together.
+// Tier 1: flight-proximate entries only. Tier 2: exploratory, research_required.
+// Blueprint §11.1, spec §6. No runtime changes — zones compile identically
+// to manually-built zones.
+
+const TOPOLOGY_TEMPLATES = {
+  simple_backbone: {
+    label: "Simple Backbone",
+    tier: 1,
+    description: "Cold plate picks up heat from compute vault and delivers to hot backbone for direct radiator rejection. One fluid loop. Simplest valid topology.",
+    enable_ext3a: true,
+    enable_ext4: false,
+    zones: [
+      { zone_id: "tpl-vault-001",    label: "Compute Vault (Pickup)",  zone_role: "pickup",    zone_type: "compute_vault",  chain_id: "cold_loop",    loop_role: "evaporator",  working_fluid_ref: "fluid-water-v0",   hot_island_role: "none",    upstream_zone_ref: null,           downstream_zone_ref: "tpl-backbone-001" },
+      { zone_id: "tpl-backbone-001", label: "Hot Backbone (Rejection)",zone_role: "rejection", zone_type: "hot_backbone",   chain_id: "cold_loop",    loop_role: "condenser",   working_fluid_ref: "fluid-water-v0",   hot_island_role: "none",    upstream_zone_ref: "tpl-vault-001",  downstream_zone_ref: null },
+    ]
+  },
+  cold_hot_island: {
+    label: "Cold Loop + Hot Island",
+    tier: 1,
+    description: "Cold loop collects heat from compute vault. HX boundary exchanges to hot island loop operating at elevated temperature. Hot island rejects to radiator. Two fluid loops at different temperature levels.",
+    enable_ext3a: true,
+    enable_ext4: false,
+    zones: [
+      { zone_id: "tpl-vault-001",    label: "Compute Vault (Pickup)",    zone_role: "pickup",              zone_type: "compute_vault",  chain_id: "cold_loop",    loop_role: "evaporator",  working_fluid_ref: "fluid-water-v0",  hot_island_role: "none",      upstream_zone_ref: null,              downstream_zone_ref: "tpl-hx-001"      },
+      { zone_id: "tpl-hx-001",       label: "HX Boundary",               zone_role: "convergence_exchange", zone_type: "hx_boundary",    chain_id: "cold_loop",    loop_role: "hx_cold_side", working_fluid_ref: "fluid-water-v0",  hot_island_role: "none",      upstream_zone_ref: "tpl-vault-001",   downstream_zone_ref: "tpl-island-001", isolation_boundary: true },
+      { zone_id: "tpl-island-001",   label: "Hot Island (Primary)",       zone_role: "storage",             zone_type: "hot_island",     chain_id: "hot_island",   loop_role: "accumulator", working_fluid_ref: "fluid-sodium-v0", hot_island_role: "primary",   upstream_zone_ref: "tpl-hx-001",      downstream_zone_ref: "tpl-reject-001"  },
+      { zone_id: "tpl-reject-001",   label: "Radiator Rejection",         zone_role: "rejection",           zone_type: "radiator_zone",  chain_id: "hot_island",   loop_role: "condenser",   working_fluid_ref: "fluid-sodium-v0", hot_island_role: "none",      upstream_zone_ref: "tpl-island-001",  downstream_zone_ref: null              },
+    ]
+  },
+  cold_dual_hot_island: {
+    label: "Cold Loop + Dual Hot Island",
+    tier: 1,
+    description: "Cold loop exchanges to two parallel hot islands via shared HX boundary. Islands operate independently at high temperature. Suitable for load-sharing or phased thermal storage strategies.",
+    enable_ext3a: true,
+    enable_ext4: false,
+    zones: [
+      { zone_id: "tpl-vault-001",    label: "Compute Vault (Pickup)",    zone_role: "pickup",              zone_type: "compute_vault",  chain_id: "cold_loop",      loop_role: "evaporator",   working_fluid_ref: "fluid-water-v0",  hot_island_role: "none",      upstream_zone_ref: null,              downstream_zone_ref: "tpl-hx-001"      },
+      { zone_id: "tpl-hx-001",       label: "HX Boundary",               zone_role: "convergence_exchange", zone_type: "hx_boundary",    chain_id: "cold_loop",      loop_role: "hx_cold_side", working_fluid_ref: "fluid-water-v0",  hot_island_role: "none",      upstream_zone_ref: "tpl-vault-001",   downstream_zone_ref: "tpl-island-a",   isolation_boundary: true },
+      { zone_id: "tpl-island-a",     label: "Hot Island A",               zone_role: "storage",             zone_type: "hot_island",     chain_id: "hot_island_a",   loop_role: "accumulator",  working_fluid_ref: "fluid-sodium-v0", hot_island_role: "primary",   upstream_zone_ref: "tpl-hx-001",      downstream_zone_ref: "tpl-reject-001"  },
+      { zone_id: "tpl-island-b",     label: "Hot Island B",               zone_role: "storage",             zone_type: "hot_island",     chain_id: "hot_island_b",   loop_role: "accumulator",  working_fluid_ref: "fluid-sodium-v0", hot_island_role: "secondary", upstream_zone_ref: "tpl-hx-001",      downstream_zone_ref: "tpl-reject-001"  },
+      { zone_id: "tpl-reject-001",   label: "Radiator Rejection",         zone_role: "rejection",           zone_type: "radiator_zone",  chain_id: "hot_island_a",   loop_role: "condenser",    working_fluid_ref: "fluid-sodium-v0", hot_island_role: "none",      upstream_zone_ref: "tpl-island-a",    downstream_zone_ref: null              },
+    ]
+  },
+  cold_hot_storage: {
+    label: "Cold Loop + Storage Buffer",
+    tier: 1,
+    description: "Cold loop exchanges to hot island. PCM storage buffer absorbs transient thermal peaks from eclipse or burst compute loads. Storage charges during low-load periods and discharges during peak demand.",
+    enable_ext3a: true,
+    enable_ext4: false,
+    zones: [
+      { zone_id: "tpl-vault-001",    label: "Compute Vault (Pickup)",    zone_role: "pickup",              zone_type: "compute_vault",  chain_id: "cold_loop",    loop_role: "evaporator",   working_fluid_ref: "fluid-water-v0",         hot_island_role: "none",    upstream_zone_ref: null,              downstream_zone_ref: "tpl-hx-001"      },
+      { zone_id: "tpl-hx-001",       label: "HX Boundary",               zone_role: "convergence_exchange", zone_type: "hx_boundary",    chain_id: "cold_loop",    loop_role: "hx_cold_side", working_fluid_ref: "fluid-water-v0",         hot_island_role: "none",    upstream_zone_ref: "tpl-vault-001",   downstream_zone_ref: "tpl-island-001", isolation_boundary: true },
+      { zone_id: "tpl-island-001",   label: "Hot Island (Primary)",       zone_role: "storage",             zone_type: "hot_island",     chain_id: "hot_island",   loop_role: "accumulator",  working_fluid_ref: "fluid-sodium-v0",        hot_island_role: "primary", upstream_zone_ref: "tpl-hx-001",      downstream_zone_ref: "tpl-storage-001" },
+      { zone_id: "tpl-storage-001",  label: "PCM Storage Buffer",         zone_role: "storage",             zone_type: "storage_buffer", chain_id: "hot_island",   loop_role: "buffer",       working_fluid_ref: "fluid-sodium-v0",        hot_island_role: "none",    upstream_zone_ref: "tpl-island-001",  downstream_zone_ref: "tpl-reject-001"  },
+      { zone_id: "tpl-reject-001",   label: "Radiator Rejection",         zone_role: "rejection",           zone_type: "radiator_zone",  chain_id: "hot_island",   loop_role: "condenser",    working_fluid_ref: "fluid-sodium-v0",        hot_island_role: "none",    upstream_zone_ref: "tpl-storage-001", downstream_zone_ref: null              },
+    ]
+  },
+  hexe_brayton_cold: {
+    label: "He/Xe Brayton + Cold Loop Exchange",
+    tier: 2,
+    description: "EXPLORATORY. He/Xe closed-loop Brayton cycle is the primary high-temperature transport loop. HX boundary exchanges heat to secondary cold-plate loop supplying compute vault. Brayton loop operates at 800–1200 K. Research required on He/Xe Cp at operating pressure.",
+    enable_ext3a: true,
+    enable_ext4: false,
+    zones: [
+      { zone_id: "tpl-vault-001",   label: "Compute Vault (Cold Side)",  zone_role: "pickup",              zone_type: "compute_vault",  chain_id: "cold_loop",    loop_role: "evaporator",   working_fluid_ref: "fluid-water-v0",   hot_island_role: "none", upstream_zone_ref: null,              downstream_zone_ref: "tpl-hx-001"     },
+      { zone_id: "tpl-hx-001",      label: "HX Boundary (Cold/Brayton)", zone_role: "convergence_exchange", zone_type: "hx_boundary",    chain_id: "cold_loop",    loop_role: "hx_cold_side", working_fluid_ref: "fluid-water-v0",   hot_island_role: "none", upstream_zone_ref: "tpl-vault-001",   downstream_zone_ref: "tpl-brayton-001", isolation_boundary: true },
+      { zone_id: "tpl-brayton-001", label: "He/Xe Brayton Loop",         zone_role: "transport",           zone_type: "brayton_loop",   chain_id: "brayton",      loop_role: "hx_hot_side",  working_fluid_ref: "fluid-hexe-v0",    hot_island_role: "none", upstream_zone_ref: "tpl-hx-001",      downstream_zone_ref: "tpl-reject-001"   },
+      { zone_id: "tpl-reject-001",  label: "Radiator Rejection",         zone_role: "rejection",           zone_type: "radiator_zone",  chain_id: "brayton",      loop_role: "condenser",    working_fluid_ref: "fluid-hexe-v0",    hot_island_role: "none", upstream_zone_ref: "tpl-brayton-001", downstream_zone_ref: null               },
+    ]
+  },
+  hexe_eutectic_cold_pump: {
+    label: "He/Xe + Eutectic Emitter + Cold Pump Return",
+    tier: 2,
+    description: "EXPLORATORY. Three-loop chain: He/Xe primary loop carries heat from high-temp source → HX to eutectic emitter loop (mid-temperature, high thermal mass) → second HX to cold pump return loop which resets cold-loop supply temperature to vault. Addresses return temperature creep. See FUTURE-THERMAL-RUNAWAY-001 for full physics model.",
+    enable_ext3a: true,
+    enable_ext4: false,
+    zones: [
+      { zone_id: "tpl-vault-001",    label: "Compute Vault (Pickup)",         zone_role: "pickup",              zone_type: "compute_vault",    chain_id: "cold_loop",    loop_role: "evaporator",   working_fluid_ref: "fluid-water-v0",  hot_island_role: "none", upstream_zone_ref: null,               downstream_zone_ref: "tpl-pump-hx-001" },
+      { zone_id: "tpl-pump-hx-001",  label: "Cold Pump Return HX",            zone_role: "convergence_exchange", zone_type: "hx_boundary",      chain_id: "cold_loop",    loop_role: "hx_cold_side", working_fluid_ref: "fluid-water-v0",  hot_island_role: "none", upstream_zone_ref: "tpl-vault-001",    downstream_zone_ref: "tpl-eutectic-001", isolation_boundary: true },
+      { zone_id: "tpl-eutectic-001", label: "Eutectic Emitter Loop",           zone_role: "transport",           zone_type: "hot_island",       chain_id: "eutectic",     loop_role: "hx_hot_side",  working_fluid_ref: "fluid-nak-v0",    hot_island_role: "primary", upstream_zone_ref: "tpl-pump-hx-001",  downstream_zone_ref: "tpl-hexe-hx-001"  },
+      { zone_id: "tpl-hexe-hx-001",  label: "HX Boundary (Eutectic/He-Xe)",   zone_role: "convergence_exchange", zone_type: "hx_boundary",      chain_id: "eutectic",     loop_role: "hx_cold_side", working_fluid_ref: "fluid-nak-v0",    hot_island_role: "none", upstream_zone_ref: "tpl-eutectic-001", downstream_zone_ref: "tpl-hexe-001",     isolation_boundary: true },
+      { zone_id: "tpl-hexe-001",     label: "He/Xe Primary Loop",              zone_role: "transport",           zone_type: "brayton_loop",     chain_id: "brayton",      loop_role: "hx_hot_side",  working_fluid_ref: "fluid-hexe-v0",   hot_island_role: "none", upstream_zone_ref: "tpl-hexe-hx-001",  downstream_zone_ref: "tpl-reject-001"    },
+      { zone_id: "tpl-reject-001",   label: "Radiator Rejection",              zone_role: "rejection",           zone_type: "radiator_zone",    chain_id: "brayton",      loop_role: "condenser",    working_fluid_ref: "fluid-hexe-v0",   hot_island_role: "none", upstream_zone_ref: "tpl-hexe-001",     downstream_zone_ref: null                },
+    ]
+  },
+  full_regen_brayton_export: {
+    label: "Full Regen Dual Island + Brayton Export",
+    tier: 2,
+    description: "EXPLORATORY. Maximum complexity topology: dual hot islands in regen cycle, Brayton branch extracts work from hot loop, PCM storage buffer manages transients, TPV recapture on radiator. All exploratory branches active. See FUTURE-HOT-ISLAND-REGEN-001 for regen cycle physics model.",
+    enable_ext3a: true,
+    enable_ext4: true,
+    zones: [
+      { zone_id: "tpl-vault-001",   label: "Compute Vault (Pickup)",    zone_role: "pickup",              zone_type: "compute_vault",  chain_id: "cold_loop",    loop_role: "evaporator",   working_fluid_ref: "fluid-water-v0",  hot_island_role: "none",      upstream_zone_ref: null,              downstream_zone_ref: "tpl-hx-001"      },
+      { zone_id: "tpl-hx-001",      label: "HX Boundary",               zone_role: "convergence_exchange", zone_type: "hx_boundary",    chain_id: "cold_loop",    loop_role: "hx_cold_side", working_fluid_ref: "fluid-water-v0",  hot_island_role: "none",      upstream_zone_ref: "tpl-vault-001",   downstream_zone_ref: "tpl-island-a",   isolation_boundary: true },
+      { zone_id: "tpl-island-a",    label: "Hot Island A (Charge)",      zone_role: "storage",             zone_type: "hot_island",     chain_id: "hot_island_a", loop_role: "accumulator",  working_fluid_ref: "fluid-sodium-v0", hot_island_role: "primary",   upstream_zone_ref: "tpl-hx-001",      downstream_zone_ref: "tpl-storage-001" },
+      { zone_id: "tpl-island-b",    label: "Hot Island B (Discharge)",   zone_role: "storage",             zone_type: "hot_island",     chain_id: "hot_island_b", loop_role: "accumulator",  working_fluid_ref: "fluid-sodium-v0", hot_island_role: "secondary", upstream_zone_ref: "tpl-hx-001",      downstream_zone_ref: "tpl-storage-001" },
+      { zone_id: "tpl-storage-001", label: "PCM Storage Buffer",         zone_role: "storage",             zone_type: "storage_buffer", chain_id: "hot_island_a", loop_role: "buffer",       working_fluid_ref: "fluid-sodium-v0", hot_island_role: "none",      upstream_zone_ref: "tpl-island-a",    downstream_zone_ref: "tpl-brayton-001" },
+      { zone_id: "tpl-brayton-001", label: "Brayton Export Branch",      zone_role: "transport",           zone_type: "brayton_loop",   chain_id: "brayton",      loop_role: "hx_hot_side",  working_fluid_ref: "fluid-hexe-v0",   hot_island_role: "none",      upstream_zone_ref: "tpl-storage-001", downstream_zone_ref: "tpl-reject-001"  },
+      { zone_id: "tpl-reject-001",  label: "Radiator Rejection + TPV",   zone_role: "rejection",           zone_type: "radiator_zone",  chain_id: "brayton",      loop_role: "condenser",    working_fluid_ref: "fluid-hexe-v0",   hot_island_role: "none",      upstream_zone_ref: "tpl-brayton-001", downstream_zone_ref: null              },
+    ]
+  },
+  cold_tpv_recapture: {
+    label: "Cold Loop + TPV Recapture",
+    tier: 2,
+    description: "EXPLORATORY. Standard cold loop with Extension 4 TPV radiator recapture enabled. TPV cells mounted on radiator surface recapture a fraction of emitted photons as electrical power. All TPV outputs are non-authoritative per ext4-spec §2.3.",
+    enable_ext3a: true,
+    enable_ext4: true,
+    zones: [
+      { zone_id: "tpl-vault-001",   label: "Compute Vault (Pickup)",  zone_role: "pickup",    zone_type: "compute_vault",  chain_id: "cold_loop", loop_role: "evaporator", working_fluid_ref: "fluid-water-v0",  hot_island_role: "none", upstream_zone_ref: null,             downstream_zone_ref: "tpl-backbone-001" },
+      { zone_id: "tpl-backbone-001",label: "Hot Backbone + TPV",      zone_role: "rejection", zone_type: "radiator_zone",  chain_id: "cold_loop", loop_role: "condenser",  working_fluid_ref: "fluid-water-v0",  hot_island_role: "none", upstream_zone_ref: "tpl-vault-001",  downstream_zone_ref: null               },
+    ]
+  },
+  custom: {
+    label: "Custom",
+    tier: 0,
+    description: "No zones spawned. Build your topology from scratch using the Add Zone Block button below.",
+    enable_ext3a: false,
+    enable_ext4: false,
+    zones: []
+  }
+};
+
+/**
+ * Apply a topology template — clear existing zones, spawn template zones,
+ * auto-enable required extensions, show template note.
+ * TOPO-TEMPLATE-001. Blueprint §11.1, spec §6.
+ */
+function applyTopologyTemplate(templateId) {
+  if (!templateId) return;
+
+  const tpl = TOPOLOGY_TEMPLATES[templateId];
+  if (!tpl) return;
+
+  // Confirm if zones already exist — avoid silent data loss
+  if (zoneBlocks.length > 0) {
+    if (!confirm(`Applying template "${tpl.label}" will replace your current ${zoneBlocks.length} zone(s). Continue?`)) {
+      document.getElementById("topology-template-select").value = "";
+      return;
+    }
+  }
+
+  // Clear and spawn
+  zoneBlocks.length = 0;
+  for (const zd of tpl.zones) {
+    addZoneBlock({ ...zd });
+  }
+
+  // Auto-enable Extension 3A when template requires it
+  if (tpl.enable_ext3a) {
+    const el = document.getElementById("enable_model_extension_3a");
+    if (el && el.value !== "true") {
+      el.value = "true";
+      el.dispatchEvent(new Event("change"));
+    }
+  }
+
+  // Auto-enable Extension 4 for exploratory templates that use TPV
+  if (tpl.enable_ext4) {
+    const el = document.getElementById("enable_model_extension_4");
+    if (el && el.value !== "true") {
+      el.value = "true";
+      el.dispatchEvent(new Event("change"));
+    }
+  }
+
+  // Show template note
+  const noteEl = document.getElementById("topology-template-note");
+  if (noteEl) {
+    const tierLabel = tpl.tier === 2 ? "⚠ EXPLORATORY — " : tpl.tier === 1 ? "✓ Flight-Proximate — " : "";
+    noteEl.style.display = "block";
+    noteEl.className = tpl.tier === 2 ? "note warn-note" : "note";
+    noteEl.innerHTML = `<strong>${tierLabel}${tpl.label}</strong><br>${tpl.description}<br>` +
+      `<span style="color:var(--text-dim);font-size:11px;">Spawned ${tpl.zones.length} zone(s). All fields editable. Working fluids are suggestions — verify for your operating conditions.</span>`;
+  }
+
+  renderZoneBlocks();
+  updateTopologyStatus();
+  renderValidationPanel();
+}
+
 /**
  * Add a new thermal zone block with defaults per spec §12.
  * Blueprint §11.1 — additive create control.
