@@ -104,6 +104,28 @@ function applyScenarioPreset(preset_id) {
   updateComputePreview();
   updateRadiatorPreview();
   updateNonComputeAggregate();
+
+  // Seed topology template from preset — TOPO-TEMPLATE-001 / Option D
+  // skipConfirm=true: operator chose preset, no additional confirm needed
+  if (entry.topology_template_id) {
+    // Sync template dropdown to reflect preset choice
+    const tplSel = document.getElementById("topology-template-select");
+    if (tplSel) tplSel.value = entry.topology_template_id;
+    applyTopologyTemplate(entry.topology_template_id, true);
+    // Show compatibility note on Tab 4 template selector
+    const tplNote = document.getElementById("topology-template-note");
+    if (tplNote) {
+      const tpl = TOPOLOGY_TEMPLATES[entry.topology_template_id];
+      if (tpl && entry.topology_template_id !== "custom") {
+        const tierLabel = tpl.tier === 2 ? "⚠ EXPLORATORY — " : "✓ ";
+        tplNote.style.display = "block";
+        tplNote.className = tpl.tier === 2 ? "note warn-note" : "note";
+        tplNote.innerHTML = `Seeded from scenario preset: <strong>${entry.label}</strong><br>` +
+          `${tierLabel}${tpl.label} — ${tpl.description}<br>` +
+          `<span style="color:var(--text-dim);font-size:11px;">Spawned ${tpl.zones.length} zone(s). All fields editable. Working fluids are suggestions.</span>`;
+      }
+    }
+  }
 }
 
 function populateDevicePresets() {
@@ -2041,14 +2063,15 @@ const TOPOLOGY_TEMPLATES = {
  * auto-enable required extensions, show template note.
  * TOPO-TEMPLATE-001. Blueprint §11.1, spec §6.
  */
-function applyTopologyTemplate(templateId) {
+function applyTopologyTemplate(templateId, skipConfirm = false) {
   if (!templateId) return;
 
   const tpl = TOPOLOGY_TEMPLATES[templateId];
   if (!tpl) return;
 
   // Confirm if zones already exist — avoid silent data loss
-  if (zoneBlocks.length > 0) {
+  // skipConfirm=true when called from applyScenarioPreset (operator already chose preset)
+  if (!skipConfirm && zoneBlocks.length > 0) {
     if (!confirm(`Applying template "${tpl.label}" will replace your current ${zoneBlocks.length} zone(s). Continue?`)) {
       document.getElementById("topology-template-select").value = "";
       return;

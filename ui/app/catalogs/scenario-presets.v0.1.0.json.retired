@@ -1,0 +1,128 @@
+{
+  "catalog_id": "scenario-presets",
+  "catalog_version": "v0.1.0",
+  "entries": [
+    {
+      "preset_id": "50kw_baseline",
+      "label": "50 kW Baseline Node (GEO)",
+      "version": "v0.1.0",
+      "node_class": "node_s_50kw",
+      "scenario_id_seed": "50kw-baseline",
+      "mission_mode_default": "full_compute",
+      "architecture_class_default": "cold_loop_plus_hot_backbone",
+      "compute_device_preset_id": "gpu_h200_class",
+      "compute_module_defaults": {
+        "device_count": 8,
+        "target_load_state": "full",
+        "redundancy_mode": "none"
+      },
+      "payload_archetype_defaults": ["ttc_baseline"],
+      "thermal_zone_defaults": ["compute_vault", "hx_boundary", "high_temp_backbone", "radiator_emitter"],
+      "radiator_defaults": {
+        "emissivity": 0.9,
+        "target_surface_temp_k": 1200,
+        "sink_temp_k": 0,
+        "view_factor": 1.0,
+        "reserve_margin_fraction": 0.15
+      },
+      "storage_defaults": {
+        "storage_class": "pcm_latent"
+      },
+      "branch_defaults": [],
+      "reporting_defaults": {},
+      "risk_notes": [
+        "1200 K radiator requires high-temperature material qualification",
+        "H200-class device assumptions are flight-proven-analog only"
+      ],
+      "research_required": true
+    },
+    {
+      "preset_id": "100kw_baseline",
+      "label": "100 kW Baseline Node (GEO)",
+      "version": "v0.1.0",
+      "node_class": "node_m_100kw",
+      "scenario_id_seed": "100kw-baseline",
+      "mission_mode_default": "full_compute",
+      "architecture_class_default": "cold_loop_plus_hot_backbone",
+      "compute_device_preset_id": "gpu_h200_class",
+      "compute_module_defaults": {
+        "device_count": 16,
+        "target_load_state": "full",
+        "redundancy_mode": "none"
+      },
+      "payload_archetype_defaults": ["ttc_baseline"],
+      "thermal_zone_defaults": ["compute_vault", "hx_boundary", "high_temp_backbone", "radiator_emitter"],
+      "radiator_defaults": {
+        "emissivity": 0.9,
+        "target_surface_temp_k": 1200,
+        "sink_temp_k": 0,
+        "view_factor": 1.0,
+        "reserve_margin_fraction": 0.15
+      },
+      "storage_defaults": {
+        "storage_class": "pcm_latent"
+      },
+      "branch_defaults": [],
+      "reporting_defaults": {},
+      "risk_notes": [
+        "100 kW class scales radiator area; dual-panel or deployable geometry required",
+        "H200-class device assumptions are flight-proven-analog only"
+      ],
+      "research_required": true
+    },
+    {
+      "preset_id": "1mw_baseline",
+      "label": "1 MW Baseline Node (GEO)",
+      "version": "v0.1.0",
+      "node_class": "node_l_1mw",
+      "scenario_id_seed": "1mw-baseline",
+      "mission_mode_default": "full_compute",
+      "architecture_class_default": "cold_loop_plus_dual_hot_island",
+      "compute_device_preset_id": "gpu_h200_class",
+      "compute_module_defaults": {
+        "device_count": 160,
+        "target_load_state": "full",
+        "redundancy_mode": "n_plus_1"
+      },
+      "payload_archetype_defaults": ["ttc_baseline"],
+      "thermal_zone_defaults": ["compute_vault", "hx_boundary", "high_temp_backbone", "radiator_emitter"],
+      "radiator_defaults": {
+        "emissivity": 0.9,
+        "target_surface_temp_k": 1200,
+        "sink_temp_k": 0,
+        "view_factor": 1.0,
+        "reserve_margin_fraction": 0.20
+      },
+      "storage_defaults": {
+        "storage_class": "eutectic_metal"
+      },
+      "branch_defaults": ["brayton_power_cycle_base"],
+      "reporting_defaults": {},
+      "risk_notes": [
+        "1 MW class is exploratory; structural, power, and launch mass must be re-evaluated",
+        "Dual hot-island topology is research-required",
+        "Power cycle branch assumptions are speculative at this scale"
+      ],
+      "research_required": true
+    },
+    {
+      "preset_id": "custom_blank",
+      "label": "Custom (Blank)",
+      "version": "v0.1.0",
+      "node_class": "custom",
+      "scenario_id_seed": "custom",
+      "mission_mode_default": "full_compute",
+      "architecture_class_default": "custom",
+      "compute_device_preset_id": "custom",
+      "compute_module_defaults": {},
+      "payload_archetype_defaults": [],
+      "thermal_zone_defaults": [],
+      "radiator_defaults": {},
+      "storage_defaults": {},
+      "branch_defaults": [],
+      "reporting_defaults": {},
+      "risk_notes": ["All fields must be manually specified by operator"],
+      "research_required": false
+    }
+  ]
+}

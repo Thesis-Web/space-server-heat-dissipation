@@ -1,0 +1,333 @@
+{
+  "catalog_id": "scenario-presets",
+  "catalog_version": "v0.1.1",
+  "entries": [
+    {
+      "preset_id": "50kw_baseline",
+      "label": "50 kW Baseline \u2014 Cold Loop + Hot Backbone (GEO)",
+      "version": "v0.1.1",
+      "node_class": "node_s_50kw",
+      "scenario_id_seed": "50kw-baseline",
+      "mission_mode_default": "full_compute",
+      "architecture_class_default": "cold_loop_plus_hot_backbone",
+      "topology_template_id": "simple_backbone",
+      "compute_device_preset_id": "gpu_h200_class",
+      "compute_module_defaults": {
+        "device_count": 8,
+        "target_load_state": "full",
+        "redundancy_mode": "none"
+      },
+      "payload_archetype_defaults": [
+        "ttc_baseline"
+      ],
+      "thermal_zone_defaults": [],
+      "radiator_defaults": {
+        "emissivity": 0.9,
+        "target_surface_temp_k": 1200,
+        "sink_temp_k": 0,
+        "view_factor": 1.0,
+        "reserve_margin_fraction": 0.15
+      },
+      "storage_defaults": {
+        "storage_class": "pcm_latent"
+      },
+      "branch_defaults": [],
+      "reporting_defaults": {},
+      "risk_notes": [
+        "1200 K radiator requires high-temperature material qualification",
+        "H200-class device assumptions are flight-proven-analog only"
+      ],
+      "research_required": true
+    },
+    {
+      "preset_id": "50kw_hot_island",
+      "label": "50 kW \u2014 Cold Loop + Hot Island (GEO)",
+      "version": "v0.1.1",
+      "node_class": "node_s_50kw",
+      "scenario_id_seed": "50kw-hot-island",
+      "mission_mode_default": "full_compute",
+      "architecture_class_default": "cold_loop_plus_hot_backbone",
+      "topology_template_id": "cold_hot_island",
+      "compute_device_preset_id": "gpu_h200_class",
+      "compute_module_defaults": {
+        "device_count": 8,
+        "target_load_state": "full",
+        "redundancy_mode": "none"
+      },
+      "payload_archetype_defaults": [
+        "ttc_baseline"
+      ],
+      "thermal_zone_defaults": [],
+      "radiator_defaults": {
+        "emissivity": 0.9,
+        "target_surface_temp_k": 1200,
+        "sink_temp_k": 0,
+        "view_factor": 1.0,
+        "reserve_margin_fraction": 0.15
+      },
+      "storage_defaults": {
+        "storage_class": "pcm_latent"
+      },
+      "branch_defaults": [],
+      "reporting_defaults": {},
+      "risk_notes": [
+        "Hot island loop adds thermal mass \u2014 verify NaK compatibility",
+        "HX boundary thermal resistance must be characterized"
+      ],
+      "research_required": true
+    },
+    {
+      "preset_id": "100kw_baseline",
+      "label": "100 kW Baseline \u2014 Cold Loop + Hot Backbone (GEO)",
+      "version": "v0.1.1",
+      "node_class": "node_m_100kw",
+      "scenario_id_seed": "100kw-baseline",
+      "mission_mode_default": "full_compute",
+      "architecture_class_default": "cold_loop_plus_hot_backbone",
+      "topology_template_id": "simple_backbone",
+      "compute_device_preset_id": "gpu_h200_class",
+      "compute_module_defaults": {
+        "device_count": 16,
+        "target_load_state": "full",
+        "redundancy_mode": "none"
+      },
+      "payload_archetype_defaults": [
+        "ttc_baseline"
+      ],
+      "thermal_zone_defaults": [],
+      "radiator_defaults": {
+        "emissivity": 0.9,
+        "target_surface_temp_k": 1200,
+        "sink_temp_k": 0,
+        "view_factor": 1.0,
+        "reserve_margin_fraction": 0.15
+      },
+      "storage_defaults": {
+        "storage_class": "pcm_latent"
+      },
+      "branch_defaults": [],
+      "reporting_defaults": {},
+      "risk_notes": [
+        "100 kW class scales radiator area; dual-panel or deployable geometry required",
+        "H200-class device assumptions are flight-proven-analog only"
+      ],
+      "research_required": true
+    },
+    {
+      "preset_id": "100kw_hot_island_storage",
+      "label": "100 kW \u2014 Cold Loop + Hot Island + Storage Buffer (GEO)",
+      "version": "v0.1.1",
+      "node_class": "node_m_100kw",
+      "scenario_id_seed": "100kw-hot-island-storage",
+      "mission_mode_default": "full_compute",
+      "architecture_class_default": "cold_loop_plus_hot_backbone",
+      "topology_template_id": "cold_hot_storage",
+      "compute_device_preset_id": "gpu_h200_class",
+      "compute_module_defaults": {
+        "device_count": 16,
+        "target_load_state": "full",
+        "redundancy_mode": "none"
+      },
+      "payload_archetype_defaults": [
+        "ttc_baseline"
+      ],
+      "thermal_zone_defaults": [],
+      "radiator_defaults": {
+        "emissivity": 0.9,
+        "target_surface_temp_k": 1200,
+        "sink_temp_k": 0,
+        "view_factor": 1.0,
+        "reserve_margin_fraction": 0.15
+      },
+      "storage_defaults": {
+        "storage_class": "pcm_latent"
+      },
+      "branch_defaults": [],
+      "reporting_defaults": {},
+      "risk_notes": [
+        "PCM storage buffer manages eclipse transients",
+        "NaK loop compatibility with SS-316 required at operating temps"
+      ],
+      "research_required": true
+    },
+    {
+      "preset_id": "1mw_baseline",
+      "label": "1 MW Baseline \u2014 Cold Loop + Dual Hot Island (GEO)",
+      "version": "v0.1.1",
+      "node_class": "node_l_1mw",
+      "scenario_id_seed": "1mw-baseline",
+      "mission_mode_default": "full_compute",
+      "architecture_class_default": "cold_loop_plus_dual_hot_island",
+      "topology_template_id": "cold_dual_hot_island",
+      "compute_device_preset_id": "gpu_h200_class",
+      "compute_module_defaults": {
+        "device_count": 160,
+        "target_load_state": "full",
+        "redundancy_mode": "n_plus_1"
+      },
+      "payload_archetype_defaults": [
+        "ttc_baseline"
+      ],
+      "thermal_zone_defaults": [],
+      "radiator_defaults": {
+        "emissivity": 0.9,
+        "target_surface_temp_k": 1200,
+        "sink_temp_k": 0,
+        "view_factor": 1.0,
+        "reserve_margin_fraction": 0.2
+      },
+      "storage_defaults": {
+        "storage_class": "eutectic_metal"
+      },
+      "branch_defaults": [
+        "brayton_power_cycle_base"
+      ],
+      "reporting_defaults": {},
+      "risk_notes": [
+        "1 MW class is exploratory; structural, power, and launch mass must be re-evaluated",
+        "Dual hot-island topology is research-required"
+      ],
+      "research_required": true
+    },
+    {
+      "preset_id": "50kw_hexe_brayton",
+      "label": "50 kW Exploratory \u2014 He/Xe Brayton + Cold Loop Exchange (GEO)",
+      "version": "v0.1.1",
+      "node_class": "node_s_50kw",
+      "scenario_id_seed": "50kw-hexe-brayton",
+      "mission_mode_default": "full_compute",
+      "architecture_class_default": "cold_loop_plus_hot_backbone",
+      "topology_template_id": "hexe_brayton_cold",
+      "compute_device_preset_id": "gpu_h200_class",
+      "compute_module_defaults": {
+        "device_count": 8,
+        "target_load_state": "full",
+        "redundancy_mode": "none"
+      },
+      "payload_archetype_defaults": [
+        "ttc_baseline"
+      ],
+      "thermal_zone_defaults": [],
+      "radiator_defaults": {
+        "emissivity": 0.85,
+        "target_surface_temp_k": 1000,
+        "sink_temp_k": 0,
+        "view_factor": 1.0,
+        "reserve_margin_fraction": 0.2
+      },
+      "storage_defaults": {
+        "storage_class": "sensible_solid"
+      },
+      "branch_defaults": [
+        "brayton_power_cycle_base"
+      ],
+      "reporting_defaults": {},
+      "risk_notes": [
+        "EXPLORATORY \u2014 He/Xe Brayton cycle not flight-qualified at this power class",
+        "He/Xe procurement and xenon mass penalty significant",
+        "Cp/density pressure-dependent \u2014 verify at operating point"
+      ],
+      "research_required": true
+    },
+    {
+      "preset_id": "50kw_hexe_eutectic_3loop",
+      "label": "50 kW Exploratory \u2014 He/Xe + Eutectic Emitter + Cold Pump Return (GEO)",
+      "version": "v0.1.1",
+      "node_class": "node_s_50kw",
+      "scenario_id_seed": "50kw-hexe-eutectic-3loop",
+      "mission_mode_default": "full_compute",
+      "architecture_class_default": "cold_loop_plus_dual_hot_island_plus_solar_polish",
+      "topology_template_id": "hexe_eutectic_cold_pump",
+      "compute_device_preset_id": "gpu_h200_class",
+      "compute_module_defaults": {
+        "device_count": 8,
+        "target_load_state": "full",
+        "redundancy_mode": "none"
+      },
+      "payload_archetype_defaults": [
+        "ttc_baseline"
+      ],
+      "thermal_zone_defaults": [],
+      "radiator_defaults": {
+        "emissivity": 0.85,
+        "target_surface_temp_k": 1200,
+        "sink_temp_k": 0,
+        "view_factor": 1.0,
+        "reserve_margin_fraction": 0.2
+      },
+      "storage_defaults": {
+        "storage_class": "eutectic_metal"
+      },
+      "branch_defaults": [],
+      "reporting_defaults": {},
+      "risk_notes": [
+        "EXPLORATORY \u2014 3-loop chain not demonstrated at this power class",
+        "Cold pump return addresses return-temp creep (FUTURE-THERMAL-RUNAWAY-001 \u2014 physics model pending)",
+        "NaK eutectic loop containment is active research area"
+      ],
+      "research_required": true
+    },
+    {
+      "preset_id": "1mw_full_regen_brayton",
+      "label": "1 MW Exploratory \u2014 Full Regen Dual Island + Brayton Export + TPV (GEO)",
+      "version": "v0.1.1",
+      "node_class": "node_l_1mw",
+      "scenario_id_seed": "1mw-full-regen-brayton",
+      "mission_mode_default": "full_compute",
+      "architecture_class_default": "cold_loop_plus_dual_hot_island",
+      "topology_template_id": "full_regen_brayton_export",
+      "compute_device_preset_id": "gpu_h200_class",
+      "compute_module_defaults": {
+        "device_count": 160,
+        "target_load_state": "full",
+        "redundancy_mode": "n_plus_1"
+      },
+      "payload_archetype_defaults": [
+        "ttc_baseline"
+      ],
+      "thermal_zone_defaults": [],
+      "radiator_defaults": {
+        "emissivity": 0.85,
+        "target_surface_temp_k": 1200,
+        "sink_temp_k": 0,
+        "view_factor": 1.0,
+        "reserve_margin_fraction": 0.2
+      },
+      "storage_defaults": {
+        "storage_class": "eutectic_metal"
+      },
+      "branch_defaults": [
+        "brayton_power_cycle_base"
+      ],
+      "reporting_defaults": {},
+      "risk_notes": [
+        "EXPLORATORY \u2014 maximum complexity; intended for design space exploration only",
+        "Regen cycle switching physics pending (FUTURE-HOT-ISLAND-REGEN-001)",
+        "TPV outputs non-authoritative per ext4-spec \u00a72.3"
+      ],
+      "research_required": true
+    },
+    {
+      "preset_id": "custom_blank",
+      "label": "Custom (Blank)",
+      "version": "v0.1.1",
+      "node_class": "custom",
+      "scenario_id_seed": "custom",
+      "mission_mode_default": "full_compute",
+      "architecture_class_default": "custom",
+      "topology_template_id": "custom",
+      "compute_device_preset_id": "custom",
+      "compute_module_defaults": {},
+      "payload_archetype_defaults": [],
+      "thermal_zone_defaults": [],
+      "radiator_defaults": {},
+      "storage_defaults": {},
+      "branch_defaults": [],
+      "reporting_defaults": {},
+      "risk_notes": [
+        "All fields must be manually specified by operator"
+      ],
+      "research_required": false
+    }
+  ]
+}

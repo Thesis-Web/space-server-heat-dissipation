@@ -11,7 +11,7 @@
 "use strict";
 
 const CATALOG_PATHS = {
-  "scenario-presets":       "catalogs/scenario-presets.v0.1.0.json",
+  "scenario-presets":       "catalogs/scenario-presets.v0.1.1.json",
   "compute-device-presets": "catalogs/compute-device-presets.v0.1.0.json",
   "payload-archetypes":     "catalogs/payload-archetypes.v0.1.0.json",
   "material-families":      "catalogs/material-families.v0.1.1.json",
