@@ -2393,6 +2393,7 @@ function renderZoneBlocks() {
         </select>
       </div>
       <div id="z${idx}_fluid_note" class="note" style="display:none;"></div>
+      ${(()=>{ const sug = ZONE_TYPE_MATERIAL_SUGGEST[b.zone_type]; return (!b.material_family_ref && sug) ? `<div class="note" style="color:var(--text-dim);font-size:11px;margin-top:2px;">💡 Suggested: ${sug.note}</div>` : ''; })()}
       <div class="field-row"><label>Pickup Geometry</label>
         <select id="z${idx}_pickup_geometry_ref" onchange="syncZoneBlock(${idx})">
           ${pickupGeometryOptions(b.pickup_geometry_ref||"")}

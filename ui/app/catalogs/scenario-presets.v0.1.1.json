@@ -26,7 +26,8 @@
         "target_surface_temp_k": 1200,
         "sink_temp_k": 0,
         "view_factor": 1.0,
-        "reserve_margin_fraction": 0.15
+        "reserve_margin_fraction": 0.15,
+        "material_family_ref": "carbon_composite"
       },
       "storage_defaults": {
         "storage_class": "pcm_latent"
@@ -63,7 +64,8 @@
         "target_surface_temp_k": 1200,
         "sink_temp_k": 0,
         "view_factor": 1.0,
-        "reserve_margin_fraction": 0.15
+        "reserve_margin_fraction": 0.15,
+        "material_family_ref": "carbon_composite"
       },
       "storage_defaults": {
         "storage_class": "pcm_latent"
@@ -100,7 +102,8 @@
         "target_surface_temp_k": 1200,
         "sink_temp_k": 0,
         "view_factor": 1.0,
-        "reserve_margin_fraction": 0.15
+        "reserve_margin_fraction": 0.15,
+        "material_family_ref": "carbon_composite"
       },
       "storage_defaults": {
         "storage_class": "pcm_latent"
@@ -137,7 +140,8 @@
         "target_surface_temp_k": 1200,
         "sink_temp_k": 0,
         "view_factor": 1.0,
-        "reserve_margin_fraction": 0.15
+        "reserve_margin_fraction": 0.15,
+        "material_family_ref": "carbon_composite"
       },
       "storage_defaults": {
         "storage_class": "pcm_latent"
@@ -174,7 +178,8 @@
         "target_surface_temp_k": 1200,
         "sink_temp_k": 0,
         "view_factor": 1.0,
-        "reserve_margin_fraction": 0.2
+        "reserve_margin_fraction": 0.2,
+        "material_family_ref": "sic"
       },
       "storage_defaults": {
         "storage_class": "eutectic_metal"
@@ -213,7 +218,8 @@
         "target_surface_temp_k": 1000,
         "sink_temp_k": 0,
         "view_factor": 1.0,
-        "reserve_margin_fraction": 0.2
+        "reserve_margin_fraction": 0.2,
+        "material_family_ref": "refractory_metal_generic"
       },
       "storage_defaults": {
         "storage_class": "sensible_solid"
@@ -253,7 +259,8 @@
         "target_surface_temp_k": 1200,
         "sink_temp_k": 0,
         "view_factor": 1.0,
-        "reserve_margin_fraction": 0.2
+        "reserve_margin_fraction": 0.2,
+        "material_family_ref": "refractory_metal_generic"
       },
       "storage_defaults": {
         "storage_class": "eutectic_metal"
@@ -291,7 +298,8 @@
         "target_surface_temp_k": 1200,
         "sink_temp_k": 0,
         "view_factor": 1.0,
-        "reserve_margin_fraction": 0.2
+        "reserve_margin_fraction": 0.2,
+        "material_family_ref": "refractory_metal_generic"
       },
       "storage_defaults": {
         "storage_class": "eutectic_metal"
