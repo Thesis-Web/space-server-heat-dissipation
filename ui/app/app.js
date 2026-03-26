@@ -1801,10 +1801,17 @@ function workingFluidOptions(selectedVal) {
   const cat = CATALOGS["working-fluids"];
   if (!cat || cat.load_error) return `<option value="">— catalog unavailable —</option>`;
   let html = `<option value="">— select fluid —</option>`;
+  const phaseTag = {
+    single_phase_gas:     "(gas)",
+    single_phase_liquid:  "(liquid)",
+    two_phase_allowed:    "(two-phase)",
+    supercritical:        "(supercritical)"
+  };
   for (const e of (cat.entries || [])) {
-    const id = e.working_fluid_id || e.fluid_id || "";
-    const label = e.label || e.fluid_class || id;
-    const sel = id === selectedVal ? " selected" : "";
+    const id    = e.working_fluid_id || e.fluid_id || "";
+    const phase = phaseTag[e.phase_class] || "";
+    const label = (e.label || e.fluid_class || id) + (phase ? " " + phase : "");
+    const sel   = id === selectedVal ? " selected" : "";
     html += `<option value="${id}"${sel}>${label}</option>`;
   }
   return html;
@@ -1989,6 +1996,29 @@ function syncZoneBlock(idx) {
   b.upstream_zone_ref  = document.getElementById(`z${idx}_upstream_zone_ref`)?.value  || null;
   b.downstream_zone_ref= document.getElementById(`z${idx}_downstream_zone_ref`)?.value|| null;
   b.working_fluid_ref  = document.getElementById(`z${idx}_working_fluid_ref`)?.value  || null;
+  // Fluid phase note — warn operator of phase regime implications
+  const _fluidNote = document.getElementById(`z${idx}_fluid_note`);
+  if (_fluidNote) {
+    const _fcat = CATALOGS["working-fluids"];
+    const _fe = (_fcat?.entries || []).find(e => (e.working_fluid_id || e.fluid_id) === b.working_fluid_ref);
+    if (!_fe) {
+      _fluidNote.style.display = "none";
+    } else if (_fe.phase_class === "two_phase_allowed") {
+      _fluidNote.style.display = "block";
+      _fluidNote.className = "note warn-note";
+      _fluidNote.textContent = "⚠ Two-phase fluid — cavitation, bubble management, and microgravity phase separation must be addressed in design.";
+    } else if (_fe.phase_class === "single_phase_liquid") {
+      _fluidNote.style.display = "block";
+      _fluidNote.className = "note";
+      _fluidNote.textContent = `Liquid-phase loop (${_fe.fluid_class}). Freeze protection required if operating near melt point. Check compatibility notes.`;
+    } else if (_fe.phase_class === "single_phase_gas") {
+      _fluidNote.style.display = "block";
+      _fluidNote.className = "note";
+      _fluidNote.textContent = `Gas-phase loop (${_fe.fluid_class}). Pressure-dependent properties — verify Cp/density at operating pressure.`;
+    } else {
+      _fluidNote.style.display = "none";
+    }
+  }
   b.pickup_geometry_ref= document.getElementById(`z${idx}_pickup_geometry_ref`)?.value|| null;
   b.convergence_enabled= document.getElementById(`z${idx}_convergence_enabled`)?.value === "true";
   b.r_bridge_k_per_w   = parseFloat(document.getElementById(`z${idx}_r_bridge`)?.value) || null;
