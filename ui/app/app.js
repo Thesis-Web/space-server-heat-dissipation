@@ -1969,7 +1969,7 @@ const TOPOLOGY_TEMPLATES = {
     zones: [
       { zone_id: "tpl-vault-001",    label: "Compute Vault (Pickup)",    zone_role: "pickup",              zone_type: "compute_vault",  chain_id: "cold_loop",    loop_role: "evaporator",  working_fluid_ref: "fluid-water-v0",  hot_island_role: "none",      upstream_zone_ref: null,              downstream_zone_ref: "tpl-hx-001"      },
       { zone_id: "tpl-hx-001",       label: "HX Boundary",               zone_role: "convergence_exchange", zone_type: "hx_boundary",    chain_id: "cold_loop",    loop_role: "hx_cold_side", working_fluid_ref: "fluid-water-v0",  hot_island_role: "none",      upstream_zone_ref: "tpl-vault-001",   downstream_zone_ref: "tpl-island-001", isolation_boundary: true },
-      { zone_id: "tpl-island-001",   label: "Hot Island (Primary)",       zone_role: "storage",             zone_type: "hot_island",     chain_id: "hot_island",   loop_role: "accumulator", working_fluid_ref: "fluid-sodium-v0", hot_island_role: "primary",   upstream_zone_ref: "tpl-hx-001",      downstream_zone_ref: "tpl-reject-001"  },
+      { zone_id: "tpl-island-001",   label: "Hot Island (Primary)",       zone_role: "storage",             zone_type: "hot_island",     chain_id: "hot_island",   loop_role: "accumulator", working_fluid_ref: "fluid-sodium-v0", hot_island_role: "hot_island_a",   upstream_zone_ref: "tpl-hx-001",      downstream_zone_ref: "tpl-reject-001"  },
       { zone_id: "tpl-reject-001",   label: "Radiator Rejection",         zone_role: "rejection",           zone_type: "radiator_zone",  chain_id: "hot_island",   loop_role: "condenser",   working_fluid_ref: "fluid-sodium-v0", hot_island_role: "none",      upstream_zone_ref: "tpl-island-001",  downstream_zone_ref: null              },
     ]
   },
@@ -1982,8 +1982,8 @@ const TOPOLOGY_TEMPLATES = {
     zones: [
       { zone_id: "tpl-vault-001",    label: "Compute Vault (Pickup)",    zone_role: "pickup",              zone_type: "compute_vault",  chain_id: "cold_loop",      loop_role: "evaporator",   working_fluid_ref: "fluid-water-v0",  hot_island_role: "none",      upstream_zone_ref: null,              downstream_zone_ref: "tpl-hx-001"      },
       { zone_id: "tpl-hx-001",       label: "HX Boundary",               zone_role: "convergence_exchange", zone_type: "hx_boundary",    chain_id: "cold_loop",      loop_role: "hx_cold_side", working_fluid_ref: "fluid-water-v0",  hot_island_role: "none",      upstream_zone_ref: "tpl-vault-001",   downstream_zone_ref: "tpl-island-a",   isolation_boundary: true },
-      { zone_id: "tpl-island-a",     label: "Hot Island A",               zone_role: "storage",             zone_type: "hot_island",     chain_id: "hot_island_a",   loop_role: "accumulator",  working_fluid_ref: "fluid-sodium-v0", hot_island_role: "primary",   upstream_zone_ref: "tpl-hx-001",      downstream_zone_ref: "tpl-reject-001"  },
-      { zone_id: "tpl-island-b",     label: "Hot Island B",               zone_role: "storage",             zone_type: "hot_island",     chain_id: "hot_island_b",   loop_role: "accumulator",  working_fluid_ref: "fluid-sodium-v0", hot_island_role: "secondary", upstream_zone_ref: "tpl-hx-001",      downstream_zone_ref: "tpl-reject-001"  },
+      { zone_id: "tpl-island-a",     label: "Hot Island A",               zone_role: "storage",             zone_type: "hot_island",     chain_id: "hot_island_a",   loop_role: "accumulator",  working_fluid_ref: "fluid-sodium-v0", hot_island_role: "hot_island_a",   upstream_zone_ref: "tpl-hx-001",      downstream_zone_ref: "tpl-reject-001"  },
+      { zone_id: "tpl-island-b",     label: "Hot Island B",               zone_role: "storage",             zone_type: "hot_island",     chain_id: "hot_island_b",   loop_role: "accumulator",  working_fluid_ref: "fluid-sodium-v0", hot_island_role: "hot_island_b", upstream_zone_ref: "tpl-hx-001",      downstream_zone_ref: "tpl-reject-001"  },
       { zone_id: "tpl-reject-001",   label: "Radiator Rejection",         zone_role: "rejection",           zone_type: "radiator_zone",  chain_id: "hot_island_a",   loop_role: "condenser",    working_fluid_ref: "fluid-sodium-v0", hot_island_role: "none",      upstream_zone_ref: "tpl-island-a",    downstream_zone_ref: null              },
     ]
   },
@@ -1996,7 +1996,7 @@ const TOPOLOGY_TEMPLATES = {
     zones: [
       { zone_id: "tpl-vault-001",    label: "Compute Vault (Pickup)",    zone_role: "pickup",              zone_type: "compute_vault",  chain_id: "cold_loop",    loop_role: "evaporator",   working_fluid_ref: "fluid-water-v0",         hot_island_role: "none",    upstream_zone_ref: null,              downstream_zone_ref: "tpl-hx-001"      },
       { zone_id: "tpl-hx-001",       label: "HX Boundary",               zone_role: "convergence_exchange", zone_type: "hx_boundary",    chain_id: "cold_loop",    loop_role: "hx_cold_side", working_fluid_ref: "fluid-water-v0",         hot_island_role: "none",    upstream_zone_ref: "tpl-vault-001",   downstream_zone_ref: "tpl-island-001", isolation_boundary: true },
-      { zone_id: "tpl-island-001",   label: "Hot Island (Primary)",       zone_role: "storage",             zone_type: "hot_island",     chain_id: "hot_island",   loop_role: "accumulator",  working_fluid_ref: "fluid-sodium-v0",        hot_island_role: "primary", upstream_zone_ref: "tpl-hx-001",      downstream_zone_ref: "tpl-storage-001" },
+      { zone_id: "tpl-island-001",   label: "Hot Island (Primary)",       zone_role: "storage",             zone_type: "hot_island",     chain_id: "hot_island",   loop_role: "accumulator",  working_fluid_ref: "fluid-sodium-v0",        hot_island_role: "hot_island_a", upstream_zone_ref: "tpl-hx-001",      downstream_zone_ref: "tpl-storage-001" },
       { zone_id: "tpl-storage-001",  label: "PCM Storage Buffer",         zone_role: "storage",             zone_type: "storage_buffer", chain_id: "hot_island",   loop_role: "buffer",       working_fluid_ref: "fluid-sodium-v0",        hot_island_role: "none",    upstream_zone_ref: "tpl-island-001",  downstream_zone_ref: "tpl-reject-001"  },
       { zone_id: "tpl-reject-001",   label: "Radiator Rejection",         zone_role: "rejection",           zone_type: "radiator_zone",  chain_id: "hot_island",   loop_role: "condenser",    working_fluid_ref: "fluid-sodium-v0",        hot_island_role: "none",    upstream_zone_ref: "tpl-storage-001", downstream_zone_ref: null              },
     ]
@@ -2023,7 +2023,7 @@ const TOPOLOGY_TEMPLATES = {
     zones: [
       { zone_id: "tpl-vault-001",    label: "Compute Vault (Pickup)",         zone_role: "pickup",              zone_type: "compute_vault",    chain_id: "cold_loop",    loop_role: "evaporator",   working_fluid_ref: "fluid-water-v0",  hot_island_role: "none", upstream_zone_ref: null,               downstream_zone_ref: "tpl-pump-hx-001" },
       { zone_id: "tpl-pump-hx-001",  label: "Cold Pump Return HX",            zone_role: "convergence_exchange", zone_type: "hx_boundary",      chain_id: "cold_loop",    loop_role: "hx_cold_side", working_fluid_ref: "fluid-water-v0",  hot_island_role: "none", upstream_zone_ref: "tpl-vault-001",    downstream_zone_ref: "tpl-eutectic-001", isolation_boundary: true },
-      { zone_id: "tpl-eutectic-001", label: "Eutectic Emitter Loop",           zone_role: "transport",           zone_type: "hot_island",       chain_id: "eutectic",     loop_role: "hx_hot_side",  working_fluid_ref: "fluid-nak-v0",    hot_island_role: "primary", upstream_zone_ref: "tpl-pump-hx-001",  downstream_zone_ref: "tpl-hexe-hx-001"  },
+      { zone_id: "tpl-eutectic-001", label: "Eutectic Emitter Loop",           zone_role: "transport",           zone_type: "hot_island",       chain_id: "eutectic",     loop_role: "hx_hot_side",  working_fluid_ref: "fluid-nak-v0",    hot_island_role: "hot_island_a", upstream_zone_ref: "tpl-pump-hx-001",  downstream_zone_ref: "tpl-hexe-hx-001"  },
       { zone_id: "tpl-hexe-hx-001",  label: "HX Boundary (Eutectic/He-Xe)",   zone_role: "convergence_exchange", zone_type: "hx_boundary",      chain_id: "eutectic",     loop_role: "hx_cold_side", working_fluid_ref: "fluid-nak-v0",    hot_island_role: "none", upstream_zone_ref: "tpl-eutectic-001", downstream_zone_ref: "tpl-hexe-001",     isolation_boundary: true },
       { zone_id: "tpl-hexe-001",     label: "He/Xe Primary Loop",              zone_role: "transport",           zone_type: "brayton_loop",     chain_id: "brayton",      loop_role: "hx_hot_side",  working_fluid_ref: "fluid-hexe-v0",   hot_island_role: "none", upstream_zone_ref: "tpl-hexe-hx-001",  downstream_zone_ref: "tpl-reject-001"    },
       { zone_id: "tpl-reject-001",   label: "Radiator Rejection",              zone_role: "rejection",           zone_type: "radiator_zone",    chain_id: "brayton",      loop_role: "condenser",    working_fluid_ref: "fluid-hexe-v0",   hot_island_role: "none", upstream_zone_ref: "tpl-hexe-001",     downstream_zone_ref: null                },
@@ -2038,8 +2038,8 @@ const TOPOLOGY_TEMPLATES = {
     zones: [
       { zone_id: "tpl-vault-001",   label: "Compute Vault (Pickup)",    zone_role: "pickup",              zone_type: "compute_vault",  chain_id: "cold_loop",    loop_role: "evaporator",   working_fluid_ref: "fluid-water-v0",  hot_island_role: "none",      upstream_zone_ref: null,              downstream_zone_ref: "tpl-hx-001"      },
       { zone_id: "tpl-hx-001",      label: "HX Boundary",               zone_role: "convergence_exchange", zone_type: "hx_boundary",    chain_id: "cold_loop",    loop_role: "hx_cold_side", working_fluid_ref: "fluid-water-v0",  hot_island_role: "none",      upstream_zone_ref: "tpl-vault-001",   downstream_zone_ref: "tpl-island-a",   isolation_boundary: true },
-      { zone_id: "tpl-island-a",    label: "Hot Island A (Charge)",      zone_role: "storage",             zone_type: "hot_island",     chain_id: "hot_island_a", loop_role: "accumulator",  working_fluid_ref: "fluid-sodium-v0", hot_island_role: "primary",   upstream_zone_ref: "tpl-hx-001",      downstream_zone_ref: "tpl-storage-001" },
-      { zone_id: "tpl-island-b",    label: "Hot Island B (Discharge)",   zone_role: "storage",             zone_type: "hot_island",     chain_id: "hot_island_b", loop_role: "accumulator",  working_fluid_ref: "fluid-sodium-v0", hot_island_role: "secondary", upstream_zone_ref: "tpl-hx-001",      downstream_zone_ref: "tpl-storage-001" },
+      { zone_id: "tpl-island-a",    label: "Hot Island A (Charge)",      zone_role: "storage",             zone_type: "hot_island",     chain_id: "hot_island_a", loop_role: "accumulator",  working_fluid_ref: "fluid-sodium-v0", hot_island_role: "hot_island_a",   upstream_zone_ref: "tpl-hx-001",      downstream_zone_ref: "tpl-storage-001" },
+      { zone_id: "tpl-island-b",    label: "Hot Island B (Discharge)",   zone_role: "storage",             zone_type: "hot_island",     chain_id: "hot_island_b", loop_role: "accumulator",  working_fluid_ref: "fluid-sodium-v0", hot_island_role: "hot_island_b", upstream_zone_ref: "tpl-hx-001",      downstream_zone_ref: "tpl-storage-001" },
       { zone_id: "tpl-storage-001", label: "PCM Storage Buffer",         zone_role: "storage",             zone_type: "storage_buffer", chain_id: "hot_island_a", loop_role: "buffer",       working_fluid_ref: "fluid-sodium-v0", hot_island_role: "none",      upstream_zone_ref: "tpl-island-a",    downstream_zone_ref: "tpl-brayton-001" },
       { zone_id: "tpl-brayton-001", label: "Brayton Export Branch",      zone_role: "transport",           zone_type: "brayton_loop",   chain_id: "brayton",      loop_role: "hx_hot_side",  working_fluid_ref: "fluid-hexe-v0",   hot_island_role: "none",      upstream_zone_ref: "tpl-storage-001", downstream_zone_ref: "tpl-reject-001"  },
       { zone_id: "tpl-reject-001",  label: "Radiator Rejection + TPV",   zone_role: "rejection",           zone_type: "radiator_zone",  chain_id: "brayton",      loop_role: "condenser",    working_fluid_ref: "fluid-hexe-v0",   hot_island_role: "none",      upstream_zone_ref: "tpl-brayton-001", downstream_zone_ref: null              },
@@ -2339,6 +2339,8 @@ function renderZoneBlocks() {
           <option value="radiator_emitter"${b.zone_role==="radiator_emitter"?" selected":""}>radiator_emitter</option>
           <option value="pickup"${b.zone_role==="pickup"?" selected":""}>pickup</option>
           <option value="transport"${b.zone_role==="transport"?" selected":""}>transport</option>
+          <option value="storage"${b.zone_role==="storage"?" selected":""}>storage</option>
+          <option value="rejection"${b.zone_role==="rejection"?" selected":""}>rejection</option>
           <option value="custom"${b.zone_role==="custom"?" selected":""}>custom</option>
         </select>
       </div>
@@ -2349,6 +2351,11 @@ function renderZoneBlocks() {
           <option value="hx_boundary"${b.zone_type==="hx_boundary"?" selected":""}>hx_boundary</option>
           <option value="high_temp_backbone"${b.zone_type==="high_temp_backbone"?" selected":""}>high_temp_backbone</option>
           <option value="radiator_emitter"${b.zone_type==="radiator_emitter"?" selected":""}>radiator_emitter</option>
+          <option value="hot_island"${b.zone_type==="hot_island"?" selected":""}>hot_island</option>
+          <option value="hot_backbone"${b.zone_type==="hot_backbone"?" selected":""}>hot_backbone</option>
+          <option value="storage_buffer"${b.zone_type==="storage_buffer"?" selected":""}>storage_buffer</option>
+          <option value="radiator_zone"${b.zone_type==="radiator_zone"?" selected":""}>radiator_zone</option>
+          <option value="brayton_loop"${b.zone_type==="brayton_loop"?" selected":""}>brayton_loop</option>
           <option value="custom"${b.zone_type==="custom"?" selected":""}>custom</option>
         </select>
       </div>
@@ -2381,6 +2388,12 @@ function renderZoneBlocks() {
           <option value="regen_loop"${b.loop_role==="regen_loop"?" selected":""}>regen_loop</option>
           <option value="radiator_loop"${b.loop_role==="radiator_loop"?" selected":""}>radiator_loop</option>
           <option value="safety_loop"${b.loop_role==="safety_loop"?" selected":""}>safety_loop</option>
+          <option value="evaporator"${b.loop_role==="evaporator"?" selected":""}>evaporator</option>
+          <option value="condenser"${b.loop_role==="condenser"?" selected":""}>condenser</option>
+          <option value="hx_cold_side"${b.loop_role==="hx_cold_side"?" selected":""}>hx_cold_side</option>
+          <option value="hx_hot_side"${b.loop_role==="hx_hot_side"?" selected":""}>hx_hot_side</option>
+          <option value="accumulator"${b.loop_role==="accumulator"?" selected":""}>accumulator</option>
+          <option value="buffer"${b.loop_role==="buffer"?" selected":""}>buffer</option>
           <option value="custom"${b.loop_role==="custom"?" selected":""}>custom</option>
         </select>
       </div>
