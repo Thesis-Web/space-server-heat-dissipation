@@ -170,7 +170,9 @@ export function compileStateToPayloads(state, catalogs) {
     // sink_temp_k (baseline) and background_sink_temp_k_override (3A) are same value —
     // GEO deep space sink ≈ 0K (engineering convention, conservative).
     surface_emissivity_bol: state.surface_emissivity_bol ?? state.emissivity ?? 0.9,
-    background_sink_temp_k_override: state.sink_temp_k ?? 0,
+    // §9.3: background_sink_temp_k_override must be > 0K. Deep space = 2.7K (CMB).
+    // Baseline radiator uses 0K convention (conservative). 3A uses physical minimum.
+    background_sink_temp_k_override: Math.max(state.sink_temp_k ?? 2.7, 2.7),
     // Radiator lifecycle fields — passed through for 3A BOL/EOL sizing (topology_only bypasses compute)
     geometry_mode: state.geometry_mode ?? "single_sided",
     face_a_view_factor: state.face_a_view_factor ?? 1.0,
@@ -390,8 +392,8 @@ export function compileStateToPayloads(state, catalogs) {
       scenario:  scenario,
       radiators: [radiator_obj],
       catalogs: {
-        working_fluid_catalog:   { entries: wfCat.entries  || [] },
-        pickup_geometry_catalog: { entries: pgCat.entries  || [] },
+        working_fluid_catalog:   { entries: wfCat.entries  || [], catalog_version: wfCat.catalog_version  || null, catalog_id: "working-fluids"  },
+        pickup_geometry_catalog: { entries: pgCat.entries  || [], catalog_version: pgCat.catalog_version || null, catalog_id: "pickup-geometries" },
       },
     };
   }
