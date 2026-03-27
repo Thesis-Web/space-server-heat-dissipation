@@ -164,6 +164,19 @@ export function compileStateToPayloads(state, catalogs) {
     reserve_margin_fraction: state.reserve_margin_fraction ?? 0.15,
     material_family_ref: state.radiator_material_family_ref || null,
     geometry_class: state.radiator_geometry_class || null,
+    // ── 3A radiator lifecycle fields — ext3a-spec §9.1, §9.4, §13.3 ───────────
+    // surface_emissivity_bol: 3A requires explicit declaration, no silent default.
+    // background_sink_temp_k_override: 3A t_sink resolution path §9.4.
+    // sink_temp_k (baseline) and background_sink_temp_k_override (3A) are same value —
+    // GEO deep space sink ≈ 0K (engineering convention, conservative).
+    surface_emissivity_bol: state.surface_emissivity_bol ?? state.emissivity ?? 0.9,
+    background_sink_temp_k_override: state.sink_temp_k ?? 0,
+    // Radiator lifecycle fields — passed through for 3A BOL/EOL sizing (topology_only bypasses compute)
+    geometry_mode: state.geometry_mode ?? "single_sided",
+    face_a_view_factor: state.face_a_view_factor ?? 1.0,
+    emissivity_degradation_fraction: state.emissivity_degradation_fraction ?? 0.05,
+    surface_emissivity_eol_override: state.surface_emissivity_eol_override ?? null,
+    cavity_emissivity_mode: state.cavity_emissivity_mode ?? "disabled",
   };
   const radiator_content = JSON.stringify(radiator_obj, null, 2);
   extra_files.push({ name: "radiator-01.json", content: radiator_content });
