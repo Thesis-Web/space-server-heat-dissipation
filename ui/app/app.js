@@ -2055,7 +2055,7 @@ const TOPOLOGY_TEMPLATES = {
     enable_ext4: false,
     zones: [
       { zone_id: "tpl-vault-001",   label: "Compute Vault (Cold Side)",  zone_role: "pickup",              zone_type: "compute_vault",  chain_id: "cold_loop",    loop_role: "evaporator",   working_fluid_ref: "fluid-water-v0",   hot_island_role: "none", upstream_zone_ref: null,              downstream_zone_ref: "tpl-hx-001"     },
-      { zone_id: "tpl-hx-001",      label: "HX Boundary (Cold/Brayton)", zone_role: "convergence_exchange", zone_type: "hx_boundary",    chain_id: "cold_loop",    loop_role: "hx_cold_side", working_fluid_ref: "fluid-water-v0",   hot_island_role: "none", upstream_zone_ref: "tpl-vault-001",   downstream_zone_ref: "tpl-brayton-001", isolation_boundary: true },
+      { zone_id: "tpl-hx-001",      label: "HX Boundary (Cold/Brayton)", zone_role: "convergence_exchange", zone_type: "hx_boundary",    chain_id: "cold_loop",    loop_role: "hx_cold_side", working_fluid_ref: "fluid-water-v0",   hot_island_role: "none", upstream_zone_ref: "tpl-vault-001",   downstream_zone_ref: "tpl-brayton-001", isolation_boundary: true, convergence_enabled: true },
       { zone_id: "tpl-brayton-001", label: "He/Xe Brayton Loop",         zone_role: "transport",           zone_type: "brayton_loop",   chain_id: "brayton",      loop_role: "hx_hot_side",  working_fluid_ref: "fluid-hexe-v0",    hot_island_role: "none", upstream_zone_ref: "tpl-hx-001",      downstream_zone_ref: "tpl-reject-001"   },
       { zone_id: "tpl-reject-001",  label: "Radiator Rejection",         zone_role: "rejection",           zone_type: "radiator_zone",  chain_id: "brayton",      loop_role: "condenser",    working_fluid_ref: "fluid-hexe-v0",    hot_island_role: "none", upstream_zone_ref: "tpl-brayton-001", downstream_zone_ref: null               },
     ]
@@ -2490,10 +2490,10 @@ function renderZoneBlocks() {
           ${pickupGeometryOptions(b.pickup_geometry_ref||"")}
         </select>
       </div>
-      <div class="field-row"><label>Convergence Exchange</label>
+      <div class="field-row"><label>Runtime Convergence Solve</label>
         <select id="z${idx}_convergence_enabled" onchange="syncZoneBlock(${idx})">
-          <option value="false"${!b.convergence_enabled?" selected":""}>No</option>
-          <option value="true"${b.convergence_enabled?" selected":""}>Yes — declare convergence in scenario</option>
+          <option value="false"${!b.convergence_enabled?" selected":""}>No — topology declared, no iteration</option>
+          <option value="true"${b.convergence_enabled?" selected":""}>Yes — runtime iterates until convergence at this boundary</option>
         </select>
       </div>
       <div class="field-row"><label>Bridge Resistance (K/W)</label>
