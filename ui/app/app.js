@@ -89,6 +89,14 @@ function applyScenarioPreset(preset_id) {
   setValue("mission_mode", entry.mission_mode_default);
   setValue("architecture_class", entry.architecture_class_default);
   if (entry.compute_device_preset_id) applyDevicePreset(entry.compute_device_preset_id);
+  // Seed compute_module_defaults — device count, load state, redundancy from preset
+  if (entry.compute_module_defaults) {
+    const cm = entry.compute_module_defaults;
+    if (cm.device_count !== undefined) { const el = document.getElementById("device_count"); if (el) el.value = cm.device_count; }
+    if (cm.target_load_state)  setValue("target_load_state", cm.target_load_state);
+    if (cm.redundancy_mode)    setValue("redundancy_mode", cm.redundancy_mode);
+    updateComputePreview();
+  }
   if (entry.radiator_defaults) {
     const rd = entry.radiator_defaults;
     if (rd.emissivity !== undefined) setValue("emissivity", rd.emissivity);
@@ -104,6 +112,10 @@ function applyScenarioPreset(preset_id) {
         if (_sel) { _sel.value = _matRef; _sel.dispatchEvent(new Event("change")); }
       }, 150);
     }
+  }
+  // Seed storage_defaults from preset — storage_class only; storage preset requires operator selection
+  if (entry.storage_defaults?.storage_class) {
+    setValue("storage_class", entry.storage_defaults.storage_class);
   }
   panel.style.display = "block";
   panel.innerHTML = `<strong>Preset:</strong> ${entry.label} | Node: ${entry.node_class} | Mode: ${entry.mission_mode_default}<br>` +
@@ -133,6 +145,22 @@ function applyScenarioPreset(preset_id) {
           `<span style="color:var(--text-dim);font-size:11px;">Spawned ${tpl.zones.length} zone(s). All fields editable. Working fluids are suggestions.</span>`;
       }
     }
+  }
+  // Seed branch blocks from preset branch_defaults — clear and respawn per preset
+  if (Array.isArray(entry.branch_defaults) && entry.branch_defaults.length > 0) {
+    branchBlocks.length = 0;
+    entry.branch_defaults.forEach((preset_id) => {
+      addBranchBlock();
+      const idx = branchBlocks.length - 1;
+      // _branchPresets is populated by wireAllFields after catalog load — safe to call here
+      if (window._branchPresets && window._branchPresets.length) {
+        window.applyBranchPreset(idx, preset_id);
+      }
+    });
+  } else if (Array.isArray(entry.branch_defaults) && entry.branch_defaults.length === 0) {
+    // Preset explicitly declares no branches — clear any existing blocks
+    branchBlocks.length = 0;
+    renderBranchBlocks();
   }
 }
 
@@ -2089,7 +2117,10 @@ function applyTopologyTemplate(templateId, skipConfirm = false) {
   // Clear and spawn
   zoneBlocks.length = 0;
   for (const zd of tpl.zones) {
-    addZoneBlock({ ...zd });
+    // Auto-seed material_family_ref from ZONE_TYPE_MATERIAL_SUGGEST if not set on zone data
+    // HOLE-WIRE-001 fix: operator sees the suggested material pre-filled, can override freely
+    const matRef = zd.material_family_ref || ZONE_TYPE_MATERIAL_SUGGEST[zd.zone_type]?.id || null;
+    addZoneBlock({ ...zd, material_family_ref: matRef });
   }
 
   // Auto-enable Extension 3A when template requires it
