@@ -1205,6 +1205,13 @@ function openPacketOutput() {
   var manifRows = (packet.file_manifest || []).map(function(f) {
     return "<tr><td>"+esc(f.name)+"</td><td>"+f.byte_length+" B</td></tr>";
   }).join("");
+  // BUG-MANIFEST-001: runtime-output.json is added to _lastBundleFiles post-execution
+  // but was never reflected in the manifest table (packet.file_manifest is built pre-run).
+  // Append the row here when runtime result is available.
+  if (_lastRuntimeResult) {
+    var _rtBytes = new TextEncoder().encode(JSON.stringify(_lastRuntimeResult, null, 2)).length;
+    manifRows += "<tr><td>runtime-output.json</td><td>"+_rtBytes+" B</td></tr>";
+  }
   var traceItems = (packet.transform_trace || []).map(function(t) {
     return "<li>"+esc(t)+"</li>";
   }).join("");

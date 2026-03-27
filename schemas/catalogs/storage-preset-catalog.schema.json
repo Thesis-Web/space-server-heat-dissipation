@@ -1,0 +1,114 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://space-server-heat-dissipation/schemas/catalogs/storage-preset-catalog.schema.json",
+  "schema_id": "storage-preset-catalog",
+  "schema_version": "v0.1.0",
+  "title": "StoragePresetCatalog",
+  "description": "Catalog schema for thermal storage presets. Governs storage-presets.v0.1.x.json. Spec pin: ext3a-spec §10, §18. Blueprint pin: §18.",
+  "type": "object",
+  "required": [
+    "catalog_id",
+    "catalog_version",
+    "entries"
+  ],
+  "properties": {
+    "catalog_id": {
+      "type": "string"
+    },
+    "catalog_version": {
+      "type": "string"
+    },
+    "catalog_notes": {
+      "type": "string"
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "preset_id",
+          "label",
+          "storage_class",
+          "storage_capacity_j",
+          "charge_power_limit_w",
+          "discharge_power_limit_w",
+          "topology_role",
+          "target_temp_k",
+          "temp_min_k",
+          "temp_max_k",
+          "cp_basis_j_per_kgk",
+          "latent_heat_j_per_kg",
+          "typical_mass_kg",
+          "research_required",
+          "basis_note"
+        ],
+        "properties": {
+          "preset_id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "storage_class": {
+            "type": "string",
+            "enum": [
+              "pcm_latent",
+              "sensible_solid",
+              "sensible_liquid",
+              "eutectic_metal",
+              "mixed",
+              "custom"
+            ]
+          },
+          "storage_capacity_j": {
+            "type": "number",
+            "minimum": 0
+          },
+          "charge_power_limit_w": {
+            "type": "number",
+            "minimum": 0
+          },
+          "discharge_power_limit_w": {
+            "type": "number",
+            "minimum": 0
+          },
+          "topology_role": {
+            "type": "string"
+          },
+          "target_temp_k": {
+            "type": "number",
+            "minimum": 0
+          },
+          "temp_min_k": {
+            "type": "number",
+            "minimum": 0
+          },
+          "temp_max_k": {
+            "type": "number",
+            "minimum": 0
+          },
+          "cp_basis_j_per_kgk": {
+            "type": "number",
+            "minimum": 0
+          },
+          "latent_heat_j_per_kg": {
+            "type": "number",
+            "minimum": 0
+          },
+          "typical_mass_kg": {
+            "type": "number",
+            "minimum": 0
+          },
+          "research_required": {
+            "type": "boolean"
+          },
+          "basis_note": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
