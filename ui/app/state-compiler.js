@@ -197,6 +197,29 @@ export function compileStateToPayloads(state, catalogs) {
     generated_aggregate_payload_ref: generated_aggregate_ref,
     transform_trace,
     research_required_items: state.research_required_items || [],
+    // ── Extension 3A scenario fields — ext3a-spec §5.3, §6 ──────────────────
+    // thermal_zones carries all zone topology for runExtension3A normalizer.
+    // convergence_control mirrors UI fields into the sub-object the normalizer expects.
+    // These fields were previously omitted — gap closed here. Spec pin: §5.3, §6, §9.
+    enable_model_extension_3a: state.enable_model_extension_3a ?? false,
+    model_extension_3a_mode: state.model_extension_3a_mode ?? "disabled",
+    thermal_zones: (state.thermal_zones || []),
+    convergence_control: {
+      max_iterations:          state.max_convergence_iterations ?? 50,
+      tolerance_abs_w:         state.convergence_tolerance_k ?? 0.1,
+      tolerance_rel_fraction:  0.001,
+      runaway_multiplier:      state.runaway_multiplier ?? 10,
+      blocking_on_nonconvergence: true,
+    },
+    // Radiator lifecycle fields for 3A BOL/EOL sizing path — spec §9, blueprint §11.3
+    cavity_emissivity_mode:           state.cavity_emissivity_mode ?? "disabled",
+    geometry_mode:                    state.geometry_mode ?? "single_sided",
+    face_a_view_factor:               state.face_a_view_factor ?? 1.0,
+    face_b_view_factor:               state.face_b_view_factor ?? 1.0,
+    surface_emissivity_bol:           state.surface_emissivity_bol ?? state.emissivity ?? 0.9,
+    emissivity_degradation_fraction:  state.emissivity_degradation_fraction ?? 0.05,
+    surface_emissivity_eol_override:  state.surface_emissivity_eol_override ?? null,
+    background_sink_temp_k_override:  state.background_sink_temp_k_override ?? null,
     // ── Extension 3B scenario fields — 3B-spec §16.1 ─────────────────────────
     // All 3B fields emitted into canonical payload. No browser-only hidden state.
     // Preset-loaded values remain explicit and visible per §16.2.
@@ -342,6 +365,24 @@ export function compileStateToPayloads(state, catalogs) {
       extension_3a_result: null,
     } } : {}),
   });
+  // ── Assemble extension_3a_input — closes the 3A runtime wiring gap ─────────
+  // Previously extension_3a_input was never built — runExtension3A never fired.
+  // Now: scenario (with thermal_zones + 3A fields) + radiators + catalog entries
+  // are packaged and attached. Runtime gate: if (input.extension_3a_input !== undefined).
+  // Spec pin: ext3a-spec §5.3, §6, §9. Blueprint §11.1–§11.3.
+  if (state.enable_model_extension_3a) {
+    const wfCat  = catalogs?.["working-fluids"]  || { entries: [] };
+    const pgCat  = catalogs?.["pickup-geometries"] || { entries: [] };
+    run_packet.extension_3a_input = {
+      scenario:  scenario,
+      radiators: [radiator_obj],
+      catalogs: {
+        working_fluid_catalog:   { entries: wfCat.entries  || [] },
+        pickup_geometry_catalog: { entries: pgCat.entries  || [] },
+      },
+    };
+  }
+
   const run_packet_content = JSON.stringify(run_packet, null, 2);
 
   const files = [
