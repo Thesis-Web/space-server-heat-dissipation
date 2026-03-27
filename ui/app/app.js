@@ -162,6 +162,24 @@ function applyScenarioPreset(preset_id) {
     branchBlocks.length = 0;
     renderBranchBlocks();
   }
+  // Auto-derive branch source/sink zone refs from spawned topology.
+  // source = first hot-side zone (accumulator/hx_hot_side/storage_buffer/hot_island)
+  // sink   = first rejection zone (zone_role rejection or zone_type radiator_zone)
+  // Operator can always override. Heuristic covers all current Tier 1 + Tier 2 templates.
+  if (branchBlocks.length > 0 && zoneBlocks.length > 0) {
+    const srcZone  = zoneBlocks.find(z =>
+      z.loop_role === "accumulator" || z.loop_role === "hx_hot_side" ||
+      z.zone_type === "storage_buffer" || z.zone_type === "hot_island"
+    );
+    const sinkZone = zoneBlocks.find(z =>
+      z.zone_role === "rejection" || z.zone_type === "radiator_zone"
+    );
+    branchBlocks.forEach(b => {
+      if (!b.source_zone_ref && srcZone)  b.source_zone_ref = srcZone.zone_id;
+      if (!b.sink_zone_ref   && sinkZone) b.sink_zone_ref   = sinkZone.zone_id;
+    });
+    renderBranchBlocks();
+  }
 }
 
 function populateDevicePresets() {
@@ -2119,8 +2137,9 @@ function applyTopologyTemplate(templateId, skipConfirm = false) {
   for (const zd of tpl.zones) {
     // Auto-seed material_family_ref from ZONE_TYPE_MATERIAL_SUGGEST if not set on zone data
     // HOLE-WIRE-001 fix: operator sees the suggested material pre-filled, can override freely
-    const matRef = zd.material_family_ref || ZONE_TYPE_MATERIAL_SUGGEST[zd.zone_type]?.id || null;
-    addZoneBlock({ ...zd, material_family_ref: matRef });
+    const matRef   = zd.material_family_ref   || ZONE_TYPE_MATERIAL_SUGGEST[zd.zone_type]?.id  || null;
+    const geomRef  = zd.pickup_geometry_ref  || ZONE_TYPE_PICKUP_SUGGEST[zd.zone_type]       || null;
+    addZoneBlock({ ...zd, material_family_ref: matRef, pickup_geometry_ref: geomRef });
   }
 
   // Auto-enable Extension 3A when template requires it
@@ -2317,6 +2336,16 @@ const ZONE_TYPE_MATERIAL_SUGGEST = {
   radiator_zone:  { id: "carbon_composite", note: "C/C suggested for radiator panel — lightweight, deployable" },
   brayton_loop:   { id: "refractory_metal_generic", note: "Refractory metal suggested for Brayton high-temp loop" },
   hx_boundary:    { id: "carbon_composite", note: "C/C or SiC suggested for HX boundary thermal interface" },
+};
+
+// Pickup geometry suggestions by zone_type — auto-seeded at template spawn.
+// Only heat-exchange zones have a meaningful pickup geometry; transport/storage zones leave blank.
+// Spec pin: ui-expansion-spec §8 (catalog-driven controls).
+const ZONE_TYPE_PICKUP_SUGGEST = {
+  compute_vault:  "geom-direct-cold-plate-v0",
+  hx_boundary:    "geom-microchannel-v0",
+  hot_backbone:   "geom-direct-cold-plate-v0",
+  hot_island:     "geom-heat-pipe-v0",
 };
 
 /**
