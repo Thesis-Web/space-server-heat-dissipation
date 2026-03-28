@@ -1108,12 +1108,22 @@ async function buildPacket() {
   if (rp) {
     try {
       const rpObj = JSON.parse(rp.content);
+      // DELIVERY-001: inject demo token from sessionStorage (set by gate.html)
+      const _demoToken = (function() { try { return sessionStorage.getItem("orbital_token") || ""; } catch(e) { return ""; } })();
+      const _fetchHeaders = { "Content-Type": "application/json" };
+      if (_demoToken) _fetchHeaders["X-Demo-Token"] = _demoToken;
       const resp = await fetch("/api/run-packet", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: _fetchHeaders,
         body: JSON.stringify(rpObj)
       });
       const data = await resp.json();
+      if (resp.status === 401 || resp.status === 429) {
+        try { sessionStorage.removeItem("orbital_token"); } catch(e) {}
+        alert((data && data.error) ? data.error : "Access token issue. Redirecting.");
+        window.location.href = "/";
+        return;
+      }
       if (data.ok) {
         _lastRuntimeResult = data.result || null;
         // Wire runtime-authoritative values to Tab 7 — spec §22, §4.1
@@ -1205,13 +1215,6 @@ function openPacketOutput() {
   var manifRows = (packet.file_manifest || []).map(function(f) {
     return "<tr><td>"+esc(f.name)+"</td><td>"+f.byte_length+" B</td></tr>";
   }).join("");
-  // BUG-MANIFEST-001: runtime-output.json is added to _lastBundleFiles post-execution
-  // but was never reflected in the manifest table (packet.file_manifest is built pre-run).
-  // Append the row here when runtime result is available.
-  if (_lastRuntimeResult) {
-    var _rtBytes = new TextEncoder().encode(JSON.stringify(_lastRuntimeResult, null, 2)).length;
-    manifRows += "<tr><td>runtime-output.json</td><td>"+_rtBytes+" B</td></tr>";
-  }
   var traceItems = (packet.transform_trace || []).map(function(t) {
     return "<li>"+esc(t)+"</li>";
   }).join("");

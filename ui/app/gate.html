@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Orbital Thermal Trade System — Access</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    background: #0d1117;
+    color: #e6edf3;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  }
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px;
+  }
+  .card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 40px 36px;
+    width: 100%;
+    max-width: 420px;
+  }
+  .logo {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #58a6ff;
+    margin-bottom: 24px;
+  }
+  h1 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #e6edf3;
+    margin-bottom: 8px;
+  }
+  .sub {
+    font-size: 13px;
+    color: #8b949e;
+    margin-bottom: 28px;
+    line-height: 1.5;
+  }
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: #8b949e;
+    margin-bottom: 6px;
+    letter-spacing: 0.04em;
+  }
+  input[type="text"] {
+    width: 100%;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    color: #e6edf3;
+    font-size: 13px;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  input[type="text"]:focus {
+    border-color: #58a6ff;
+  }
+  input[type="text"].error {
+    border-color: #f85149;
+  }
+  .error-msg {
+    font-size: 12px;
+    color: #f85149;
+    margin-top: 6px;
+    min-height: 16px;
+  }
+  button {
+    margin-top: 20px;
+    width: 100%;
+    background: #238636;
+    border: 1px solid #2ea043;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  button:hover { background: #2ea043; }
+  button:active { background: #1a7f37; }
+  .divider {
+    border: none;
+    border-top: 1px solid #21262d;
+    margin: 28px 0;
+  }
+  .contact {
+    font-size: 12px;
+    color: #8b949e;
+    line-height: 1.6;
+    text-align: center;
+  }
+  .contact a {
+    color: #58a6ff;
+    text-decoration: none;
+  }
+  .contact a:hover { text-decoration: underline; }
+  .badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: #1f2937;
+    border: 1px solid #30363d;
+    border-radius: 4px;
+    padding: 2px 6px;
+    color: #8b949e;
+    margin-bottom: 16px;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">ExNulla · Orbital Lab</div>
+  <span class="badge">Token-gated access</span>
+  <h1>Orbital Thermal Trade System</h1>
+  <p class="sub">
+    Runtime-authoritative orbital compute node thermal modeling.
+    GEO scenarios, configurable thermal architecture, radiator sizing, and optional branches.
+  </p>
+
+  <label for="token-input">Access Token</label>
+  <input
+    type="text"
+    id="token-input"
+    placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+    autocomplete="off"
+    spellcheck="false"
+  />
+  <div class="error-msg" id="error-msg"></div>
+  <button id="enter-btn" type="button">Enter Tool</button>
+
+  <hr class="divider" />
+
+  <p class="contact">
+    Don't have a token?<br />
+    Email <a href="mailto:thethesiscoin@gmail.com">thethesiscoin@gmail.com</a>
+    or message on
+    <a href="https://www.linkedin.com/in/james-scott-b47028169/" target="_blank" rel="noreferrer">LinkedIn</a>
+    to request access.
+  </p>
+</div>
+
+<script>
+  var input = document.getElementById('token-input');
+  var btn = document.getElementById('enter-btn');
+  var errMsg = document.getElementById('error-msg');
+
+  // UUID pattern
+  var UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+  function tryEnter() {
+    var val = input.value.trim();
+    errMsg.textContent = '';
+    input.classList.remove('error');
+
+    if (!val) {
+      errMsg.textContent = 'Please enter your access token.';
+      input.classList.add('error');
+      input.focus();
+      return;
+    }
+    if (!UUID_RE.test(val)) {
+      errMsg.textContent = 'Token format is invalid. Check for typos.';
+      input.classList.add('error');
+      input.focus();
+      return;
+    }
+
+    // Store token and launch tool
+    try { sessionStorage.setItem('orbital_token', val); } catch(e) {}
+    window.location.href = '/tool';
+  }
+
+  btn.addEventListener('click', tryEnter);
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') tryEnter();
+  });
+
+  // If token already in session, skip gate
+  try {
+    var existing = sessionStorage.getItem('orbital_token');
+    if (existing && UUID_RE.test(existing)) {
+      window.location.href = '/tool';
+    }
+  } catch(e) {}
+</script>
+</body>
+</html>

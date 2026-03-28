@@ -100,6 +100,15 @@ app.use(function(req, res, next) {
 });
 
 // ── Static UI ────────────────────────────────────────────────────────────────
+// ── Gate + tool routes ───────────────────────────────────────────────────────
+// / → token gate page. /tool → full UI. Token injected via sessionStorage.
+app.get('/', function(req, res) {
+  res.sendFile(path.join(__dirname, 'ui/app/gate.html'));
+});
+app.get('/tool', function(req, res) {
+  res.sendFile(path.join(__dirname, 'ui/app/index.html'));
+});
+
 app.use(express.static(path.join(__dirname, 'ui/app')));
 
 // ── Token-gated run endpoint ─────────────────────────────────────────────────
