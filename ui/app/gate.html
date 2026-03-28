@@ -193,6 +193,18 @@
     if (e.key === 'Enter') tryEnter();
   });
 
+  // Show exhausted state if redirected back with ?exhausted=1
+  if (window.location.search.indexOf('exhausted=1') !== -1) {
+    document.getElementById('token-input').style.display = 'none';
+    document.getElementById('enter-btn').style.display = 'none';
+    var el = document.getElementById('error-msg');
+    el.style.color = '#f6c177';
+    el.style.fontSize = '13px';
+    el.style.marginTop = '0';
+    el.textContent = 'Token exhausted. Email thethesiscoin@gmail.com or message on LinkedIn for a new token.';
+    document.querySelector('label').style.display = 'none';
+  }
+
   // If token already in session, skip gate
   try {
     var existing = sessionStorage.getItem('orbital_token');

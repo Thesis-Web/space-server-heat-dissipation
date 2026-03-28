@@ -1120,8 +1120,11 @@ async function buildPacket() {
       const data = await resp.json();
       if (resp.status === 401 || resp.status === 429) {
         try { sessionStorage.removeItem("orbital_token"); } catch(e) {}
-        alert((data && data.error) ? data.error : "Access token issue. Redirecting.");
-        window.location.href = "/";
+        var _msg = (data && data.error) ? data.error : 'Access token issue.';
+        var _dest = (resp.status === 429) ? '/?exhausted=1' : '/';
+        sessionStorage.removeItem('orbital_token');
+        alert(_msg + ' Redirecting to gate.');
+        window.location.href = _dest;
         return;
       }
       if (data.ok) {
