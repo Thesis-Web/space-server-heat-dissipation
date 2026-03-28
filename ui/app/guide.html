@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Operator Guide — Orbital Thermal Trade System</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0d1117; --surface: #161b22; --border: #30363d;
+    --fg: #e6edf3; --muted: #8b949e; --accent: #58a6ff;
+    --green: #3fb950; --yellow: #d29922; --red: #f85149;
+    --orange: #db6d28;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg); color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    font-size: 15px; line-height: 1.7;
+    max-width: 860px; margin: 0 auto; padding: 40px 24px 80px;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  h1 { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+  h2 { font-size: 20px; font-weight: 600; color: var(--fg); margin: 48px 0 12px; padding-top: 16px; border-top: 1px solid var(--border); }
+  h3 { font-size: 16px; font-weight: 600; color: var(--accent); margin: 28px 0 8px; }
+  h4 { font-size: 14px; font-weight: 600; color: var(--muted); margin: 20px 0 6px; text-transform: uppercase; letter-spacing: 0.06em; }
+  p { margin-bottom: 14px; color: var(--fg); }
+  ul, ol { padding-left: 22px; margin-bottom: 14px; }
+  li { margin-bottom: 6px; }
+  code { background: #1c2128; border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; font-family: "SFMono-Regular", Consolas, monospace; font-size: 13px; color: #79c0ff; }
+  pre { background: #1c2128; border: 1px solid var(--border); border-radius: 8px; padding: 16px; overflow-x: auto; margin-bottom: 16px; }
+  pre code { border: none; background: none; padding: 0; font-size: 13px; }
+  .kicker { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+  .sub { color: var(--muted); font-size: 14px; margin-bottom: 32px; }
+  .callout { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 8px; padding: 16px 20px; margin: 20px 0; }
+  .callout.warn { border-left-color: var(--yellow); }
+  .callout.ok { border-left-color: var(--green); }
+  .callout.tip { border-left-color: var(--orange); }
+  .callout p:last-child { margin-bottom: 0; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px; }
+  th { text-align: left; padding: 8px 12px; background: var(--surface); color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--border); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; }
+  td { padding: 8px 12px; border-bottom: 1px solid #21262d; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  .pill { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px; letter-spacing: 0.06em; text-transform: uppercase; margin-right: 4px; }
+  .pill-auth { background: #1a3a1a; color: var(--green); border: 1px solid #2a5a2a; }
+  .pill-exp { background: #3a2a0a; color: var(--yellow); border: 1px solid #6a4a0a; }
+  .pill-preview { background: #1a2a3a; color: var(--accent); border: 1px solid #1a3a5a; }
+  .toc { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px 24px; margin-bottom: 48px; }
+  .toc h3 { margin-top: 0; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; }
+  .toc ol { margin-bottom: 0; }
+  .toc li { margin-bottom: 4px; font-size: 14px; }
+  .step-badge { display: inline-block; background: var(--accent); color: #0d1117; font-size: 11px; font-weight: 700; border-radius: 50%; width: 20px; height: 20px; text-align: center; line-height: 20px; margin-right: 8px; flex-shrink: 0; }
+  .step { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; }
+  .step-content { flex: 1; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+  .branch-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; margin-bottom: 12px; }
+  .branch-card h4 { margin-top: 0; color: var(--fg); font-size: 14px; text-transform: none; letter-spacing: 0; }
+  .back-btn { display: inline-block; font-size: 12px; color: var(--muted); border: 1px solid var(--border); border-radius: 6px; padding: 4px 12px; margin-bottom: 32px; }
+  .back-btn:hover { color: var(--fg); text-decoration: none; }
+  .version-bar { font-size: 11px; color: var(--muted); margin-bottom: 32px; }
+</style>
+</head>
+<body>
+
+<a href="/tool" class="back-btn">← Back to tool</a>
+
+<div class="kicker">ExNulla · Orbital Lab</div>
+<h1>Operator Guide</h1>
+<p class="sub">Orbital Thermal Trade System · Packet Builder v0.1.5 · Runtime-authoritative</p>
+<div class="version-bar">Guide v0.1.0 · GEO scope · Last updated 2026-03-28</div>
+
+<div class="toc">
+  <h3>Contents</h3>
+  <ol>
+    <li><a href="#quickstart">Quick start — your first valid packet in 5 minutes</a></li>
+    <li><a href="#mental-model">The core mental model</a></li>
+    <li><a href="#presets">Presets explained — all of them</a></li>
+    <li><a href="#tab1">Tab 1 — Scenario</a></li>
+    <li><a href="#tab2">Tab 2 — Compute Payload</a></li>
+    <li><a href="#tab3">Tab 3 — Non-Compute Payload (don't skip this)</a></li>
+    <li><a href="#tab4">Tab 4 — Thermal Architecture</a></li>
+    <li><a href="#tab5">Tab 5 — Radiator &amp; Storage</a></li>
+    <li><a href="#tab6">Tab 6 — Optional Branches (Brayton, Stirling, TPV, TEG, laser)</a></li>
+    <li><a href="#tab7">Tab 7 — Output &amp; Packet</a></li>
+    <li><a href="#edit-anything">Everything is editable — what that means</a></li>
+    <li><a href="#blockers">Blockers vs warnings</a></li>
+    <li><a href="#authority">Runtime authority vs preview</a></li>
+  </ol>
+</div>
+
+<!-- ───────────────────────────────────────────────── -->
+<h2 id="quickstart">1. Quick start — your first valid packet in 5 minutes</h2>
+
+<p>If you want to understand the system deeply, read everything below. If you want to see it work first, do this:</p>
+
+<div class="step"><span class="step-badge">1</span><div class="step-content"><strong>Tab 1 — Scenario.</strong> Open the <em>Scenario Preset</em> dropdown and select <code>50 kW Baseline — Cold Loop + Hot Backbone (GEO)</code>. The system seeds a complete coherent state. You're already 80% done.</div></div>
+<div class="step"><span class="step-badge">2</span><div class="step-content"><strong>Tab 7 — Output &amp; Packet.</strong> Scroll to the bottom and click <strong>Build Report</strong>. The runtime executes and returns authoritative numbers: thermal load, radiator area, risk summary, topology validation.</div></div>
+<div class="step"><span class="step-badge">3</span><div class="step-content"><strong>Read the output.</strong> Look at Thermal Load Summary, Radiator Sizing, and the Risk Summary card. The green <em>runtime ✓</em> badges confirm server-side execution — these are real outputs, not estimates.</div></div>
+<div class="step"><span class="step-badge">4</span><div class="step-content"><strong>Click Open Formatted Report</strong> for a clean printable version of everything. Download the JSON bundle to keep the packet artifact.</div></div>
+
+<div class="callout ok">
+<p><strong>That's a valid run.</strong> Now go back to any tab and change things. The system is designed to be explored. Change the device count, swap the radiator material, add a branch — then run again and compare. That iteration is the whole point.</p>
+</div>
+
+<p>The rest of this guide explains what you're actually changing and why it matters.</p>
+
+<!-- ───────────────────────────────────────────────── -->
+<h2 id="mental-model">2. The core mental model</h2>
+
+<p>One sentence that explains everything:</p>
+
+<blockquote style="border-left:3px solid var(--accent);padding:12px 20px;margin:20px 0;color:var(--muted);font-style:italic;">
+The browser is a packet builder. The server is the only calculator.
+</blockquote>
+
+<p>The UI lets you assemble, inspect, and edit a scenario. The moment you click <strong>Build Report</strong>, the entire packet goes to a server-side runtime engine. The runtime normalizes, validates, aggregates, and computes. The numbers it returns are the only numbers you should trust for engineering decisions.</p>
+
+<p>Preview values shown while you edit — like the radiator area preview in Tab 5 or the compute total preview below Tab 2 — are convenience indicators. They help you steer. They are not the output.</p>
+
+<div class="callout">
+<p>Three kinds of information exist in the UI:</p>
+<ul>
+<li><span class="pill pill-auth">Runtime</span> Server-executed. These numbers matter.</li>
+<li><span class="pill pill-preview">Preview</span> Browser-calculated estimates. Useful for steering, not authoritative.</li>
+<li><span class="pill pill-exp">Exploratory</span> Intentionally non-authoritative. Used for concept comparison, not engineering claims.</li>
+</ul>
+</div>
+
+<p>The seven tabs move in a physical order: mission frame → heat source → other loads → transport topology → rejection and storage → optional side loops → authoritative output. Follow that order the first time through. After that, edit in any order you like.</p>
+
+<!-- ───────────────────────────────────────────────── -->
+<h2 id="presets">3. Presets explained — all of them</h2>
+
+<p>Presets are not shortcuts. They are coherent starting points with sourced, documented assumptions. Every preset discloses its provenance, maturity class, and what it assumes. Selecting a preset doesn't lock anything — every field remains editable.</p>
+
+<h3>Scenario Presets</h3>
+<p>These seed the entire scenario from Tab 1 through Tab 5 including topology templates, zone graphs, storage class, and branch structure.</p>
+
+<table>
+<tr><th>Preset</th><th>What it builds</th><th>When to use it</th></tr>
+<tr><td><code>50 kW Baseline — Cold Loop + Hot Backbone (GEO)</code></td><td>Single cold loop collecting compute heat, delivering to a hot backbone for direct radiator rejection. Simplest valid topology. One fluid loop.</td><td>Starting point for any 50 kW class scenario. The canonical baseline.</td></tr>
+<tr><td><code>50 kW — Cold Loop + Hot Island (GEO)</code></td><td>Cold loop exchanges heat to a hot island via an HX boundary. Two loops — cold-side compute, hot-side rejection.</td><td>When you need to decouple compute operating temperature from radiator operating temperature.</td></tr>
+<tr><td><code>100 kW Baseline — Cold Loop + Hot Backbone (GEO)</code></td><td>Same topology as 50 kW baseline, scaled to 100 kW class device count and overhead.</td><td>100 kW scale studies. Direct comparison against 50 kW baseline.</td></tr>
+<tr><td><code>100 kW — Cold Loop + Hot Island + Storage Buffer (GEO)</code></td><td>Hot island with a PCM thermal storage buffer to manage eclipse transients. NaK loop at operating temps.</td><td>When eclipse power continuity matters and you need a real thermal buffer, not just a note.</td></tr>
+<tr><td><code>1 MW Baseline — Cold Loop + Dual Hot Island (GEO)</code></td><td>Two hot islands, HX boundary, higher capacity topology. This is where the architecture gets genuinely complex.</td><td>1 MW class trade space. Dual island comparison studies.</td></tr>
+<tr><td><code>50 kW Exploratory — He/Xe Brayton + Cold Loop Exchange (GEO)</code></td><td>Gas-phase primary loop (He/Xe), cold-plate secondary, HX boundary. Brayton branch active.</td><td>When you want to model a gas-cycle primary thermal path instead of liquid.</td></tr>
+<tr><td><code>50 kW Exploratory — He/Xe + Eutectic Emitter + Cold Pump Return (GEO)</code></td><td>Three-loop chain with return temperature polish. High-complexity fluid path.</td><td>Research-grade trade studies on multi-loop fluid architectures.</td></tr>
+<tr><td><code>1 MW Exploratory — Full Regen Dual Island + Brayton Export + TPV (GEO)</code></td><td>Maximum complexity. Regenerative dual hot island, Brayton power export branch, TPV recapture enabled. Everything on.</td><td>End-to-end concept evaluation of a fully regenerative 1 MW architecture. Expect research-required flags throughout.</td></tr>
+<tr><td><code>Custom (Blank)</code></td><td>Nothing seeded. All fields at defaults.</td><td>Building from scratch when no reference preset fits your concept.</td></tr>
+</table>
+
+<div class="callout warn">
+<p><strong>What presets do NOT include:</strong> Non-compute payload loads — telemetry, crosslink, radar, communications. These are always additive. Real spacecraft don't have zero payload overhead beyond compute. Go to Tab 3 and add them. Even a minimal TT&amp;C baseline adds 1–3 kW continuous load that the radiator must handle.</p>
+</div>
+
+<h3>Compute Device Presets</h3>
+<p>Each device preset carries documented thermal basis, provenance, and a maturity flag. The maturity flag tells you how much to trust the numbers.</p>
+
+<table>
+<tr><th>Preset</th><th>TDP class</th><th>Maturity</th><th>Notes</th></tr>
+<tr><td>H200-Class GPU (SXM5 Analog, v0.1.1)</td><td>~700 W</td><td>flight_proven_analog</td><td>Based on NVIDIA H200 published TDP. Cold-plate inlet max 45°C from OEM HGX liquid-cooling docs. Research required on junction-to-coolant path.</td></tr>
+<tr><td>NVIDIA H100 SXM5 (Hopper, 80GB HBM3)</td><td>700 W</td><td>flight_proven_analog</td><td>Same basis as H200 but older generation. Good for comparison runs.</td></tr>
+<tr><td>NVIDIA A100 SXM4 80GB (Ampere)</td><td>400 W</td><td>flight_proven_analog</td><td>Lower TDP class. More conservative thermal case.</td></tr>
+<tr><td>AMD Instinct MI300X (CDNA3, 192GB HBM3)</td><td>750 W</td><td>research_required</td><td>Thermal characterization less publicly documented than NVIDIA. Numbers are estimates.</td></tr>
+<tr><td>AMD MI250X (CDNA2)</td><td>500 W</td><td>research_required</td><td>Earlier AMD HPC-class estimate.</td></tr>
+<tr><td>Intel Gaudi 3 / Gaudi 2</td><td>600 W / 600 W</td><td>research_required</td><td>Intel OAM package format. Less thermal data public than SXM-class.</td></tr>
+<tr><td>Rad-Hard ASIC Class (BAE RAD750 Rep.)</td><td>Low (~10–20 W)</td><td>flight_proven_analog</td><td>Radiation-hardened class. Very different thermal profile — not for high-compute scenarios.</td></tr>
+<tr><td>High-Temp SiC Power Module Class</td><td>Conversion reference</td><td>research_required</td><td>Represents power conversion devices, not compute GPUs.</td></tr>
+<tr><td>Next-Gen GPU Placeholder</td><td>Speculative</td><td>speculative</td><td>For forward-looking scenarios. Not based on any specific announced product.</td></tr>
+<tr><td>Custom Device</td><td>Operator-specified</td><td>custom</td><td>Fill in everything yourself.</td></tr>
+</table>
+
+<h3>Storage Presets</h3>
+<p>Storage presets seed the thermal storage block in Tab 5 with thermophysically sourced data.</p>
+
+<table>
+<tr><th>Preset</th><th>Class</th><th>Target Temp</th><th>What it's for</th></tr>
+<tr><td>Al-12%Si Eutectic PCM (~855K)</td><td>pcm_latent</td><td>855 K</td><td>Phase-change buffer at Zone C temperatures. Sourced from Frontiers in Energy Research 2024 Al-12Si DSC data.</td></tr>
+<tr><td>Al-33.6%Cu Eutectic PCM (~821K)</td><td>pcm_latent</td><td>821 K</td><td>Alternative eutectic PCM. Lower latent heat than Al-12Si but well-characterized.</td></tr>
+<tr><td>LiF-20%CaF2 Eutectic PCM (~1040K)</td><td>pcm_latent</td><td>1040 K</td><td>High-temperature Zone C buffer. NASA reference for Brayton-Cycle Solar Dynamic systems.</td></tr>
+<tr><td>SiC Sensible Store (800–1600K)</td><td>sensible_solid</td><td>1200 K</td><td>Refractory sensible storage for regen architectures. SiC cp sourced from Hexoloy SA datasheet.</td></tr>
+<tr><td>Graphite Sensible Store (500–3000K)</td><td>sensible_solid</td><td>1800 K</td><td>Ultra-high-temp reference. POCO Graphite properties. Containment is a major design constraint.</td></tr>
+</table>
+
+<!-- ───────────────────────────────────────────────── -->
+<h2 id="tab1">4. Tab 1 — Scenario</h2>
+
+<p>Tab 1 is the control frame. Everything downstream inherits from it.</p>
+
+<h3>The fields that matter most</h3>
+<p><strong>Architecture Class</strong> is the most important structural selector in the entire UI. It declares what kind of thermal plant you are about to describe in Tabs 4 and 5. If you select <code>cold_loop_plus_dual_hot_island</code> here, Tab 4 should have zones that match that topology or the runtime will raise flags.</p>
+
+<p><strong>Mission Mode</strong> is a major behavioral switch. <code>full_compute</code> means continuous full load — the hardest thermal case. <code>burst</code> means intermittent peak load with cooldown intervals. <code>eclipse</code> changes what storage strategies are sensible. <code>safe_mode</code> drops most load. Pick the mode that matches your trade scenario, not just the most demanding case every time.</p>
+
+<p><strong>Assumptions</strong> field: use this. One line per assumption. Examples: "assumed radiator symmetric deployment", "assumed NaK compatible with SS-316 at operating temps", "assumed burst duty cycle 20%". The runtime cannot infer these from numbers alone. If you don't surface them here they become invisible bugs in your trade analysis.</p>
+
+<h3>Extension toggles</h3>
+<p>The four extension toggles control which modeling layers are active. You do not need them all on for a valid basic run.</p>
+
+<table>
+<tr><th>Extension</th><th>What it adds</th><th>Authority</th></tr>
+<tr><td>Extension 2 — Spectral Capture</td><td>Exploratory spectral/thermal concentration stage modeling</td><td><span class="pill pill-exp">Exploratory</span></td></tr>
+<tr><td>Extension 3A — Thermal Topology</td><td>Multi-zone graph, resistance chains, BOL/EOL radiator lifecycle, convergence solver</td><td><span class="pill pill-auth">Runtime</span></td></tr>
+<tr><td>Extension 3B — Eclipse State</td><td>Sunlit/eclipse state modeling, vault gas environment, operating state presets</td><td><span class="pill pill-auth">Runtime</span></td></tr>
+<tr><td>Extension 4 — TPV Recapture</td><td>Thermophotovoltaic radiator recapture modeling</td><td><span class="pill pill-exp">Exploratory</span></td></tr>
+</table>
+
+<div class="callout tip">
+<p><strong>First time through:</strong> leave Extension 2 and Extension 4 disabled. Enable 3A if you want topology validation (recommended). Enable 3B if your scenario involves eclipse state. Build your baseline first, then turn on exploratory extensions to compare.</p>
+</div>
+
+<!-- ───────────────────────────────────────────────── -->
+<h2 id="tab2">5. Tab 2 — Compute Payload</h2>
+
+<p>Tab 2 defines the primary heat source — the compute module — and everything about how it generates and tolerates heat.</p>
+
+<h3>Device count and load state</h3>
+<p>Device count scales the array. Target load state picks which rung of the power ladder the runtime uses. A system with 8× H200-class GPUs at full load is a 5600 W compute electrical draw before overheads. At medium load that becomes roughly 3500 W. The radiator burden tracks this directly.</p>
+
+<h3>Module overheads — don't leave these at zero</h3>
+<p>Real compute modules have memory, storage, network fabric, power conversion hardware, and control systems that all generate heat. These are separate overhead fields for exactly that reason. If you leave them at zero you are modeling a GPU floating in space with no support electronics, which is not a real scenario. Add realistic overhead estimates. Even modest overheads can add 1–2 kW per module.</p>
+
+<h3>Redundancy mode</h3>
+<p>This changes installed vs active capacity. <code>n+1</code> means one spare — installed count is device_count+1 but thermal modeling reflects active fraction. This matters for sizing because you may need to handle the worst-case active set, not just the nominal set.</p>
+
+<!-- ───────────────────────────────────────────────── -->
+<h2 id="tab3">6. Tab 3 — Non-Compute Payload</h2>
+
+<div class="callout warn">
+<p><strong>This tab is often skipped on first pass and it shouldn't be.</strong> A scenario with only compute load and zero payload overhead is not a spacecraft scenario — it's a heater-in-a-vacuum scenario. Real missions have TT&amp;C, crosslinks, optional radar or optical comms, and power management loads. These add to the radiator burden and they are not in the scenario presets.</p>
+</div>
+
+<h3>Why additive blocks</h3>
+<p>Payload service loads are not one number. A satellite may run TT&amp;C continuously, fire its crosslink at 50% duty cycle, and activate its radar only during imaging passes. Additive blocks let you model that structure instead of collapsing everything into one field.</p>
+
+<h3>Archetype presets</h3>
+<table>
+<tr><th>Archetype</th><th>Seeds</th><th>Typical load range</th></tr>
+<tr><td>TT&C Baseline</td><td>Telemetry + uplink/downlink + control receiver</td><td>1–3 kW continuous</td></tr>
+<tr><td>RF Relay Payload</td><td>Transponder + RF amplifiers + routing</td><td>5–20 kW depending on power level</td></tr>
+<tr><td>Optical ISL</td><td>Laser terminal + pointing/acquisition + thermal management</td><td>50–200 W per terminal</td></tr>
+<tr><td>SAR Class</td><td>Synthetic aperture radar transmit/receive chain</td><td>10–50 kW peak, duty-cycled</td></tr>
+<tr><td>Mixed Mission</td><td>Combination of the above</td><td>Depends on mix</td></tr>
+</table>
+
+<h3>Duty modes</h3>
+<p><code>continuous</code> means the load is always on. <code>uniform</code> applies a duty fraction across all subsystems equally. <code>per_subsystem</code> lets each load item have its own duty cycle. Use <code>per_subsystem</code> when your payload has genuinely different operating profiles for different loads.</p>
+
+<!-- ───────────────────────────────────────────────── -->
+<h2 id="tab4">7. Tab 4 — Thermal Architecture</h2>
+
+<p>This is where the system becomes an actual thermal network instead of just a list of watts. Tab 4 is the hardest tab to understand and the most important one to get right.</p>
+
+<h3>Zones — what they are</h3>
+<p>A thermal zone is not just a temperature point. It is a named location or function in the thermal network that carries physical meaning: where heat is picked up, transported, exchanged, stored, or rejected.</p>
+
+<p>Every zone declares: what role it plays, what type of object it is, what chain it belongs to, what its upstream and downstream neighbors are, and what materials and working fluids are involved.</p>
+
+<h3>Zone roles vs zone types</h3>
+<p><strong>Zone role</strong> answers: what job does this zone perform? (pickup, transport, rejection, storage, convergence exchange)<br>
+<strong>Zone type</strong> answers: what thermal object is this? (compute_vault, hx_boundary, hot_backbone, hot_island, storage_buffer, radiator_zone)</p>
+
+<p>These can seem redundant. They are not. A zone might have role <code>pickup</code> and type <code>compute_vault</code> — that means it is a pickup zone located in the compute vault. Another might have role <code>convergence_exchange</code> and type <code>hx_boundary</code> — meaning it is the HX interface where two loops meet.</p>
+
+<h3>The upstream/downstream graph — most important thing in this tab</h3>
+<p>Upstream and downstream refs turn your list of zones into a directed graph. Without them, zones are just labeled boxes. With them, the runtime can validate topology, detect cycles, confirm chain continuity, and order execution.</p>
+
+<p>Think of it physically: heat flows from the compute vault → along the cold loop → across the HX boundary into the hot backbone → to the radiator zone. Each arrow in that sentence is a downstream ref declaration.</p>
+
+<h3>HX touch points — the controlled interface concept</h3>
+<p>A heat exchanger boundary is where two distinct thermal loops or domains are allowed to interact without becoming the same loop. This is one of the most important concepts in multi-loop architecture modeling.</p>
+
+<p>Real architectures use HX boundaries to:</p>
+<ul>
+<li>Keep compute electronics at a cool operating temperature while running the rejection loop at a much higher temperature</li>
+<li>Allow two hot islands to exchange heat without being wired together</li>
+<li>Let a Brayton or Stirling cycle draw from a hot-side source without the compute loop seeing those temperatures</li>
+</ul>
+
+<p>The rule: if two thermal paths need to share energy but should not share temperature directly, use an HX boundary zone between them. Declare convergence enabled on that zone if the runtime should iterate to equilibrium.</p>
+
+<h3>Resistance chain fields</h3>
+<p>The R-value fields (junction→case, case→spreader, spreader→pickup, pickup→loop, loop→sink) describe the local thermal resistance ladder through the device package and into the coolant. Null values tell the runtime to use defaults. Non-null values let you model a specific package-to-loop resistance path for more detailed lifecycle or temperature budget analysis.</p>
+
+<!-- ───────────────────────────────────────────────── -->
+<h2 id="tab5">8. Tab 5 — Radiator &amp; Storage</h2>
+
+<h3>Radiator material families</h3>
+<table>
+<tr><th>Material</th><th>ε (emissivity)</th><th>T max</th><th>Best for</th></tr>
+<tr><td>Carbon Composite (C/C or CFRP)</td><td>~0.85</td><td>1800 K</td><td>High-temperature backbone radiators. Well-characterized. Mainstream choice.</td></tr>
+<tr><td>Silicon Carbide (SiC)</td><td>~0.90</td><td>1900 K</td><td>High emissivity at elevated temperatures. Good for high-T rejection zones.</td></tr>
+<tr><td>Refractory Metal (generic class)</td><td>~0.80</td><td>2500 K</td><td>Extreme temperature domains. Heavy. Research required.</td></tr>
+<tr><td>Molybdenum Alloy (Mo-Re, TZM)</td><td>~0.75</td><td>2200 K</td><td>High-temperature structural radiator class. Used in nuclear and high-T power systems.</td></tr>
+<tr><td>Tungsten Alloy (W-Re, W-Cu)</td><td>~0.70</td><td>2800 K</td><td>Extreme temperature emitter class. Very heavy.</td></tr>
+<tr><td>Eutectic Metal Compatible</td><td>~0.85</td><td>1100 K</td><td>For PCM storage-adjacent radiator zones.</td></tr>
+<tr><td>Liquid Metal Compatible</td><td>~0.82</td><td>1200 K</td><td>For NaK or sodium loop-adjacent surfaces.</td></tr>
+</table>
+
+<h3>BOL/EOL lifecycle fields (Extension 3A)</h3>
+<p>BOL is Beginning of Life. EOL is End of Life. In space, radiator emissivity degrades over time due to radiation damage and contamination. The system models this as a degradation fraction applied to the BOL emissivity to derive EOL emissivity. A radiator that starts at ε=0.90 and degrades 5% arrives at ε=0.855 at EOL — requiring larger area to maintain the same rejection.</p>
+
+<p>The display shows both BOL and EOL area estimates side by side so you can see the margin you need to design for over mission life.</p>
+
+<!-- ───────────────────────────────────────────────── -->
+<h2 id="tab6">9. Tab 6 — Optional Branches</h2>
+
+<p>Branches are side-path systems that attach to the main thermal architecture and either extract energy, convert it, or export it. None are required for a valid packet. All add architectural complexity that must be physically coherent.</p>
+
+<div class="callout warn">
+<p><strong>Before enabling any branch:</strong> make sure your Tab 4 zone graph has a declared source zone that the branch can draw from. A Brayton branch needs a hot-side source zone. A TPV branch needs a high-temperature emitter zone. A branch with no coherent thermal source will either raise a blocker or produce physically meaningless output.</p>
+</div>
+
+<div class="branch-card">
+<h4>⚡ Reverse Brayton / Heat-Lift Branch</h4>
+<p>A reverse Brayton cycle uses work input (electrical power) to move heat from a cold source to a hotter rejection domain — the thermal equivalent of a heat pump or refrigerator. This is useful when you have a compute zone that cannot tolerate the hot-side rejection temperature and you need to actively lift that heat to a higher domain before rejecting it. The tradeoff: the electrical work consumed to run the compressor becomes additional heat the system must ultimately reject, increasing the total radiator burden.</p>
+<p><strong>When it helps:</strong> when a zone is thermally isolated from the hot backbone by a large temperature gap that passive transport cannot bridge.</p>
+</div>
+
+<div class="branch-card">
+<h4>🔄 Brayton Power-Cycle Branch</h4>
+<p>A true Brayton power cycle extracts work from a high-temperature thermal source. Working fluid (typically He/Xe gas mixture in space applications) is compressed, heated by a high-temperature source, expanded through a turbine to generate electrical work, then rejected at a lower temperature. This is not a heat pump — it is an engine. It requires a genuinely hot thermal source (typically above 1000 K to be meaningful) and it produces electricity that can offset solar array requirements or power onboard systems.</p>
+<p><strong>The catch:</strong> the waste heat from the cycle's cold-side rejection still requires a radiator. You get electrical output but you do not eliminate rejection.</p>
+<p><strong>When it helps:</strong> when you have a high-grade thermal source from compute waste or solar concentration and you want to reclaim electrical work from it rather than just radiating it away.</p>
+</div>
+
+<div class="branch-card">
+<h4>🔁 Stirling Branch</h4>
+<p>A Stirling engine operates on a closed regenerative thermodynamic cycle using a working gas (hydrogen or helium typically) reciprocating between hot and cold spaces. Unlike Brayton, Stirling is a piston-based cycle — mechanically simpler at small scale, but lower power density. Stirling engines have been used on spacecraft for cryocooling (reverse Stirling) and have been studied for direct conversion of radioisotope or solar thermal heat to electricity. In the context of this system, a Stirling branch draws from a hot-side thermal domain and generates electrical work.</p>
+<p><strong>When it helps:</strong> moderate-temperature power recovery at smaller scale than a full gas-turbine Brayton cycle.</p>
+</div>
+
+<div class="branch-card">
+<h4>📡 TPV — Thermophotovoltaic Branch</h4>
+<p>TPV converts infrared radiation from a hot emitter surface directly to electricity via photovoltaic cells — no moving parts, no working fluid. The hot emitter radiates photons; PV cells tuned to that wavelength absorb them and generate current. Efficiency is highly sensitive to emitter temperature. At 800–1000 K, practical TPV efficiency is poor (sub-10%). At 1200–1600 K with well-matched PV bandgaps, efficiency can reach 20–30% in research settings.</p>
+<p><strong>The constraint:</strong> TPV PV cells need to be cooled. Their waste heat still needs a radiator behind them. TPV reduces the load on the main radiator only if the electrical output is exported off-vehicle or used to power systems that would otherwise require solar array area. If the electricity is consumed onboard, it becomes heat again.</p>
+<p><strong>Extension 4</strong> in this system models TPV as an exploratory recapture layer — intentionally labeled non-authoritative because TPV efficiency coefficients at space-relevant temperatures remain research-stage.</p>
+<p><strong>When it helps:</strong> when you already have a high-temperature emitter surface (above 1000 K) and want to quantify what electrical recapture is plausible before sizing the full solar array.</p>
+</div>
+
+<div class="branch-card">
+<h4>⚡ TEG — Thermoelectric Generator Branch</h4>
+<p>TEG devices use the Seebeck effect — a temperature differential across a semiconductor junction produces a voltage. No moving parts. Very reliable. Efficiency is low (typically 5–8% at practical temperature differentials). TEGs are used on space probes powered by radioisotope heat sources (RTGs on Voyager, Cassini, Curiosity). At compute-node temperature differentials (50–100 K between cold loop and ambient) the output is small. The system flags TEG branches as low-significance recovery if their electrical output is below 1% of total internal dissipation.</p>
+<p><strong>When it helps:</strong> scavenging small amounts of power from unavoidable temperature gradients. Not architecture-defining at this scale.</p>
+</div>
+
+<div class="branch-card">
+<h4>🔦 Laser / RF Export Branch</h4>
+<p>Directed energy export branches model the conversion of electrical power (derived from thermal branches or the main solar array) into laser or RF beams directed away from the spacecraft. This is the only thermal branch that can actually reduce total onboard heat burden — because if energy leaves as a photon beam it does not return as heat. The catch: the conversion process (laser or RF amplifier) is itself lossy, and those losses become heat onboard.</p>
+<p><strong>When it helps:</strong> long-range power beaming concepts, inter-satellite laser link power budgets, or directed energy applications where exporting energy off-vehicle is the design intent.</p>
+</div>
+
+<!-- ───────────────────────────────────────────────── -->
+<h2 id="tab7">10. Tab 7 — Output &amp; Packet</h2>
+
+<p>Tab 7 is where the system produces authoritative output. Fill in Report Identity (org name, contact, confidentiality notice) — this appears in the formatted report and the packet artifact. Then click <strong>Build Report</strong>.</p>
+
+<h3>What the runtime returns</h3>
+<ul>
+<li><strong>Thermal Load Summary:</strong> device count, per-device power, compute total, non-compute total, total reject load. These are the numbers the radiator must handle.</li>
+<li><strong>Radiator Sizing:</strong> effective area, area with margin, target surface temp, emissivity used. The display also shows whether these are runtime-computed or preview estimates — look for the green <em>runtime ✓</em> badge.</li>
+<li><strong>Extension 3A Results:</strong> topology validity, zone execution order, resistance chain bounds, BOL/EOL lifecycle sizing. Green means the zone graph is coherent and validated.</li>
+<li><strong>Risk Summary:</strong> maturity class, thermal cycling risk, corrosion risk, contamination risk, packaging stress. Derived from the material and device choices you made.</li>
+<li><strong>Transform Trace:</strong> a step-by-step log of everything the runtime computed. If something looks wrong, start here to understand why.</li>
+</ul>
+
+<h3>Readiness Check</h3>
+<p>The readiness check runs before the output cards populate. <strong>Blockers</strong> (red) mean the packet has a physical or schema error that prevents valid output. Resolve them before trusting results. <strong>Warnings</strong> (yellow) mean something is flagged but not blocking — usually a research-required assumption or a non-critical inconsistency.</p>
+
+<!-- ───────────────────────────────────────────────── -->
+<h2 id="edit-anything">11. Everything is editable — what that means</h2>
+
+<p>Every preset seeds a default state. No preset locks any field. You can change device TDP after selecting a preset. You can change radiator emissivity. You can change zone temperatures. You can add or remove zones, change working fluids, swap materials, adjust load states — any of it.</p>
+
+<div class="callout ok">
+<p><strong>The rule:</strong> as long as your edits do not cause a blocker flag, the runtime will accept the packet and return authoritative output. The system is designed for exploration. Edit freely. Run often. Compare results.</p>
+</div>
+
+<p>The only things you should not change arbitrarily without understanding the implications:</p>
+<ul>
+<li>Zone upstream/downstream refs — these define the topology graph. Wrong refs break topology validation.</li>
+<li>Convergence tolerance and runaway multiplier — these control when the iterative solver stops. The spec requires runaway multiplier ≥ 2.0.</li>
+<li>Extension mode fields — switching between <code>topology_only</code> and <code>full</code> in 3A changes which calculations run.</li>
+</ul>
+
+<!-- ───────────────────────────────────────────────── -->
+<h2 id="blockers">12. Blockers vs warnings</h2>
+
+<table>
+<tr><th>Type</th><th>Color</th><th>Meaning</th><th>What to do</th></tr>
+<tr><td>Blocker</td><td style="color:var(--red)">■ Red</td><td>Physical impossibility, schema error, or missing required field. Runtime output is not trustworthy.</td><td>Fix before using output.</td></tr>
+<tr><td>Warning</td><td style="color:var(--yellow)">■ Yellow</td><td>Research-required assumption, non-critical inconsistency, or flagged edge case.</td><td>Acknowledge. Decide whether it affects your trade conclusion.</td></tr>
+<tr><td>Research Required</td><td style="color:var(--orange)">■ Orange</td><td>A device preset or catalog entry is based on estimates, not qualified data.</td><td>Note in your assumptions. Do not treat output as flight truth.</td></tr>
+</table>
+
+<p>Common blocker causes:</p>
+<ul>
+<li>Zone graph has a cycle (heat can't flow in a circle without explicit convergence declaration)</li>
+<li>Background sink temp is 0 K exactly when 3A lifecycle is active (physical minimum is 2.7 K, the cosmic microwave background)</li>
+<li>Runaway multiplier set below 2.0</li>
+<li>Required fields left empty when runtime needs them for computation</li>
+</ul>
+
+<!-- ───────────────────────────────────────────────── -->
+<h2 id="authority">13. Runtime authority vs preview</h2>
+
+<p>The system uses this hierarchy without exception:</p>
+
+<ol>
+<li><strong>Runtime output</strong> — server-executed, authoritative, what you trust</li>
+<li><strong>Preview values</strong> — browser-calculated, useful for steering while editing, not the answer</li>
+<li><strong>Exploratory outputs</strong> — Extensions 2 and 4, intentionally non-authoritative, for concept comparison only</li>
+</ol>
+
+<p>If the preview radiator area shown in Tab 5 while editing differs from the runtime radiator area shown in Tab 7 after running — <strong>the runtime number is correct</strong>. The preview is an approximation using simplified math and the current UI state. The runtime normalizes, applies defaults, resolves catalogs, and executes the full validated formula stack.</p>
+
+<hr>
+
+<p style="font-size:13px; color:var(--muted); text-align:center; margin-top:40px;">
+  Orbital Thermal Trade System · ExNulla · <a href="/tool">Back to tool</a>
+</p>
+
+</body>
+</html>

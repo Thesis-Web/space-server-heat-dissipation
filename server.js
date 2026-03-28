@@ -108,6 +108,9 @@ app.get('/', function(req, res) {
 app.get('/tool', function(req, res) {
   res.sendFile(path.join(__dirname, 'ui/app/index.html'));
 });
+app.get('/guide', function(req, res) {
+  res.sendFile(path.join(__dirname, 'ui/app/guide.html'));
+});
 
 app.use(express.static(path.join(__dirname, 'ui/app')));
 
