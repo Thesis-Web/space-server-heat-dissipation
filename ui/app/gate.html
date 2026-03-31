@@ -185,7 +185,7 @@
 
     // Store token and launch tool
     try { sessionStorage.setItem('orbital_token', val); } catch(e) {}
-    window.location.href = '/tool';
+    window.location.href = '/tool?token=' + encodeURIComponent(val);
   }
 
   btn.addEventListener('click', tryEnter);
@@ -209,7 +209,7 @@
   try {
     var existing = sessionStorage.getItem('orbital_token');
     if (existing && UUID_RE.test(existing)) {
-      window.location.href = '/tool';
+      window.location.href = '/tool?token=' + encodeURIComponent(val);
     }
   } catch(e) {}
 </script>

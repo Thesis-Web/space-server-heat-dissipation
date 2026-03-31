@@ -1109,7 +1109,7 @@ async function buildPacket() {
     try {
       const rpObj = JSON.parse(rp.content);
       // DELIVERY-001: inject demo token from sessionStorage (set by gate.html)
-      const _demoToken = (function() { try { return sessionStorage.getItem("orbital_token") || ""; } catch(e) { return ""; } })();
+      const _demoToken = (function() { try { var _qp = new URLSearchParams(window.location.search).get('token'); if (_qp) { try { sessionStorage.setItem('orbital_token', _qp); } catch(e) {} return _qp; } return sessionStorage.getItem('orbital_token') || ''; } catch(e) { return ''; } })();
       const _fetchHeaders = { "Content-Type": "application/json" };
       if (_demoToken) _fetchHeaders["X-Demo-Token"] = _demoToken;
       const resp = await fetch("/api/run-packet", {
